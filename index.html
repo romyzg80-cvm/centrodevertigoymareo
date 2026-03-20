@@ -7,7 +7,7 @@
 <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;600;700&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
 <style>
 :root{
-  --teal:#2abfbf;--teal-d:#1a9090;--teal-pale:#e8f8f8;--teal-mid:#b2e0e0;
+  --teal:#2abfbf;--teal-d:#1a9090;--teal-pale:#e8f8f8;
   --navy:#1e3a5f;--navy-d:#142840;--navy-light:#2c5282;
   --slate:#4a6fa5;--slate-pale:#eef2f8;
   --sand:#f7f8fc;--sand-d:#edf0f7;
@@ -24,6 +24,23 @@
 *{box-sizing:border-box;margin:0;padding:0;}
 html{scroll-behavior:smooth;}
 body{font-family:'Inter',sans-serif;background:var(--sand);color:var(--text);min-height:100vh;font-size:14px;}
+
+/* LOGIN */
+#loginScreen{position:fixed;inset:0;background:linear-gradient(135deg,var(--navy-d),var(--navy) 50%,var(--navy-light));display:flex;align-items:center;justify-content:center;z-index:9999;padding:16px;}
+.login-box{background:#fff;border-radius:20px;padding:36px;max-width:380px;width:100%;box-shadow:var(--shadow-lg);text-align:center;}
+.login-logo{width:80px;height:80px;background:var(--teal-pale);border-radius:16px;display:flex;align-items:center;justify-content:center;margin:0 auto 16px;overflow:hidden;}
+.login-logo img{width:72px;height:72px;object-fit:contain;}
+.login-title{font-family:'Playfair Display',serif;font-size:1.4rem;color:var(--navy);margin-bottom:4px;}
+.login-sub{font-size:.78rem;color:var(--text-soft);margin-bottom:24px;}
+.login-field{display:flex;flex-direction:column;gap:5px;margin-bottom:14px;text-align:left;}
+.login-field label{font-size:.72rem;font-weight:600;color:var(--text-soft);text-transform:uppercase;letter-spacing:.05em;}
+.login-field input{padding:11px 14px;border-radius:var(--radius-sm);border:1.5px solid var(--border);font-family:'Inter',sans-serif;font-size:.92rem;background:var(--sand);outline:none;transition:border .18s;}
+.login-field input:focus{border-color:var(--teal);background:#fff;}
+.login-btn{width:100%;padding:12px;border-radius:var(--radius-sm);border:none;background:var(--navy);color:#fff;font-family:'Inter',sans-serif;font-size:.95rem;font-weight:600;cursor:pointer;transition:background .18s;margin-top:4px;}
+.login-btn:hover{background:var(--navy-d);}
+.login-error{background:var(--danger-pale);color:var(--danger);border-radius:8px;padding:8px 12px;font-size:.80rem;margin-top:10px;display:none;}
+
+/* HEADER */
 header{background:linear-gradient(135deg,var(--navy-d) 0%,var(--navy) 50%,var(--navy-light) 100%);color:#fff;padding:0 20px;display:flex;align-items:center;justify-content:space-between;height:64px;position:sticky;top:0;z-index:500;box-shadow:0 2px 20px rgba(0,0,0,.3);}
 .logo-area{display:flex;align-items:center;gap:12px;}
 .logo-box{width:46px;height:46px;background:#fff;border-radius:10px;display:flex;align-items:center;justify-content:center;cursor:pointer;overflow:hidden;flex-shrink:0;transition:transform .2s;position:relative;}
@@ -34,17 +51,25 @@ header{background:linear-gradient(135deg,var(--navy-d) 0%,var(--navy) 50%,var(--
 #logoInput{display:none;}
 .brand h1{font-family:'Playfair Display',serif;font-size:1.05rem;font-weight:600;line-height:1.15;}
 .brand p{font-size:.65rem;opacity:.65;text-transform:uppercase;letter-spacing:.1em;margin-top:1px;}
+.header-right{display:flex;align-items:center;gap:12px;}
 .header-info{text-align:right;font-size:.72rem;opacity:.8;line-height:1.6;}
 .header-info strong{font-size:.88rem;opacity:1;display:block;font-weight:600;}
+.user-badge{background:rgba(255,255,255,.15);border:1px solid rgba(255,255,255,.25);border-radius:20px;padding:4px 12px;font-size:.75rem;display:flex;align-items:center;gap:6px;cursor:pointer;transition:background .18s;}
+.user-badge:hover{background:rgba(255,255,255,.25);}
+
+/* NAV */
 nav{background:var(--white);border-bottom:2px solid var(--sand-d);display:flex;overflow-x:auto;padding:0 8px;position:sticky;top:64px;z-index:490;scrollbar-width:none;box-shadow:var(--shadow);}
 nav::-webkit-scrollbar{display:none;}
 .nav-btn{background:none;border:none;padding:12px 14px;font-family:'Inter',sans-serif;font-size:.78rem;font-weight:500;color:var(--text-soft);cursor:pointer;border-bottom:3px solid transparent;margin-bottom:-2px;white-space:nowrap;transition:all .18s;display:flex;align-items:center;gap:5px;}
 .nav-btn:hover{color:var(--teal);}
 .nav-btn.active{color:var(--navy);border-bottom-color:var(--teal);font-weight:600;}
+
+/* SYNC */
 #syncBar{padding:8px 18px;font-size:.78rem;display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap;background:var(--warning-pale);border-bottom:1px solid #fcd34d;color:#92400e;}
-#syncBar.ok{background:var(--success-pale);border-color:var(--teal-mid);color:var(--success);}
+#syncBar.ok{background:var(--success-pale);border-color:var(--teal-pale);color:var(--success);}
 #syncBar.err{background:var(--danger-pale);border-color:#f5c6c2;color:var(--danger);}
 #syncBar.hide{display:none;}
+
 main{max-width:1200px;margin:0 auto;padding:20px 12px 90px;}
 .section{display:none;animation:fadeIn .2s ease;}
 .section.active{display:block;}
@@ -56,7 +81,7 @@ main{max-width:1200px;margin:0 auto;padding:20px 12px 90px;}
 .stat:hover{transform:translateY(-2px);box-shadow:var(--shadow-md);}
 .stat .n{font-family:'Playfair Display',serif;font-size:1.8rem;color:var(--navy);line-height:1;}
 .stat .l{font-size:.68rem;color:var(--text-soft);margin-top:4px;text-transform:uppercase;letter-spacing:.05em;}
-.stat.teal .n{color:var(--teal-d);} .stat.green .n{color:var(--success);} .stat.red .n{color:var(--danger);} .stat.purple .n{color:var(--purple);}
+.stat.teal .n{color:var(--teal-d);}.stat.green .n{color:var(--success);}.stat.red .n{color:var(--danger);}.stat.purple .n{color:var(--purple);}
 .btn{display:inline-flex;align-items:center;gap:5px;padding:8px 16px;border-radius:var(--radius-sm);border:none;font-family:'Inter',sans-serif;font-size:.82rem;font-weight:500;cursor:pointer;transition:all .18s;white-space:nowrap;}
 .btn:active{transform:scale(.97);}
 .btn-primary{background:var(--navy);color:#fff;}.btn-primary:hover{background:var(--navy-d);}
@@ -65,13 +90,12 @@ main{max-width:1200px;margin:0 auto;padding:20px 12px 90px;}
 .btn-danger{background:var(--danger-pale);color:var(--danger);border:1px solid #f5c6c2;}
 .btn-success{background:var(--success-pale);color:var(--success);border:1px solid #a8dfc1;}
 .btn-purple{background:var(--purple-pale);color:var(--purple);border:1px solid #d8b4fe;}
-.btn-warning{background:var(--warning-pale);color:var(--warning);border:1px solid #fcd34d;}
 .btn-sm{padding:5px 10px;font-size:.75rem;border-radius:7px;}
 .btn-xs{padding:3px 8px;font-size:.70rem;border-radius:6px;}
 .form-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(190px,1fr));gap:11px;}
 .fg{display:flex;flex-direction:column;gap:4px;}.fg.full{grid-column:1/-1;}
 .fg label{font-size:.72rem;font-weight:600;color:var(--text-soft);text-transform:uppercase;letter-spacing:.05em;}
-.fg input,.fg select,.fg textarea{padding:9px 11px;border-radius:var(--radius-sm);border:1.5px solid var(--border);font-family:'Inter',sans-serif;font-size:.88rem;background:var(--sand);color:var(--text);transition:border .18s,background .18s;outline:none;width:100%;}
+.fg input,.fg select,.fg textarea{padding:9px 11px;border-radius:var(--radius-sm);border:1.5px solid var(--border);font-family:'Inter',sans-serif;font-size:.88rem;background:var(--sand);color:var(--text);transition:border .18s;outline:none;width:100%;}
 .fg input:focus,.fg select:focus,.fg textarea:focus{border-color:var(--teal);background:#fff;}
 .fg textarea{resize:vertical;min-height:72px;}
 .form-actions{display:flex;gap:8px;justify-content:flex-end;margin-top:10px;flex-wrap:wrap;}
@@ -86,7 +110,6 @@ tbody td{padding:9px 12px;vertical-align:middle;}
 .b-asistio{background:var(--success-pale);color:var(--success);}
 .b-ausente{background:var(--danger-pale);color:var(--danger);}
 .b-pendiente{background:var(--warning-pale);color:var(--warning);}
-.b-activo{background:var(--teal-pale);color:var(--teal-d);}
 .prof-tabs{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:12px;}
 .ptab{padding:6px 13px;border-radius:20px;border:1.5px solid var(--border);font-size:.78rem;font-weight:500;cursor:pointer;background:var(--white);color:var(--text-soft);transition:all .18s;display:flex;align-items:center;gap:5px;}
 .ptab:hover{border-color:var(--teal);color:var(--teal);}
@@ -98,7 +121,7 @@ tbody td{padding:9px 12px;vertical-align:middle;}
 @media(max-width:700px){.week-grid{grid-template-columns:repeat(3,1fr);}}
 @media(max-width:400px){.week-grid{grid-template-columns:repeat(2,1fr);}}
 .day-col{background:var(--sand);border-radius:10px;overflow:hidden;border:1px solid var(--border);min-height:140px;}
-.day-hd{background:var(--navy);color:#fff;text-align:center;padding:6px 3px;font-size:.68rem;font-weight:600;text-transform:uppercase;letter-spacing:.05em;}
+.day-hd{background:var(--navy);color:#fff;text-align:center;padding:6px 3px;font-size:.68rem;font-weight:600;text-transform:uppercase;}
 .day-hd.today{background:var(--teal);}
 .day-hd .dn{font-family:'Playfair Display',serif;font-size:1.15rem;display:block;line-height:1.2;}
 .day-body{padding:4px;display:flex;flex-direction:column;gap:3px;}
@@ -106,7 +129,7 @@ tbody td{padding:9px 12px;vertical-align:middle;}
 .tchip:hover{background:var(--slate-pale);}
 .tchip .th{font-weight:700;color:var(--navy);font-size:.66rem;}
 .tchip .tp{white-space:nowrap;overflow:hidden;text-overflow:ellipsis;color:var(--text-soft);}
-.tchip.asistio{opacity:.75;} .tchip.ausente{opacity:.5;}
+.tchip.asistio{opacity:.75;}.tchip.ausente{opacity:.5;}
 .ficha-header{display:flex;align-items:flex-start;justify-content:space-between;flex-wrap:wrap;gap:10px;margin-bottom:14px;}
 .ficha-nombre{font-family:'Playfair Display',serif;font-size:1.45rem;color:var(--navy);}
 .ficha-sub{font-size:.82rem;color:var(--text-soft);margin-top:2px;}
@@ -119,8 +142,7 @@ tbody td{padding:9px 12px;vertical-align:middle;}
 .ftab{padding:8px 14px;border:none;background:none;font-family:'Inter',sans-serif;font-size:.80rem;font-weight:500;color:var(--text-soft);cursor:pointer;border-bottom:2px solid transparent;margin-bottom:-2px;white-space:nowrap;transition:all .18s;}
 .ftab.active{color:var(--navy);border-bottom-color:var(--teal);font-weight:600;}
 .ftab-content{display:none;}.ftab-content.active{display:block;}
-.sesion-card{background:var(--sand);border-radius:10px;padding:12px 14px;margin-bottom:8px;border-left:3px solid var(--border);transition:box-shadow .15s;}
-.sesion-card:hover{box-shadow:var(--shadow);}
+.sesion-card{background:var(--sand);border-radius:10px;padding:12px 14px;margin-bottom:8px;border-left:3px solid var(--border);}
 .sesion-card.asistio{border-left-color:var(--success);}
 .sesion-card.ausente{border-left-color:var(--danger);}
 .sesion-top{display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:6px;margin-bottom:4px;}
@@ -130,7 +152,7 @@ tbody td{padding:9px 12px;vertical-align:middle;}
 .upload-zone{border:2px dashed var(--border);border-radius:10px;padding:20px;text-align:center;color:var(--text-soft);cursor:pointer;transition:all .18s;background:var(--sand);}
 .upload-zone:hover{border-color:var(--teal);background:var(--teal-pale);}
 .archivos-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(130px,1fr));gap:8px;margin-top:10px;}
-.archivo-item{background:#fff;border:1px solid var(--border);border-radius:9px;padding:10px;text-align:center;font-size:.75rem;position:relative;transition:box-shadow .15s;}
+.archivo-item{background:#fff;border:1px solid var(--border);border-radius:9px;padding:10px;text-align:center;font-size:.75rem;position:relative;}
 .archivo-item:hover{box-shadow:var(--shadow);}
 .archivo-del{position:absolute;top:4px;right:4px;background:var(--danger-pale);color:var(--danger);border:none;border-radius:5px;padding:1px 5px;font-size:.65rem;cursor:pointer;opacity:0;transition:opacity .15s;}
 .archivo-item:hover .archivo-del{opacity:1;}
@@ -174,13 +196,37 @@ tbody td{padding:9px 12px;vertical-align:middle;}
 .empty .ei{font-size:2.5rem;margin-bottom:8px;}
 .flex-between{display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:8px;}
 .flex-end{display:flex;justify-content:flex-end;gap:8px;flex-wrap:wrap;}
-.mt-8{margin-top:8px;}.mt-12{margin-top:12px;}.mt-16{margin-top:16px;}
+.mt-8{margin-top:8px;}.mt-12{margin-top:12px;}
 .text-muted{color:var(--text-soft);font-size:.80rem;}
 .text-success{color:var(--success);font-weight:600;}
+.loading-overlay{position:fixed;inset:0;background:rgba(30,58,95,.7);z-index:600;display:flex;align-items:center;justify-content:center;flex-direction:column;gap:14px;color:#fff;}
+.loading-overlay.hide{display:none;}
+.spinner{width:40px;height:40px;border:4px solid rgba(255,255,255,.3);border-top-color:#fff;border-radius:50%;animation:spin .8s linear infinite;}
+@keyframes spin{to{transform:rotate(360deg)}}
 @media(max-width:480px){header{height:56px;}nav{top:56px;}.card{padding:13px;}.modal{padding:16px;}}
 </style>
 </head>
 <body>
+
+<!-- LOGIN -->
+<div id="loginScreen">
+  <div class="login-box">
+    <div class="login-logo"><img id="loginLogo" alt="Logo"></div>
+    <div class="login-title">Centro de Vértigo y Mareo</div>
+    <div class="login-sub">Medicina Vestibular · Tucumán</div>
+    <div class="login-field"><label>Usuario</label><input type="text" id="loginUser" placeholder="Tu nombre de usuario" onkeydown="if(event.key==='Enter')login()"></div>
+    <div class="login-field"><label>Contraseña</label><input type="password" id="loginPass" placeholder="••••••••" onkeydown="if(event.key==='Enter')login()"></div>
+    <button class="login-btn" onclick="login()">Ingresar →</button>
+    <div class="login-error" id="loginError">Usuario o contraseña incorrectos</div>
+  </div>
+</div>
+
+<!-- LOADING -->
+<div class="loading-overlay hide" id="loadingOverlay">
+  <div class="spinner"></div>
+  <div id="loadingMsg" style="font-size:.88rem">Cargando datos...</div>
+</div>
+
 <header>
   <div class="logo-area">
     <div class="logo-box" onclick="document.getElementById('logoInput').click()">
@@ -188,23 +234,26 @@ tbody td{padding:9px 12px;vertical-align:middle;}
       <span class="logo-tip">cambiar</span>
     </div>
     <input type="file" id="logoInput" accept="image/*" onchange="cargarLogo(event)">
-    <div class="brand">
-      <h1>Centro de Vértigo y Mareo</h1>
-      <p>Medicina Vestibular · Tucumán</p>
+    <div class="brand"><h1>Centro de Vértigo y Mareo</h1><p>Medicina Vestibular · Tucumán</p></div>
+  </div>
+  <div class="header-right">
+    <div class="header-info"><strong id="headerDate"></strong>San Juan 28 · 381 302-1908</div>
+    <div class="user-badge" onclick="cerrarSesion()">
+      <span id="userBadgeName"></span>
+      <span style="opacity:.7;font-size:.68rem">· Salir</span>
     </div>
   </div>
-  <div class="header-info"><strong id="headerDate"></strong>San Juan 28 · 381 302-1908</div>
 </header>
 
-<nav>
+<nav id="mainNav">
   <button class="nav-btn active" onclick="go('inicio')">🏠 Inicio</button>
   <button class="nav-btn" onclick="go('agenda')">📅 Agenda</button>
   <button class="nav-btn" onclick="go('pacientes')">👥 Pacientes</button>
-  <button class="nav-btn" onclick="go('caja')">💰 Caja</button>
-  <button class="nav-btn" onclick="go('estadisticas')">📊 Estadísticas</button>
+  <button class="nav-btn caja-nav" onclick="go('caja')">💰 Caja</button>
+  <button class="nav-btn stats-nav" onclick="go('estadisticas')">📊 Estadísticas</button>
   <button class="nav-btn" onclick="go('nuevo-turno')">➕ Turno</button>
   <button class="nav-btn" onclick="go('nuevo-paciente')">🆕 Paciente</button>
-  <button class="nav-btn" onclick="go('config')">⚙️ Config</button>
+  <button class="nav-btn config-nav" onclick="go('config')">⚙️ Config</button>
 </nav>
 
 <div id="syncBar" class="hide">
@@ -264,7 +313,7 @@ tbody td{padding:9px 12px;vertical-align:middle;}
     <div class="flex-between" style="margin-bottom:10px">
       <div style="display:flex;gap:8px;flex-wrap:wrap">
         <select id="cajaMes" onchange="renderCaja()" style="padding:7px 11px;border-radius:7px;border:1.5px solid var(--border);font-family:'Inter',sans-serif;font-size:.82rem;background:var(--sand);outline:none;"></select>
-        <select id="cajaProf" onchange="renderCaja()" style="padding:7px 11px;border-radius:7px;border:1.5px solid var(--border);font-family:'Inter',sans-serif;font-size:.82rem;background:var(--sand);outline:none;"><option value="">Todos los profesionales</option></select>
+        <select id="cajaProf" onchange="renderCaja()" style="padding:7px 11px;border-radius:7px;border:1.5px solid var(--border);font-family:'Inter',sans-serif;font-size:.82rem;background:var(--sand);outline:none;"><option value="">Todos</option></select>
       </div>
       <button class="btn btn-secondary btn-sm" onclick="exportarCaja()">📥 Exportar CSV</button>
     </div>
@@ -311,7 +360,7 @@ tbody td{padding:9px 12px;vertical-align:middle;}
       <div class="fg"><label>DNI *</label><input type="text" id="np-dni" placeholder="XX.XXX.XXX"></div>
       <div class="fg"><label>Teléfono</label><input type="tel" id="np-tel" placeholder="381-XXX-XXXX"></div>
       <div class="fg"><label>Email</label><input type="email" id="np-email"></div>
-      <div class="fg"><label>Fecha de nacimiento</label><input type="date" id="np-fnac"></div>
+      <div class="fg"><label>Fecha nacimiento</label><input type="date" id="np-fnac"></div>
       <div class="fg"><label>Sexo</label><select id="np-sexo"><option value="">—</option><option>Femenino</option><option>Masculino</option><option>Otro</option></select></div>
       <div class="fg"><label>Obra social</label>
         <select id="np-os">
@@ -329,7 +378,7 @@ tbody td{padding:9px 12px;vertical-align:middle;}
         <select id="np-dx">
           <option value="">Seleccionar...</option>
           <optgroup label="Patología Vestibular"><option>VPPB — Canal posterior</option><option>VPPB — Canal horizontal</option><option>VPPB — Canal anterior</option><option>Neuritis vestibular</option><option>Laberintitis</option><option>Enfermedad de Ménière</option><option>Migraña vestibular</option><option>Hipofunción vestibular unilateral</option><option>Hipofunción vestibular bilateral</option><option>Desequilibrio crónico</option><option>Presbivértigo</option></optgroup>
-          <optgroup label="Otras especialidades"><option>Tinnitus (acúfenos)</option><option>Disfunción ATM</option><option>Alteración postural / Posturología</option><option>Mareos cervicogénicos</option><option>Mareo fóbico postural</option><option>Síndrome de desembarco</option></optgroup>
+          <optgroup label="Otras"><option>Tinnitus (acúfenos)</option><option>Disfunción ATM</option><option>Alteración postural / Posturología</option><option>Mareos cervicogénicos</option><option>Mareo fóbico postural</option><option>Síndrome de desembarco</option></optgroup>
           <option>A determinar / Evaluación inicial</option>
         </select>
       </div>
@@ -355,7 +404,7 @@ tbody td{padding:9px 12px;vertical-align:middle;}
       <h3>☁️ Google Sheets</h3>
       <div id="sheetStatus" style="margin-bottom:10px;font-size:.82rem;"></div>
       <div class="step-box"><h4>Paso 1</h4><p>Creá una planilla en <a href="https://sheets.google.com" target="_blank" style="color:var(--teal)">Google Sheets</a> llamada <strong>CVM Sistema</strong>.</p></div>
-      <div class="step-box"><h4>Paso 2</h4><p><strong>Extensiones → Apps Script</strong>. Borrá todo, pegá el script, guardá y ejecutá.</p></div>
+      <div class="step-box"><h4>Paso 2</h4><p><strong>Extensiones → Apps Script</strong>. Borrá todo, pegá el script de abajo, guardá y ejecutá.</p></div>
       <div class="step-box"><h4>Paso 3</h4><p><strong>Implementar → Nueva implementación → Aplicación web</strong>. Ejecutar como: Yo. Acceso: Cualquier persona. Copiá la URL.</p></div>
       <div class="step-box" style="border-color:var(--navy)">
         <h4>📋 Script para Apps Script</h4>
@@ -370,7 +419,7 @@ tbody td{padding:9px 12px;vertical-align:middle;}
     </div>
     <div class="config-section">
       <h3>🖼️ Logo</h3>
-      <p class="text-muted">Hacé clic en el logo del header para cambiarlo.</p>
+      <p class="text-muted">Hacé clic en el logo del header para cambiarlo. Se guarda automáticamente.</p>
     </div>
   </div>
 </div>
@@ -382,6 +431,7 @@ tbody td{padding:9px 12px;vertical-align:middle;}
   <span>📸 <a href="https://www.instagram.com/centrodemedicinavestibular" target="_blank">@centrodemedicinavestibular</a></span>
 </div>
 
+<!-- MODALES -->
 <div class="overlay" id="modalTurno">
   <div class="modal">
     <div class="modal-title">Detalle del Turno <button class="modal-close" onclick="cerrarModal('modalTurno')">✕</button></div>
@@ -389,7 +439,7 @@ tbody td{padding:9px 12px;vertical-align:middle;}
     <div class="modal-actions">
       <button class="btn btn-success btn-sm" onclick="marcarAsistencia('asistio')">✅ Asistió</button>
       <button class="btn btn-danger btn-sm" onclick="marcarAsistencia('ausente')">❌ Ausente</button>
-      <button class="btn btn-danger btn-sm" onclick="eliminarTurno()">🗑️ Eliminar turno</button>
+      <button class="btn btn-danger btn-sm" onclick="eliminarTurno()">🗑️ Eliminar</button>
       <button class="btn btn-secondary btn-sm" onclick="cerrarModal('modalTurno')">Cerrar</button>
     </div>
   </div>
@@ -431,11 +481,11 @@ tbody td{padding:9px 12px;vertical-align:middle;}
         <select id="pago-concepto"><option>Evaluación inicial</option><option>Sesión de rehabilitación</option><option>Evaluación postural</option><option>Tratamiento ATM</option><option>Tratamiento tinnitus</option><option>Posturología</option><option>Otro</option></select>
       </div>
       <div class="fg"><label>Profesional</label><select id="pago-prof"></select></div>
-      <div class="fg full"><label>Observaciones</label><input type="text" id="pago-obs" placeholder="N° recibo, observaciones..."></div>
+      <div class="fg full"><label>Observaciones</label><input type="text" id="pago-obs" placeholder="N° recibo..."></div>
     </div>
     <div class="modal-actions">
       <button class="btn btn-secondary" onclick="cerrarModal('modalPago')">Cancelar</button>
-      <button class="btn btn-success" onclick="guardarPago()">💾 Registrar Pago</button>
+      <button class="btn btn-success" onclick="guardarPago()">💾 Registrar</button>
     </div>
   </div>
 </div>
@@ -443,107 +493,278 @@ tbody td{padding:9px 12px;vertical-align:middle;}
 <input type="file" id="archivoInput" accept="image/*,application/pdf,.doc,.docx" multiple style="display:none" onchange="procesarArchivos(event)">
 
 <script>
+// ══════════════════════════════════════════
+// USUARIOS Y PERMISOS
+// ══════════════════════════════════════════
+const USUARIOS = {
+  'romina':   {pass:'otolitos', nombre:'Romina', rol:'admin',  profId:null},
+  'cecilia':  {pass:'otolitos', nombre:'Cecilia', rol:'admin', profId:'p1'},
+  'alvaro':   {pass:'otolitos', nombre:'Álvaro',  rol:'kine',  profId:'p2'},
+  'zulma':    {pass:'otolitos', nombre:'Zulma',   rol:'kine',  profId:'p3'},
+  'lucas':    {pass:'otolitos', nombre:'Lucas',   rol:'kine',  profId:'p4'},
+};
+let usuarioActual = null;
+
+function login(){
+  const user = document.getElementById('loginUser').value.trim().toLowerCase();
+  const pass = document.getElementById('loginPass').value;
+  const err  = document.getElementById('loginError');
+  const u = USUARIOS[user];
+  if(!u || u.pass !== pass){
+    err.style.display='block';
+    document.getElementById('loginPass').value='';
+    return;
+  }
+  err.style.display='none';
+  usuarioActual = {...u, username: user};
+  localStorage.setItem('cvm_session', JSON.stringify(usuarioActual));
+  document.getElementById('loginScreen').style.display='none';
+  document.getElementById('userBadgeName').textContent = usuarioActual.nombre;
+  aplicarPermisos();
+  cargarDesdeSheetsYArrancar();
+}
+
+function aplicarPermisos(){
+  const esAdmin = usuarioActual.rol === 'admin';
+  // Ocultar caja y estadísticas para kines
+  document.querySelectorAll('.caja-nav, .stats-nav').forEach(function(b){
+    b.style.display = esAdmin ? '' : 'none';
+  });
+  // Config solo admins
+  document.querySelectorAll('.config-nav').forEach(function(b){
+    b.style.display = esAdmin ? '' : 'none';
+  });
+}
+
+function cerrarSesion(){
+  if(!confirm('¿Cerrar sesión?'))return;
+  usuarioActual = null;
+  localStorage.removeItem('cvm_session');
+  document.getElementById('loginScreen').style.display='flex';
+  document.getElementById('loginUser').value='';
+  document.getElementById('loginPass').value='';
+}
+
+// ══════════════════════════════════════════
+// CONSTANTES
+// ══════════════════════════════════════════
 const COLORES=['#6b21a8','#1e3a5f','#0f7b4a','#c0392b','#d97706','#1a5f8a','#7a3b1e','#2a6f4f'];
 const MESES=['Enero','Febrero','Marzo','Abril','Mayo','Junio','Julio','Agosto','Septiembre','Octubre','Noviembre','Diciembre'];
 const DIAS=['Dom','Lun','Mar','Mié','Jue','Vie','Sáb'];
 
-let profs=JSON.parse(localStorage.getItem('cvm3_profs')||'null')||[
+// ══════════════════════════════════════════
+// STATE
+// ══════════════════════════════════════════
+let profs = JSON.parse(localStorage.getItem('cvm3_profs')||'null') || [
   {id:'p1',nombre:'Cecilia',rol:'Evaluación y Rehabilitación vestibular',color:'#6b21a8'},
-  {id:'p2',nombre:'Álvaro',rol:'Rehabilitación Vestibular',color:'#1e3a5f'},
-  {id:'p3',nombre:'Zulma',rol:'Rehabilitación Vestibular',color:'#0f7b4a'},
-  {id:'p4',nombre:'Lucas',rol:'Rehabilitación Vestibular',color:'#c0392b'},
+  {id:'p2',nombre:'Álvaro', rol:'Rehabilitación Vestibular',color:'#1e3a5f'},
+  {id:'p3',nombre:'Zulma',  rol:'Rehabilitación Vestibular',color:'#0f7b4a'},
+  {id:'p4',nombre:'Lucas',  rol:'Rehabilitación Vestibular',color:'#c0392b'},
 ];
-let pacientes=JSON.parse(localStorage.getItem('cvm3_pac')||'[]');
-let turnos=JSON.parse(localStorage.getItem('cvm3_tur')||'[]');
-let pagos=JSON.parse(localStorage.getItem('cvm3_pag')||'[]');
-let sheetUrl=localStorage.getItem('cvm3_sheet')||'';
-let semanaOffset=0,profActual=profs[0]?.id,pacActual=null,turnoActual=null,mesEst=new Date().getMonth(),pacArchivoActual=null;
+let pacientes=[], turnos=[], pagos=[];
+let sheetUrl = localStorage.getItem('cvm3_sheet')||'';
+let semanaOffset=0, profActual=profs[0]&&profs[0].id, pacActual=null, turnoActual=null, mesEst=new Date().getMonth(), pacArchivoActual=null;
 
-const SP=()=>localStorage.setItem('cvm3_pac',JSON.stringify(pacientes));
-const ST=()=>localStorage.setItem('cvm3_tur',JSON.stringify(turnos));
-const SPG=()=>localStorage.setItem('cvm3_pag',JSON.stringify(pagos));
-const SPR=()=>localStorage.setItem('cvm3_profs',JSON.stringify(profs));
-const getPac=id=>pacientes.find(p=>p.id==id);
-const getPr=id=>profs.find(p=>p.id===id);
-const fd=d=>d instanceof Date?d.toISOString().split('T')[0]:d;
-const fdisp=ds=>{if(!ds)return'—';const[y,m,d]=ds.split('-');return d+'/'+m+'/'+y;};
-const hoy=()=>fd(new Date());
+const SP  = function(){localStorage.setItem('cvm3_pac', JSON.stringify(pacientes));};
+const ST  = function(){localStorage.setItem('cvm3_tur', JSON.stringify(turnos));};
+const SPG = function(){localStorage.setItem('cvm3_pag', JSON.stringify(pagos));};
+const SPR = function(){localStorage.setItem('cvm3_profs', JSON.stringify(profs));};
+const getPac = function(id){return pacientes.find(function(p){return p.id==id;});};
+const getPr  = function(id){return profs.find(function(p){return p.id===id;});};
+const fd = function(d){return d instanceof Date ? d.toISOString().split('T')[0] : d;};
+const fdisp = function(ds){if(!ds)return'—';var p=ds.split('-');return p[2]+'/'+p[1]+'/'+p[0];};
+const hoy = function(){return fd(new Date());};
 
+// ══════════════════════════════════════════
 // LOGO
+// ══════════════════════════════════════════
 function cargarLogo(e){
-  const f=e.target.files[0];if(!f)return;
-  const r=new FileReader();
-  r.onload=ev=>{document.getElementById('logoImg').src=ev.target.result;localStorage.setItem('cvm3_logo',ev.target.result);};
+  var f=e.target.files[0];if(!f)return;
+  var r=new FileReader();
+  r.onload=function(ev){
+    var d=ev.target.result;
+    document.getElementById('logoImg').src=d;
+    document.getElementById('loginLogo').src=d;
+    localStorage.setItem('cvm3_logo',d);
+  };
   r.readAsDataURL(f);
 }
 (function(){
-  const s=localStorage.getItem('cvm3_logo');
-  document.getElementById('logoImg').src=s||"data:image/svg+xml,%3Csvg viewBox='0 0 100 100' xmlns='http://www.w3.org/2000/svg'%3E%3Cellipse cx='38' cy='38' rx='22' ry='10' fill='none' stroke='%232abfbf' stroke-width='5' transform='rotate(-35 38 38)'/%3E%3Cellipse cx='50' cy='32' rx='22' ry='10' fill='none' stroke='%231e3a5f' stroke-width='5' transform='rotate(-20 50 32)'/%3E%3Cellipse cx='60' cy='44' rx='22' ry='10' fill='none' stroke='%239baab8' stroke-width='5' transform='rotate(-5 60 44)'/%3E%3C/svg%3E";
+  var s=localStorage.getItem('cvm3_logo');
+  var fallback="data:image/svg+xml,%3Csvg viewBox='0 0 100 100' xmlns='http://www.w3.org/2000/svg'%3E%3Cellipse cx='38' cy='38' rx='22' ry='10' fill='none' stroke='%232abfbf' stroke-width='5' transform='rotate(-35 38 38)'/%3E%3Cellipse cx='50' cy='32' rx='22' ry='10' fill='none' stroke='%231e3a5f' stroke-width='5' transform='rotate(-20 50 32)'/%3E%3Cellipse cx='60' cy='44' rx='22' ry='10' fill='none' stroke='%239baab8' stroke-width='5' transform='rotate(-5 60 44)'/%3E%3C/svg%3E";
+  document.getElementById('logoImg').src = s||fallback;
+  document.getElementById('loginLogo').src = s||fallback;
 })();
 
-// NAV
-const NAV_MAP={inicio:0,agenda:1,pacientes:2,caja:3,estadisticas:4,'nuevo-turno':5,'nuevo-paciente':6,config:7};
-const renders={inicio:renderInicio,agenda:renderAgenda,pacientes:renderPacientes,caja:renderCaja,estadisticas:renderEstadisticas,'nuevo-turno':initNuevoTurno,'nuevo-paciente':initNuevoPaciente,ficha:renderFicha,config:renderConfig};
-function go(id){
-  document.querySelectorAll('.section').forEach(s=>s.classList.remove('active'));
-  document.querySelectorAll('.nav-btn').forEach(b=>b.classList.remove('active'));
-  document.getElementById('s-'+id).classList.add('active');
-  if(NAV_MAP[id]>=0)document.querySelectorAll('.nav-btn')[NAV_MAP[id]].classList.add('active');
-  renders[id]&&renders[id]();
+// ══════════════════════════════════════════
+// CARGA DESDE GOOGLE SHEETS
+// ══════════════════════════════════════════
+function mostrarLoading(msg){
+  document.getElementById('loadingOverlay').classList.remove('hide');
+  document.getElementById('loadingMsg').textContent = msg||'Cargando...';
+}
+function ocultarLoading(){
+  document.getElementById('loadingOverlay').classList.add('hide');
 }
 
+function cargarDesdeSheetsYArrancar(){
+  if(!sheetUrl){
+    // Sin Sheets: usar localStorage
+    pacientes = JSON.parse(localStorage.getItem('cvm3_pac')||'[]');
+    turnos    = JSON.parse(localStorage.getItem('cvm3_tur')||'[]');
+    pagos     = JSON.parse(localStorage.getItem('cvm3_pag')||'[]');
+    arrancarApp();
+    return;
+  }
+  mostrarLoading('Cargando datos del servidor...');
+  var promesas = [
+    fetch(sheetUrl+'?type=pacientes').then(function(r){return r.json();}),
+    fetch(sheetUrl+'?type=turnos').then(function(r){return r.json();}),
+    fetch(sheetUrl+'?type=pagos').then(function(r){return r.json();})
+  ];
+  Promise.all(promesas).then(function(resultados){
+    if(resultados[0].ok && Array.isArray(resultados[0].data) && resultados[0].data.length){
+      pacientes = resultados[0].data.map(parsePaciente);
+      SP();
+    } else {
+      pacientes = JSON.parse(localStorage.getItem('cvm3_pac')||'[]');
+    }
+    if(resultados[1].ok && Array.isArray(resultados[1].data) && resultados[1].data.length){
+      turnos = resultados[1].data.map(parseTurno);
+      ST();
+    } else {
+      turnos = JSON.parse(localStorage.getItem('cvm3_tur')||'[]');
+    }
+    if(resultados[2].ok && Array.isArray(resultados[2].data) && resultados[2].data.length){
+      pagos = resultados[2].data.map(parsePago);
+      SPG();
+    } else {
+      pagos = JSON.parse(localStorage.getItem('cvm3_pag')||'[]');
+    }
+    ocultarLoading();
+    arrancarApp();
+  }).catch(function(){
+    // Si falla la red, usar localStorage
+    pacientes = JSON.parse(localStorage.getItem('cvm3_pac')||'[]');
+    turnos    = JSON.parse(localStorage.getItem('cvm3_tur')||'[]');
+    pagos     = JSON.parse(localStorage.getItem('cvm3_pag')||'[]');
+    ocultarLoading();
+    setSyncBar('err','⚠️ Sin conexión a Sheets — usando datos locales');
+    arrancarApp();
+  });
+}
+
+function parsePaciente(r){
+  var sesiones = [], archivos = [], pagosP = [];
+  try{sesiones = typeof r.sesiones==='string' ? JSON.parse(r.sesiones||'[]') : (r.sesiones||[]);}catch(e){sesiones=[];}
+  try{archivos = typeof r.archivos==='string' ? JSON.parse(r.archivos||'[]') : (r.archivos||[]);}catch(e){archivos=[];}
+  try{pagosP   = typeof r.pagos==='string'    ? JSON.parse(r.pagos||'[]')    : (r.pagos||[]);}  catch(e){pagosP=[];}
+  return {id:r.id,nombre:r.nombre,dni:r.dni,tel:r.tel,email:r.email,fnac:r.fnac,sexo:r.sexo,os:r.os,afil:r.afil,medico:r.medico,profId:r.profId,dx:r.dx,obs:r.obs,alta:r.alta,sesiones:sesiones,archivos:archivos,pagos:pagosP};
+}
+function parseTurno(r){
+  return {id:r.id,profId:r.profId,pacId:r.pacId,fecha:r.fecha,hora:r.hora,tipo:r.tipo,dur:r.dur,notas:r.notas,estado:r.estado||'pendiente'};
+}
+function parsePago(r){
+  return {id:r.id,pacId:r.pacId,profId:r.profId,fecha:r.fecha,monto:r.monto,forma:r.forma,concepto:r.concepto,obs:r.obs};
+}
+
+function arrancarApp(){
+  updateDate();
+  // Si el usuario es kine, ir directo a su agenda
+  if(usuarioActual.rol === 'kine' && usuarioActual.profId){
+    profActual = usuarioActual.profId;
+  }
+  renderInicio();
+}
+
+// ══════════════════════════════════════════
+// NAVEGACIÓN
+// ══════════════════════════════════════════
+const NAV_MAP={inicio:0,agenda:1,pacientes:2,caja:3,estadisticas:4,'nuevo-turno':5,'nuevo-paciente':6,config:7};
+const renders={inicio:renderInicio,agenda:renderAgenda,pacientes:renderPacientes,caja:renderCaja,estadisticas:renderEstadisticas,'nuevo-turno':initNuevoTurno,'nuevo-paciente':initNuevoPaciente,ficha:renderFicha,config:renderConfig};
+
+function go(id){
+  // Control de acceso
+  if((id==='caja'||id==='estadisticas'||id==='config') && usuarioActual && usuarioActual.rol!=='admin'){
+    alert('No tenés permiso para acceder a esta sección.');
+    return;
+  }
+  document.querySelectorAll('.section').forEach(function(s){s.classList.remove('active');});
+  document.querySelectorAll('.nav-btn').forEach(function(b){b.classList.remove('active');});
+  document.getElementById('s-'+id).classList.add('active');
+  if(NAV_MAP[id]>=0){
+    var btns=document.querySelectorAll('.nav-btn');
+    if(btns[NAV_MAP[id]])btns[NAV_MAP[id]].classList.add('active');
+  }
+  if(renders[id])renders[id]();
+}
+
+// ══════════════════════════════════════════
 // INICIO
+// ══════════════════════════════════════════
 function renderInicio(){
-  const th=turnos.filter(t=>t.fecha===hoy());
-  const ing=pagos.filter(p=>p.fecha===hoy()).reduce((s,p)=>s+Number(p.monto),0);
-  document.getElementById('statsGrid').innerHTML=
-    '<div class="stat teal"><div class="n">'+pacientes.length+'</div><div class="l">Pacientes</div></div>'+
-    '<div class="stat"><div class="n">'+th.length+'</div><div class="l">Turnos hoy</div></div>'+
-    '<div class="stat green"><div class="n">'+th.filter(t=>t.estado==='asistio').length+'</div><div class="l">Asistieron</div></div>'+
-    '<div class="stat red"><div class="n">'+th.filter(t=>t.estado==='ausente').length+'</div><div class="l">Ausentes</div></div>'+
-    '<div class="stat purple"><div class="n">$'+ing.toLocaleString('es-AR')+'</div><div class="l">Ingreso hoy</div></div>';
+  var th=turnos.filter(function(t){return t.fecha===hoy();});
+  var ing=pagos.filter(function(p){return p.fecha===hoy();}).reduce(function(s,p){return s+Number(p.monto);},0);
+  var statsHtml='<div class="stat teal"><div class="n">'+pacientes.length+'</div><div class="l">Pacientes</div></div>'
+    +'<div class="stat"><div class="n">'+th.length+'</div><div class="l">Turnos hoy</div></div>'
+    +'<div class="stat green"><div class="n">'+th.filter(function(t){return t.estado==='asistio';}).length+'</div><div class="l">Asistieron</div></div>'
+    +'<div class="stat red"><div class="n">'+th.filter(function(t){return t.estado==='ausente';}).length+'</div><div class="l">Ausentes</div></div>';
+  if(usuarioActual&&usuarioActual.rol==='admin'){
+    statsHtml+='<div class="stat purple"><div class="n">$'+ing.toLocaleString('es-AR')+'</div><div class="l">Ingreso hoy</div></div>';
+  }
+  document.getElementById('statsGrid').innerHTML=statsHtml;
   if(!th.length){
     document.getElementById('turnosHoy').innerHTML='<div class="empty"><div class="ei">📭</div>Sin turnos para hoy</div>';
   } else {
-    let h='<div class="tbl-wrap"><table><thead><tr><th>Hora</th><th>Profesional</th><th>Paciente</th><th>Tipo</th><th>Estado</th><th></th></tr></thead><tbody>';
-    th.sort((a,b)=>a.hora.localeCompare(b.hora)).forEach(function(t){
-      const p=getPac(t.pacId),pr=getPr(t.profId);
-      h+='<tr><td><strong>'+t.hora+'</strong></td><td><span style="color:'+( pr?pr.color:'#333')+';font-weight:600;font-size:.76rem">● '+(pr?pr.nombre:'—')+'</span></td><td>'+(p?p.nombre:'—')+'</td><td>'+t.tipo+'</td><td><span class="badge b-'+t.estado+'">'+(t.estado==='pendiente'?'🕐 Pendiente':t.estado==='asistio'?'✅ Asistió':'❌ Ausente')+'</span></td><td><button class="btn btn-secondary btn-xs" onclick="abrirModalTurno('+t.id+')">Ver</button></td></tr>';
+    var h='<div class="tbl-wrap"><table><thead><tr><th>Hora</th><th>Profesional</th><th>Paciente</th><th>Tipo</th><th>Estado</th><th></th></tr></thead><tbody>';
+    th.sort(function(a,b){return a.hora.localeCompare(b.hora);}).forEach(function(t){
+      var p=getPac(t.pacId),pr=getPr(t.profId);
+      h+='<tr><td><strong>'+t.hora+'</strong></td><td><span style="color:'+(pr?pr.color:'#333')+';font-weight:600;font-size:.76rem">● '+(pr?pr.nombre:'—')+'</span></td><td>'+(p?p.nombre:'—')+'</td><td>'+t.tipo+'</td><td><span class="badge b-'+t.estado+'">'+(t.estado==='pendiente'?'🕐 Pendiente':t.estado==='asistio'?'✅ Asistió':'❌ Ausente')+'</span></td><td><button class="btn btn-secondary btn-xs" onclick="abrirModalTurno('+t.id+')">Ver</button></td></tr>';
     });
     document.getElementById('turnosHoy').innerHTML=h+'</tbody></table></div>';
   }
-  let h2='<div class="tbl-wrap"><table><thead><tr><th>Paciente</th><th>Diagnóstico</th><th>Obra social</th><th></th></tr></thead><tbody>';
-  [...pacientes].reverse().slice(0,5).forEach(function(p){
+  var h2='<div class="tbl-wrap"><table><thead><tr><th>Paciente</th><th>Diagnóstico</th><th>Obra social</th><th></th></tr></thead><tbody>';
+  var ultimos=[].concat(pacientes).reverse().slice(0,5);
+  ultimos.forEach(function(p){
     h2+='<tr><td><strong>'+p.nombre+'</strong></td><td style="max-width:160px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">'+p.dx+'</td><td>'+(p.os||'<span class="text-muted">Particular</span>')+'</td><td><button class="btn btn-secondary btn-xs" onclick="verFicha('+p.id+')">📋 Ficha</button></td></tr>';
   });
   document.getElementById('ultPacientes').innerHTML=h2+'</tbody></table></div>';
 }
 
+// ══════════════════════════════════════════
 // AGENDA
+// ══════════════════════════════════════════
 function renderProfTabs(){
   document.getElementById('profTabs').innerHTML=profs.map(function(pr){
-    return '<div class="ptab'+(pr.id===profActual?' active':'')+'" style="'+(pr.id===profActual?'background:'+pr.color:'')+'\" onclick="selProf(\''+pr.id+'\')"><span class="pdot" style="background:'+pr.color+'"></span>'+pr.nombre+'</div>';
+    var isActive=pr.id===profActual;
+    return '<div class="ptab'+(isActive?' active':'')+'" style="'+(isActive?'background:'+pr.color+';':'')+'" onclick="selProf(\''+pr.id+'\')"><span class="pdot" style="background:'+pr.color+'"></span>'+pr.nombre+'</div>';
   }).join('');
 }
-function selProf(id){profActual=id;renderProfTabs();renderWeekGrid();}
+function selProf(id){
+  // Kines solo pueden ver su propia agenda
+  if(usuarioActual&&usuarioActual.rol==='kine'&&usuarioActual.profId&&id!==usuarioActual.profId){
+    alert('Solo podés ver tu propia agenda.');return;
+  }
+  profActual=id;renderProfTabs();renderWeekGrid();
+}
 function renderAgenda(){renderProfTabs();renderWeekGrid();}
 function renderWeekGrid(){
-  const today=new Date(),base=new Date(today);
+  var today=new Date(),base=new Date(today);
   base.setDate(today.getDate()+semanaOffset*7);
-  const dow=base.getDay(),mon=new Date(base);
+  var dow=base.getDay(),mon=new Date(base);
   mon.setDate(base.getDate()-(dow===0?6:dow-1));
-  const we=new Date(mon);we.setDate(mon.getDate()+5);
+  var we=new Date(mon);we.setDate(mon.getDate()+5);
   document.getElementById('weekLbl').textContent=mon.getDate()+'/'+(mon.getMonth()+1)+' — '+we.getDate()+'/'+(we.getMonth()+1)+'/'+mon.getFullYear();
-  const pr=getPr(profActual);
-  let h='';
-  for(let i=0;i<6;i++){
-    const d=new Date(mon);d.setDate(mon.getDate()+i);
-    const ds=fd(d),isToday=ds===fd(today);
-    const dt=turnos.filter(t=>t.fecha===ds&&t.profId===profActual).sort((a,b)=>a.hora.localeCompare(b.hora));
+  var pr=getPr(profActual);
+  var h='';
+  for(var i=0;i<6;i++){
+    var d=new Date(mon);d.setDate(mon.getDate()+i);
+    var ds=fd(d),isToday=ds===fd(today);
+    var dt=turnos.filter(function(t){return t.fecha===ds&&t.profId===profActual;}).sort(function(a,b){return a.hora.localeCompare(b.hora);});
     h+='<div class="day-col"><div class="day-hd'+(isToday?' today':'')+'">'+DIAS[d.getDay()]+'<span class="dn">'+d.getDate()+'</span></div><div class="day-body">';
     if(!dt.length)h+='<div style="text-align:center;padding:8px 3px;font-size:.68rem;color:var(--text-soft)">Libre</div>';
     dt.forEach(function(t){
-      const p=getPac(t.pacId);
+      var p=getPac(t.pacId);
       h+='<div class="tchip '+(t.estado!=='pendiente'?t.estado:'')+'" style="border-left-color:'+(pr?pr.color:'var(--border)')+'" onclick="abrirModalTurno('+t.id+')"><div class="th">'+t.hora+'</div><div class="tp">'+(p?p.nombre.split(',')[0]:'—')+'</div></div>';
     });
     h+='</div></div>';
@@ -552,11 +773,13 @@ function renderWeekGrid(){
 }
 function cambiarSemana(d){semanaOffset+=d;renderWeekGrid();}
 
+// ══════════════════════════════════════════
 // MODAL TURNO
+// ══════════════════════════════════════════
 function abrirModalTurno(tid){
   turnoActual=tid;
-  const t=turnos.find(x=>x.id===tid),p=getPac(t.pacId),pr=getPr(t.profId);
-  let b='<div class="datos-grid">';
+  var t=turnos.find(function(x){return x.id===tid;}),p=getPac(t.pacId),pr=getPr(t.profId);
+  var b='<div class="datos-grid">';
   b+='<div class="dato"><div class="k">Fecha</div><div class="v">'+fdisp(t.fecha)+'</div></div>';
   b+='<div class="dato"><div class="k">Hora</div><div class="v">'+t.hora+' ('+(t.dur||60)+' min)</div></div>';
   b+='<div class="dato"><div class="k">Profesional</div><div class="v" style="color:'+(pr?pr.color:'#333')+';font-weight:600">'+(pr?pr.nombre:'—')+'</div></div>';
@@ -564,55 +787,58 @@ function abrirModalTurno(tid){
   b+='<div class="dato"><div class="k">Estado</div><div class="v"><span class="badge b-'+t.estado+'">'+t.estado+'</span></div></div>';
   if(t.notas)b+='<div class="dato" style="grid-column:1/-1"><div class="k">Notas</div><div class="v">'+t.notas+'</div></div>';
   b+='</div>';
-  if(p)b+='<button class="btn btn-secondary btn-sm" onclick="verFicha('+p.id+');cerrarModal(\'modalTurno\')">Ver ficha completa →</button>';
+  if(p)b+='<button class="btn btn-secondary btn-sm" style="margin-top:8px" onclick="verFicha('+p.id+');cerrarModal(\'modalTurno\')">Ver ficha completa →</button>';
   document.getElementById('modalTurnoBody').innerHTML=b;
   abrirModal('modalTurno');
 }
 function eliminarTurno(){
   if(!confirm('¿Eliminar este turno?'))return;
-  turnos=turnos.filter(t=>t.id!==turnoActual);
-  ST();syncSheet('turnos');
-  cerrarModal('modalTurno');
-  const s=document.querySelector('.section.active')&&document.querySelector('.section.active').id.replace('s-','');
-  if(s&&renders[s])renders[s]();
+  turnos=turnos.filter(function(t){return t.id!==turnoActual;});
+  ST();syncSheet('turnos');cerrarModal('modalTurno');
+  var s=document.querySelector('.section.active');
+  if(s&&renders[s.id.replace('s-','')])renders[s.id.replace('s-','')]();
 }
 function marcarAsistencia(estado){
-  const t=turnos.find(x=>x.id===turnoActual);
+  var t=turnos.find(function(x){return x.id===turnoActual;});
   if(t){t.estado=estado;ST();syncSheet('turnos');}
   cerrarModal('modalTurno');
-  const s=document.querySelector('.section.active')&&document.querySelector('.section.active').id.replace('s-','');
-  if(s&&renders[s])renders[s]();
+  var s=document.querySelector('.section.active');
+  if(s&&renders[s.id.replace('s-','')])renders[s.id.replace('s-','')]();
 }
 
+// ══════════════════════════════════════════
 // PACIENTES
+// ══════════════════════════════════════════
 function renderPacientes(){
-  const q=(document.getElementById('buscarPac')&&document.getElementById('buscarPac').value||'').toLowerCase();
-  const f=pacientes.filter(p=>p.nombre.toLowerCase().includes(q)||p.dni.includes(q)||(p.os||'').toLowerCase().includes(q));
+  var q=(document.getElementById('buscarPac')&&document.getElementById('buscarPac').value||'').toLowerCase();
+  var f=pacientes.filter(function(p){return p.nombre.toLowerCase().includes(q)||p.dni.includes(q)||(p.os||'').toLowerCase().includes(q);});
   if(!f.length){document.getElementById('tblPacientes').innerHTML='<tr><td colspan="7"><div class="empty"><div class="ei">🔍</div>Sin resultados</div></td></tr>';return;}
   document.getElementById('tblPacientes').innerHTML=f.map(function(p){
-    const pr=getPr(p.profId);
+    var pr=getPr(p.profId);
     return '<tr><td><strong>'+p.nombre+'</strong><br><span class="text-muted">'+p.dx+'</span></td><td>'+p.dni+'</td><td>'+(p.tel||'—')+'</td><td>'+(p.os||'<span class="text-muted">Particular</span>')+'</td><td><span style="color:'+(pr?pr.color:'#333')+';font-size:.75rem;font-weight:600">● '+(pr?pr.nombre:'—')+'</span></td><td>'+(p.sesiones?p.sesiones.length:0)+' ses.</td><td class="td-actions"><button class="btn btn-secondary btn-xs" onclick="verFicha('+p.id+')">📋 Ficha</button> <button class="btn btn-teal btn-xs" onclick="ntParaPac('+p.id+')">+ Turno</button> <button class="btn btn-success btn-xs" onclick="abrirModalPago('+p.id+')">💰</button> <button class="btn btn-danger btn-xs" onclick="eliminarPaciente('+p.id+')">🗑️</button></td></tr>';
   }).join('');
 }
 
+// ══════════════════════════════════════════
 // FICHA
+// ══════════════════════════════════════════
 function verFicha(id){pacActual=id;go('ficha');}
 function renderFicha(){
-  const p=getPac(pacActual);if(!p)return;
-  const pr=getPr(p.profId);
-  const edad=p.fnac?Math.floor((new Date()-new Date(p.fnac))/(365.25*24*3600*1e3)):'—';
-  const totalPag=(p.pagos||[]).reduce((s,pg)=>s+Number(pg.monto),0);
-  let html='<div class="ficha-header"><div>';
+  var p=getPac(pacActual);if(!p)return;
+  var pr=getPr(p.profId);
+  var edad=p.fnac?Math.floor((new Date()-new Date(p.fnac))/(365.25*24*3600*1e3)):'—';
+  var totalPag=(p.pagos||[]).reduce(function(s,pg){return s+Number(pg.monto);},0);
+  var html='<div class="ficha-header"><div>';
   html+='<div class="ficha-nombre">'+p.nombre+'</div>';
   html+='<div class="ficha-sub">'+p.dx+'</div>';
   if(pr)html+='<div class="ficha-prof" style="color:'+pr.color+'">● '+pr.nombre+' — '+pr.rol+'</div>';
   html+='</div><div style="display:flex;gap:6px;flex-wrap:wrap">';
   html+='<button class="btn btn-teal btn-sm" onclick="abrirModalSesion()">+ Sesión</button>';
-  html+='<button class="btn btn-success btn-sm" onclick="abrirModalPago('+p.id+')">💰 Pago</button>';
+  if(usuarioActual&&usuarioActual.rol==='admin')html+='<button class="btn btn-success btn-sm" onclick="abrirModalPago('+p.id+')">💰 Pago</button>';
   html+='<button class="btn btn-secondary btn-sm" onclick="ntParaPac('+p.id+')">+ Turno</button>';
-  html+='<button class="btn btn-purple btn-sm" onclick="imprimirInforme('+p.id+',\'paciente\')">📄 Informe Paciente</button>';
-  html+='<button class="btn btn-secondary btn-sm" onclick="imprimirInforme('+p.id+',\'clinico\')">📋 Informe Clínico</button>';
-  html+='<button class="btn btn-danger btn-sm" onclick="eliminarPaciente('+p.id+');go(\'pacientes\')">🗑️ Eliminar</button>';
+  html+='<button class="btn btn-purple btn-sm" onclick="imprimirInforme('+p.id+',\'paciente\')">📄 Paciente</button>';
+  html+='<button class="btn btn-secondary btn-sm" onclick="imprimirInforme('+p.id+',\'clinico\')">📋 Clínico</button>';
+  if(usuarioActual&&usuarioActual.rol==='admin')html+='<button class="btn btn-danger btn-sm" onclick="eliminarPaciente('+p.id+');go(\'pacientes\')">🗑️ Eliminar</button>';
   html+='</div></div>';
   html+='<div class="datos-grid">';
   html+='<div class="dato"><div class="k">DNI</div><div class="v">'+p.dni+'</div></div>';
@@ -622,39 +848,39 @@ function renderFicha(){
   if(p.afil)html+='<div class="dato"><div class="k">N° Afiliado</div><div class="v">'+p.afil+'</div></div>';
   if(p.medico)html+='<div class="dato"><div class="k">Médico derivante</div><div class="v">'+p.medico+'</div></div>';
   html+='<div class="dato"><div class="k">Sesiones</div><div class="v">'+((p.sesiones&&p.sesiones.length)||0)+' registradas</div></div>';
-  html+='<div class="dato"><div class="k">Total pagado</div><div class="v text-success">$'+totalPag.toLocaleString('es-AR')+'</div></div>';
+  if(usuarioActual&&usuarioActual.rol==='admin')html+='<div class="dato"><div class="k">Total pagado</div><div class="v text-success">$'+totalPag.toLocaleString('es-AR')+'</div></div>';
   if(p.obs)html+='<div class="dato" style="grid-column:1/-1"><div class="k">Antecedentes</div><div class="v">'+p.obs+'</div></div>';
   html+='</div>';
   html+='<div class="ficha-tabs">';
   html+='<button class="ftab active" onclick="switchFTab(this,\'ft-ses\')">📋 Historia Clínica ('+(p.sesiones?p.sesiones.length:0)+')</button>';
   html+='<button class="ftab" onclick="switchFTab(this,\'ft-arch\')">📁 Archivos ('+(p.archivos?p.archivos.length:0)+')</button>';
-  html+='<button class="ftab" onclick="switchFTab(this,\'ft-pag\')">💰 Pagos ('+(p.pagos?p.pagos.length:0)+')</button>';
+  if(usuarioActual&&usuarioActual.rol==='admin')html+='<button class="ftab" onclick="switchFTab(this,\'ft-pag\')">💰 Pagos ('+(p.pagos?p.pagos.length:0)+')</button>';
   html+='</div>';
   html+='<div class="ftab-content active" id="ft-ses">'+renderSesiones(p)+'</div>';
   html+='<div class="ftab-content" id="ft-arch">'+renderArchivos(p)+'</div>';
-  html+='<div class="ftab-content" id="ft-pag">'+renderPagosPac(p)+'</div>';
+  if(usuarioActual&&usuarioActual.rol==='admin')html+='<div class="ftab-content" id="ft-pag">'+renderPagosPac(p)+'</div>';
   document.getElementById('fichaWrap').innerHTML=html;
 }
 function switchFTab(btn,id){
-  document.querySelectorAll('.ftab').forEach(b=>b.classList.remove('active'));
-  document.querySelectorAll('.ftab-content').forEach(c=>c.classList.remove('active'));
+  document.querySelectorAll('.ftab').forEach(function(b){b.classList.remove('active');});
+  document.querySelectorAll('.ftab-content').forEach(function(c){c.classList.remove('active');});
   btn.classList.add('active');
-  const el=document.getElementById(id);if(el)el.classList.add('active');
+  var el=document.getElementById(id);if(el)el.classList.add('active');
 }
 function renderSesiones(p){
   if(!p.sesiones||!p.sesiones.length)return '<div class="empty"><div class="ei">📭</div>Sin sesiones</div>';
-  return [...p.sesiones].reverse().map(function(s){
+  return [].concat(p.sesiones).reverse().map(function(s){
     return '<div class="sesion-card '+s.asistencia+'"><div class="sesion-top"><span class="sesion-fecha">'+fdisp(s.fecha)+'</span><span class="badge b-'+s.asistencia+'">'+(s.asistencia==='asistio'?'✅ Asistió':'❌ Ausente')+'</span></div><div class="sesion-tipo">'+(s.tipo||'')+'</div>'+(s.nota?'<div class="sesion-nota">'+s.nota+'</div>':'')+'</div>';
   }).join('');
 }
 function renderArchivos(p){
-  let h='<div class="upload-zone" onclick="document.getElementById(\'archivoInput\').click();pacArchivoActual='+p.id+'"><div style="font-size:2rem;margin-bottom:6px">📎</div><div>Hacé clic para adjuntar archivos</div><div style="font-size:.72rem;margin-top:4px">PDF, imágenes, Word — también podés sacar fotos desde el celular</div></div>';
+  var h='<div class="upload-zone" onclick="document.getElementById(\'archivoInput\').click();pacArchivoActual='+p.id+'"><div style="font-size:2rem;margin-bottom:6px">📎</div><div>Hacé clic para adjuntar archivos</div><div style="font-size:.72rem;margin-top:4px">PDF, imágenes, Word — también podés sacar fotos desde el celular</div></div>';
   if(p.archivos&&p.archivos.length){
     h+='<div class="archivos-grid">';
     p.archivos.forEach(function(a,i){
-      const nombre=a.nombre||a;
-      const ext=(nombre).split('.').pop().toLowerCase();
-      const icon=['jpg','jpeg','png','gif','webp'].includes(ext)?'🖼️':ext==='pdf'?'📄':['doc','docx'].includes(ext)?'📝':'📎';
+      var nombre=a.nombre||a;
+      var ext=nombre.split('.').pop().toLowerCase();
+      var icon=['jpg','jpeg','png','gif','webp'].includes(ext)?'🖼️':ext==='pdf'?'📄':['doc','docx'].includes(ext)?'📝':'📎';
       h+='<div class="archivo-item"><button class="archivo-del" onclick="eliminarArchivo('+p.id+','+i+')">✕</button><div style="font-size:1.6rem;margin-bottom:4px">'+icon+'</div><div style="word-break:break-all;font-size:.74rem">'+nombre+'</div>'+(a.data?'<button class="btn btn-secondary btn-xs" style="margin-top:6px" onclick="verArchivo('+p.id+','+i+')">Ver</button>':'')+'</div>';
     });
     h+='</div>';
@@ -663,37 +889,37 @@ function renderArchivos(p){
 }
 function renderPagosPac(p){
   if(!p.pagos||!p.pagos.length)return '<div class="empty"><div class="ei">💸</div>Sin pagos</div>';
-  let total=0;
-  let h=p.pagos.map(function(pg){total+=Number(pg.monto);return '<div class="pago-item"><span class="pago-fecha">'+fdisp(pg.fecha)+'</span><span style="flex:1;font-size:.83rem">'+pg.concepto+' · '+pg.forma+'</span><span class="pago-monto">$'+Number(pg.monto).toLocaleString('es-AR')+'</span></div>';}).join('');
+  var total=0;
+  var h=p.pagos.map(function(pg){total+=Number(pg.monto);return '<div class="pago-item"><span class="pago-fecha">'+fdisp(pg.fecha)+'</span><span style="flex:1;font-size:.83rem">'+pg.concepto+' · '+pg.forma+'</span><span class="pago-monto">$'+Number(pg.monto).toLocaleString('es-AR')+'</span></div>';}).join('');
   return h+'<div style="text-align:right;margin-top:10px;font-size:.88rem;font-weight:600;color:var(--success)">Total: $'+total.toLocaleString('es-AR')+'</div>';
 }
 
 // ARCHIVOS
 function procesarArchivos(e){
-  const pid=pacArchivoActual;const p=getPac(pid);if(!p)return;
+  var pid=pacArchivoActual;var p=getPac(pid);if(!p)return;
   if(!p.archivos)p.archivos=[];
   Array.from(e.target.files).forEach(function(f){
-    const r=new FileReader();
+    var r=new FileReader();
     r.onload=function(ev){p.archivos.push({nombre:f.name,data:ev.target.result,tipo:f.type,fecha:hoy()});SP();syncSheet('pacientes');renderFicha();};
     r.readAsDataURL(f);
   });
   e.target.value='';
 }
 function verArchivo(pid,idx){
-  const p=getPac(pid);const a=p.archivos[idx];if(!a||!a.data)return;
-  const w=window.open();
+  var p=getPac(pid);var a=p.archivos[idx];if(!a||!a.data)return;
+  var w=window.open();
   if(a.tipo&&a.tipo.startsWith('image/')){w.document.write('<img src="'+a.data+'" style="max-width:100%">');}
   else{w.location.href=a.data;}
 }
 function eliminarArchivo(pid,idx){
   if(!confirm('¿Eliminar este archivo?'))return;
-  const p=getPac(pid);p.archivos.splice(idx,1);SP();syncSheet('pacientes');renderFicha();
+  var p=getPac(pid);p.archivos.splice(idx,1);SP();syncSheet('pacientes');renderFicha();
 }
 
 // SESIÓN
 function abrirModalSesion(){document.getElementById('ses-fecha').value=hoy();document.getElementById('ses-nota').value='';abrirModal('modalSesion');}
 function guardarSesion(){
-  const p=getPac(pacActual);if(!p)return;
+  var p=getPac(pacActual);if(!p)return;
   if(!p.sesiones)p.sesiones=[];
   p.sesiones.push({fecha:document.getElementById('ses-fecha').value,tipo:document.getElementById('ses-tipo').value,asistencia:document.getElementById('ses-asist').value,nota:document.getElementById('ses-nota').value});
   SP();syncSheet('pacientes');cerrarModal('modalSesion');renderFicha();
@@ -701,67 +927,71 @@ function guardarSesion(){
 
 // ELIMINAR PACIENTE
 function eliminarPaciente(id){
-  const p=getPac(id);if(!p)return;
+  var p=getPac(id);if(!p)return;
   if(!confirm('¿Eliminar a '+p.nombre+'?\n\nSe borrarán también sus turnos y pagos. Esta acción no se puede deshacer.'))return;
-  pacientes=pacientes.filter(x=>x.id!=id);
-  turnos=turnos.filter(t=>t.pacId!=id);
-  pagos=pagos.filter(pg=>pg.pacId!=id);
+  pacientes=pacientes.filter(function(x){return x.id!=id;});
+  turnos=turnos.filter(function(t){return t.pacId!=id;});
+  pagos=pagos.filter(function(pg){return pg.pacId!=id;});
   SP();ST();SPG();syncSheet('pacientes');syncSheet('turnos');syncSheet('pagos');
   renderPacientes();
 }
 
 // NUEVO TURNO
 function initNuevoTurno(){
-  document.getElementById('nt-prof').innerHTML='<option value="">Seleccionar...</option>'+profs.map(pr=>'<option value="'+pr.id+'">'+pr.nombre+' — '+pr.rol+'</option>').join('');
-  document.getElementById('nt-pac').innerHTML='<option value="">Seleccionar paciente...</option>'+pacientes.map(p=>'<option value="'+p.id+'">'+p.nombre+'</option>').join('');
+  document.getElementById('nt-prof').innerHTML='<option value="">Seleccionar...</option>'+profs.map(function(pr){return '<option value="'+pr.id+'">'+pr.nombre+' — '+pr.rol+'</option>';}).join('');
+  document.getElementById('nt-pac').innerHTML='<option value="">Seleccionar paciente...</option>'+pacientes.map(function(p){return '<option value="'+p.id+'">'+p.nombre+'</option>';}).join('');
   if(!document.getElementById('nt-fecha').value)document.getElementById('nt-fecha').value=hoy();
+  // Si es kine, preseleccionar su profesional
+  if(usuarioActual&&usuarioActual.rol==='kine'&&usuarioActual.profId){
+    document.getElementById('nt-prof').value=usuarioActual.profId;
+  }
 }
 function ntParaPac(pid){go('nuevo-turno');setTimeout(function(){document.getElementById('nt-pac').value=pid;},60);}
 function guardarTurno(){
-  const pid=parseInt(document.getElementById('nt-pac').value);
-  const prid=document.getElementById('nt-prof').value;
-  const fecha=document.getElementById('nt-fecha').value;
-  const hora=document.getElementById('nt-hora').value;
+  var pid=parseInt(document.getElementById('nt-pac').value);
+  var prid=document.getElementById('nt-prof').value;
+  var fecha=document.getElementById('nt-fecha').value;
+  var hora=document.getElementById('nt-hora').value;
   if(!pid||!prid||!fecha||!hora){alert('Completá profesional, paciente, fecha y hora.');return;}
   turnos.push({id:Date.now(),profId:prid,pacId:pid,fecha:fecha,hora:hora,tipo:document.getElementById('nt-tipo').value,dur:parseInt(document.getElementById('nt-dur').value),notas:document.getElementById('nt-notas').value,estado:'pendiente'});
   ST();syncSheet('turnos');
   document.getElementById('nt-hora').value='';document.getElementById('nt-notas').value='';
-  document.getElementById('nt-pac').value='';document.getElementById('nt-prof').value='';
+  document.getElementById('nt-pac').value='';
   go('agenda');
 }
 
 // NUEVO PACIENTE
 function initNuevoPaciente(){
-  document.getElementById('np-prof').innerHTML='<option value="">Seleccionar...</option>'+profs.map(pr=>'<option value="'+pr.id+'">'+pr.nombre+'</option>').join('');
+  document.getElementById('np-prof').innerHTML='<option value="">Seleccionar...</option>'+profs.map(function(pr){return '<option value="'+pr.id+'">'+pr.nombre+'</option>';}).join('');
 }
 function guardarPaciente(){
-  const nombre=document.getElementById('np-nombre').value.trim();
-  const dni=document.getElementById('np-dni').value.trim();
-  const dx=document.getElementById('np-dx').value;
+  var nombre=document.getElementById('np-nombre').value.trim();
+  var dni=document.getElementById('np-dni').value.trim();
+  var dx=document.getElementById('np-dx').value;
   if(!nombre||!dni||!dx){alert('Completá nombre, DNI y diagnóstico.');return;}
   pacientes.push({id:Date.now(),nombre:nombre,dni:dni,tel:document.getElementById('np-tel').value,email:document.getElementById('np-email').value,fnac:document.getElementById('np-fnac').value,sexo:document.getElementById('np-sexo').value,os:document.getElementById('np-os').value,afil:document.getElementById('np-afil').value,medico:document.getElementById('np-medico').value,profId:document.getElementById('np-prof').value,dx:dx,obs:document.getElementById('np-obs').value,sesiones:[],archivos:[],pagos:[],alta:hoy()});
   SP();syncSheet('pacientes');
-  ['np-nombre','np-dni','np-tel','np-email','np-fnac','np-afil','np-medico','np-obs'].forEach(id=>document.getElementById(id).value='');
-  ['np-os','np-dx','np-sexo','np-prof'].forEach(id=>document.getElementById(id).value='');
+  ['np-nombre','np-dni','np-tel','np-email','np-fnac','np-afil','np-medico','np-obs'].forEach(function(id){document.getElementById(id).value='';});
+  ['np-os','np-dx','np-sexo','np-prof'].forEach(function(id){document.getElementById(id).value='';});
   go('pacientes');
 }
 
 // CAJA
 function initCaja(){
-  const sel=document.getElementById('cajaMes');
-  if(!sel.options.length){MESES.forEach((m,i)=>sel.add(new Option(m,i)));sel.value=new Date().getMonth();}
-  const sp=document.getElementById('cajaProf');
-  sp.innerHTML='<option value="">Todos</option>'+profs.map(pr=>'<option value="'+pr.id+'">'+pr.nombre+'</option>').join('');
+  var sel=document.getElementById('cajaMes');
+  if(!sel.options.length){MESES.forEach(function(m,i){sel.add(new Option(m,i));});sel.value=new Date().getMonth();}
+  var sp=document.getElementById('cajaProf');
+  sp.innerHTML='<option value="">Todos</option>'+profs.map(function(pr){return '<option value="'+pr.id+'">'+pr.nombre+'</option>';}).join('');
 }
 function renderCaja(){
   initCaja();
-  const mes=parseInt(document.getElementById('cajaMes').value);
-  const profF=document.getElementById('cajaProf').value;
-  const año=new Date().getFullYear();
-  const pf=pagos.filter(function(pg){const d=new Date(pg.fecha);return d.getMonth()===mes&&d.getFullYear()===año&&(!profF||pg.profId===profF);});
-  const total=pf.reduce((s,p)=>s+Number(p.monto),0);
-  const ef=pf.filter(p=>p.forma==='Efectivo').reduce((s,p)=>s+Number(p.monto),0);
-  const tf=pf.filter(p=>p.forma==='Transferencia').reduce((s,p)=>s+Number(p.monto),0);
+  var mes=parseInt(document.getElementById('cajaMes').value);
+  var profF=document.getElementById('cajaProf').value;
+  var año=new Date().getFullYear();
+  var pf=pagos.filter(function(pg){var d=new Date(pg.fecha);return d.getMonth()===mes&&d.getFullYear()===año&&(!profF||pg.profId===profF);});
+  var total=pf.reduce(function(s,p){return s+Number(p.monto);},0);
+  var ef=pf.filter(function(p){return p.forma==='Efectivo';}).reduce(function(s,p){return s+Number(p.monto);},0);
+  var tf=pf.filter(function(p){return p.forma==='Transferencia';}).reduce(function(s,p){return s+Number(p.monto);},0);
   document.getElementById('cajaResumen').innerHTML=
     '<div class="caja-stat"><div class="cn" style="color:var(--success)">$'+total.toLocaleString('es-AR')+'</div><div class="cl">Total '+MESES[mes]+'</div></div>'+
     '<div class="caja-stat"><div class="cn">'+pf.length+'</div><div class="cl">Pagos</div></div>'+
@@ -769,72 +999,71 @@ function renderCaja(){
     '<div class="caja-stat"><div class="cn" style="color:var(--teal-d)">$'+tf.toLocaleString('es-AR')+'</div><div class="cl">Transferencia</div></div>';
   if(!pf.length){document.getElementById('cajaPagos').innerHTML='<div class="empty"><div class="ei">💸</div>Sin pagos este mes</div>';return;}
   document.getElementById('cajaPagos').innerHTML=pf.map(function(pg){
-    const p=getPac(pg.pacId),pr=getPr(pg.profId);
+    var p=getPac(pg.pacId),pr=getPr(pg.profId);
     return '<div class="pago-item"><span class="pago-fecha">'+fdisp(pg.fecha)+'</span><div style="flex:1"><div style="font-size:.83rem;font-weight:500">'+(p?p.nombre:'—')+'</div><div style="font-size:.74rem;color:var(--text-soft)">'+pg.concepto+' · '+pg.forma+(pr?' · <span style="color:'+pr.color+'">'+pr.nombre+'</span>':'')+'</div>'+(pg.obs?'<div style="font-size:.72rem;color:var(--text-soft)">'+pg.obs+'</div>':'')+'</div><span class="pago-monto">$'+Number(pg.monto).toLocaleString('es-AR')+'</span><button class="btn btn-danger btn-xs" onclick="eliminarPago('+pg.id+')">✕</button></div>';
   }).join('');
 }
 function eliminarPago(id){
   if(!confirm('¿Eliminar este pago?'))return;
-  const pg=pagos.find(p=>p.id===id);
-  if(pg){const p=getPac(pg.pacId);if(p&&p.pagos)p.pagos=p.pagos.filter(pp=>pp.id!==id);SP();}
-  pagos=pagos.filter(p=>p.id!==id);SPG();syncSheet('pagos');renderCaja();
+  var pg=pagos.find(function(p){return p.id===id;});
+  if(pg){var p=getPac(pg.pacId);if(p&&p.pagos)p.pagos=p.pagos.filter(function(pp){return pp.id!==id;});SP();}
+  pagos=pagos.filter(function(p){return p.id!==id;});SPG();syncSheet('pagos');renderCaja();
 }
 function exportarCaja(){
-  const mes=parseInt(document.getElementById('cajaMes').value);
-  const año=new Date().getFullYear();
-  const pf=pagos.filter(function(pg){const d=new Date(pg.fecha);return d.getMonth()===mes&&d.getFullYear()===año;});
-  let csv='Fecha,Paciente,Concepto,Profesional,Forma,Monto,Obs\n';
-  pf.forEach(function(pg){const p=getPac(pg.pacId),pr=getPr(pg.profId);csv+=pg.fecha+',"'+(p?p.nombre:'—')+'","'+pg.concepto+'","'+(pr?pr.nombre:'—')+'","'+pg.forma+'",'+pg.monto+',"'+(pg.obs||'')+'"\n';});
-  const a=document.createElement('a');a.href='data:text/csv;charset=utf-8,\uFEFF'+encodeURIComponent(csv);a.download='Caja_CVM_'+MESES[mes]+'_'+año+'.csv';a.click();
+  var mes=parseInt(document.getElementById('cajaMes').value);
+  var año=new Date().getFullYear();
+  var pf=pagos.filter(function(pg){var d=new Date(pg.fecha);return d.getMonth()===mes&&d.getFullYear()===año;});
+  var csv='Fecha,Paciente,Concepto,Profesional,Forma,Monto,Obs\n';
+  pf.forEach(function(pg){var p=getPac(pg.pacId),pr=getPr(pg.profId);csv+=pg.fecha+',"'+(p?p.nombre:'—')+'","'+pg.concepto+'","'+(pr?pr.nombre:'—')+'","'+pg.forma+'",'+pg.monto+',"'+(pg.obs||'')+'"\n';});
+  var a=document.createElement('a');a.href='data:text/csv;charset=utf-8,\uFEFF'+encodeURIComponent(csv);a.download='Caja_CVM_'+MESES[mes]+'_'+año+'.csv';a.click();
 }
 function abrirModalPago(pid){
   document.getElementById('pago-fecha').value=hoy();
   document.getElementById('pago-monto').value='';
   document.getElementById('pago-obs').value='';
-  document.getElementById('pago-pac').innerHTML='<option value="">Seleccionar...</option>'+pacientes.map(p=>'<option value="'+p.id+'"'+(p.id==pid?' selected':'')+'>'+p.nombre+'</option>').join('');
-  document.getElementById('pago-prof').innerHTML='<option value="">—</option>'+profs.map(pr=>'<option value="'+pr.id+'">'+pr.nombre+'</option>').join('');
+  document.getElementById('pago-pac').innerHTML='<option value="">Seleccionar...</option>'+pacientes.map(function(p){return '<option value="'+p.id+'"'+(p.id==pid?' selected':'')+'>'+p.nombre+'</option>';}).join('');
+  document.getElementById('pago-prof').innerHTML='<option value="">—</option>'+profs.map(function(pr){return '<option value="'+pr.id+'">'+pr.nombre+'</option>';}).join('');
   abrirModal('modalPago');
 }
 function guardarPago(){
-  const pacId=parseInt(document.getElementById('pago-pac').value);
-  const monto=parseFloat(document.getElementById('pago-monto').value);
+  var pacId=parseInt(document.getElementById('pago-pac').value);
+  var monto=parseFloat(document.getElementById('pago-monto').value);
   if(!pacId||!monto){alert('Completá paciente y monto.');return;}
-  const pg={id:Date.now(),pacId:pacId,profId:document.getElementById('pago-prof').value,fecha:document.getElementById('pago-fecha').value,monto:monto,forma:document.getElementById('pago-forma').value,concepto:document.getElementById('pago-concepto').value,obs:document.getElementById('pago-obs').value};
+  var pg={id:Date.now(),pacId:pacId,profId:document.getElementById('pago-prof').value,fecha:document.getElementById('pago-fecha').value,monto:monto,forma:document.getElementById('pago-forma').value,concepto:document.getElementById('pago-concepto').value,obs:document.getElementById('pago-obs').value};
   pagos.push(pg);SPG();
-  const p=getPac(pacId);if(p){if(!p.pagos)p.pagos=[];p.pagos.push(pg);SP();}
+  var p=getPac(pacId);if(p){if(!p.pagos)p.pagos=[];p.pagos.push(pg);SP();}
   syncSheet('pagos');cerrarModal('modalPago');
-  const s=document.querySelector('.section.active')&&document.querySelector('.section.active').id.replace('s-','');
-  if(s&&renders[s])renders[s]();
+  var s=document.querySelector('.section.active');
+  if(s&&renders[s.id.replace('s-','')])renders[s.id.replace('s-','')]();
 }
 
 // ESTADÍSTICAS
 function renderEstadisticas(){
-  const año=new Date().getFullYear();
+  var año=new Date().getFullYear();
   document.getElementById('mesGrid').innerHTML=MESES.map(function(m,i){
-    const n=turnos.filter(function(t){const d=new Date(t.fecha);return d.getMonth()===i&&d.getFullYear()===año;}).length;
+    var n=turnos.filter(function(t){var d=new Date(t.fecha);return d.getMonth()===i&&d.getFullYear()===año;}).length;
     return '<div class="mes-card'+(i===mesEst?' active':'')+'" onclick="selMes('+i+')"><div class="mn">'+n+'</div><div class="ml">'+m.substring(0,3)+'</div></div>';
   }).join('');
   renderEstDetalle();
 }
 function selMes(m){mesEst=m;renderEstadisticas();}
 function renderEstDetalle(){
-  const año=new Date().getFullYear();
-  const tm=turnos.filter(function(t){const d=new Date(t.fecha);return d.getMonth()===mesEst&&d.getFullYear()===año;});
-  const pm=pacientes.filter(function(p){const d=new Date(p.alta);return d.getMonth()===mesEst&&d.getFullYear()===año;});
-  const pgm=pagos.filter(function(p){const d=new Date(p.fecha);return d.getMonth()===mesEst&&d.getFullYear()===año;});
-  const totalIng=pgm.reduce((s,p)=>s+Number(p.monto),0);
-  const maxProf=Math.max.apply(null,profs.map(pr=>tm.filter(t=>t.profId===pr.id).length).concat([1]));
-  let html='<div class="stats-grid" style="margin-bottom:16px">';
+  var año=new Date().getFullYear();
+  var tm=turnos.filter(function(t){var d=new Date(t.fecha);return d.getMonth()===mesEst&&d.getFullYear()===año;});
+  var pm=pacientes.filter(function(p){var d=new Date(p.alta);return d.getMonth()===mesEst&&d.getFullYear()===año;});
+  var pgm=pagos.filter(function(p){var d=new Date(p.fecha);return d.getMonth()===mesEst&&d.getFullYear()===año;});
+  var totalIng=pgm.reduce(function(s,p){return s+Number(p.monto);},0);
+  var maxProf=Math.max.apply(null,profs.map(function(pr){return tm.filter(function(t){return t.profId===pr.id;}).length;}).concat([1]));
+  var html='<div class="stats-grid" style="margin-bottom:16px">';
   html+='<div class="stat"><div class="n">'+tm.length+'</div><div class="l">Turnos</div></div>';
-  html+='<div class="stat green"><div class="n">'+tm.filter(t=>t.estado==='asistio').length+'</div><div class="l">Asistencias</div></div>';
-  html+='<div class="stat red"><div class="n">'+tm.filter(t=>t.estado==='ausente').length+'</div><div class="l">Ausencias</div></div>';
+  html+='<div class="stat green"><div class="n">'+tm.filter(function(t){return t.estado==='asistio';}).length+'</div><div class="l">Asistencias</div></div>';
+  html+='<div class="stat red"><div class="n">'+tm.filter(function(t){return t.estado==='ausente';}).length+'</div><div class="l">Ausencias</div></div>';
   html+='<div class="stat teal"><div class="n">'+pm.length+'</div><div class="l">Altas</div></div>';
-  html+='<div class="stat purple"><div class="n">$'+totalIng.toLocaleString('es-AR')+'</div><div class="l">Ingresos</div></div>';
-  html+='</div>';
+  html+='<div class="stat purple"><div class="n">$'+totalIng.toLocaleString('es-AR')+'</div><div class="l">Ingresos</div></div></div>';
   html+='<div style="font-family:\'Playfair Display\',serif;font-size:1rem;color:var(--navy);margin-bottom:10px">👩‍⚕️ Turnos por profesional</div>';
   profs.forEach(function(pr){
-    const n=tm.filter(t=>t.profId===pr.id).length;
-    const a=tm.filter(t=>t.profId===pr.id&&t.estado==='asistio').length;
+    var n=tm.filter(function(t){return t.profId===pr.id;}).length;
+    var a=tm.filter(function(t){return t.profId===pr.id&&t.estado==='asistio';}).length;
     html+='<div class="chart-bar-wrap"><div class="chart-label"><span>● '+pr.nombre+'</span><span>'+n+' turnos · '+a+' asistencias</span></div><div class="chart-bar-bg"><div class="chart-bar" style="width:'+(n/maxProf*100)+'%;background:'+pr.color+'"><span>'+n+'</span></div></div></div>';
   });
   document.getElementById('statsDetalle').innerHTML=html;
@@ -845,23 +1074,25 @@ function renderConfig(){
   document.getElementById('profEditor').innerHTML=profs.map(function(pr){
     return '<div class="prof-editor-item"><span style="width:14px;height:14px;border-radius:50%;background:'+pr.color+';flex-shrink:0;display:inline-block"></span><input type="text" value="'+pr.nombre+'" id="pn-'+pr.id+'" placeholder="Nombre"><input type="text" value="'+pr.rol+'" id="pr-'+pr.id+'" placeholder="Rol" style="flex:2"><button class="btn btn-danger btn-sm" onclick="eliminarProf(\''+pr.id+'\')">✕</button></div>';
   }).join('');
-  document.getElementById('sheetStatus').innerHTML=sheetUrl?'<span style="color:var(--success)">✅ Conectado a Google Sheets</span>':'<span style="color:var(--warning)">⚠️ Sin conexión — datos guardados solo en este navegador</span>';
+  document.getElementById('sheetStatus').innerHTML=sheetUrl
+    ?'<span style="color:var(--success)">✅ Conectado a Google Sheets</span>'
+    :'<span style="color:var(--warning)">⚠️ Sin conexión — datos solo en este navegador</span>';
   document.getElementById('scriptBox').textContent=SCRIPT_GAS;
   if(sheetUrl)document.getElementById('sheetUrl').value=sheetUrl;
 }
 function agregarProf(){
-  const id='p'+Date.now();
+  var id='p'+Date.now();
   profs.push({id:id,nombre:'Nuevo/a Kinesiólogo/a',rol:'Rehabilitación Vestibular',color:COLORES[profs.length%COLORES.length]});
   renderConfig();
 }
 function eliminarProf(id){
   if(profs.length<=1){alert('Debe haber al menos 1 profesional.');return;}
   if(!confirm('¿Eliminar este profesional?'))return;
-  profs=profs.filter(p=>p.id!==id);renderConfig();
+  profs=profs.filter(function(p){return p.id!==id;});renderConfig();
 }
 function guardarProfs(){
   profs.forEach(function(pr){
-    const n=document.getElementById('pn-'+pr.id);const r=document.getElementById('pr-'+pr.id);
+    var n=document.getElementById('pn-'+pr.id);var r=document.getElementById('pr-'+pr.id);
     if(n&&n.value.trim())pr.nombre=n.value.trim();
     if(r&&r.value.trim())pr.rol=r.value.trim();
   });
@@ -869,32 +1100,33 @@ function guardarProfs(){
 }
 
 // GOOGLE SHEETS
-const SCRIPT_GAS='function doPost(e){\n  try{\n    const d=JSON.parse(e.postData.contents);\n    const ss=SpreadsheetApp.getActiveSpreadsheet();\n    if(d.type==="pacientes") syncS(ss,"Pacientes",d.records,["id","nombre","dni","tel","email","fnac","sexo","os","afil","medico","profId","dx","obs","alta"]);\n    if(d.type==="turnos") syncS(ss,"Turnos",d.records,["id","profId","pacId","fecha","hora","tipo","dur","notas","estado"]);\n    if(d.type==="pagos") syncS(ss,"Pagos",d.records,["id","pacId","profId","fecha","monto","forma","concepto","obs"]);\n    if(d.type==="ping") return ok("pong");\n    return ok("synced");\n  }catch(err){return ContentService.createTextOutput(JSON.stringify({error:err.message})).setMimeType(ContentService.MimeType.JSON);}\n}\nfunction doGet(e){\n  const ss=SpreadsheetApp.getActiveSpreadsheet();\n  const t=e.parameter.type;\n  const name=t==="pacientes"?"Pacientes":t==="turnos"?"Turnos":"Pagos";\n  const s=ss.getSheetByName(name);\n  if(!s)return ok([]);\n  return ok(s2j(s));\n}\nfunction syncS(ss,name,records,headers){\n  let s=ss.getSheetByName(name);\n  if(!s)s=ss.insertSheet(name);\n  s.clearContents();s.appendRow(headers);\n  records.forEach(r=>s.appendRow(headers.map(h=>{const v=r[h];return(Array.isArray(v)||typeof v==="object")?JSON.stringify(v):(v||"");})));\n}\nfunction s2j(s){\n  const d=s.getDataRange().getValues();if(d.length<2)return[];\n  const h=d[0];return d.slice(1).map(r=>{const o={};h.forEach((k,i)=>o[k]=r[i]);return o;});\n}\nfunction ok(data){return ContentService.createTextOutput(JSON.stringify({ok:true,data})).setMimeType(ContentService.MimeType.JSON);}';
+const SCRIPT_GAS='function doPost(e){\n  try{\n    var d=JSON.parse(e.postData.contents);\n    var ss=SpreadsheetApp.getActiveSpreadsheet();\n    if(d.type==="pacientes") syncS(ss,"Pacientes",d.records,["id","nombre","dni","tel","email","fnac","sexo","os","afil","medico","profId","dx","obs","alta","sesiones","archivos","pagos"]);\n    if(d.type==="turnos") syncS(ss,"Turnos",d.records,["id","profId","pacId","fecha","hora","tipo","dur","notas","estado"]);\n    if(d.type==="pagos") syncS(ss,"Pagos",d.records,["id","pacId","profId","fecha","monto","forma","concepto","obs"]);\n    if(d.type==="ping") return ok("pong");\n    return ok("synced");\n  }catch(err){return ContentService.createTextOutput(JSON.stringify({error:err.message})).setMimeType(ContentService.MimeType.JSON);}}\nfunction doGet(e){\n  var ss=SpreadsheetApp.getActiveSpreadsheet();\n  var t=e.parameter.type;\n  var name=t==="pacientes"?"Pacientes":t==="turnos"?"Turnos":"Pagos";\n  var s=ss.getSheetByName(name);\n  if(!s)return ok([]);\n  return ok(s2j(s));}\nfunction syncS(ss,name,records,headers){\n  var s=ss.getSheetByName(name);\n  if(!s)s=ss.insertSheet(name);\n  s.clearContents();s.appendRow(headers);\n  records.forEach(function(r){s.appendRow(headers.map(function(h){var v=r[h];return(Array.isArray(v)||typeof v==="object")?JSON.stringify(v):(v||"");}));});}\nfunction s2j(s){\n  var d=s.getDataRange().getValues();if(d.length<2)return[];\n  var h=d[0];return d.slice(1).map(function(r){var o={};h.forEach(function(k,i){o[k]=r[i];});return o;});}\nfunction ok(data){return ContentService.createTextOutput(JSON.stringify({ok:true,data:data})).setMimeType(ContentService.MimeType.JSON);}';
 
-function copiarScript(){navigator.clipboard.writeText(SCRIPT_GAS).then(function(){alert('✅ Script copiado. Pegalo en Apps Script.');});}
+function copiarScript(){
+  navigator.clipboard.writeText(SCRIPT_GAS).then(function(){alert('✅ Script copiado. Pegalo en Apps Script.');});
+}
 function setSyncBar(type,msg){
-  const b=document.getElementById('syncBar');
+  var b=document.getElementById('syncBar');
   b.className=type==='ok'?'ok':type==='err'?'err':'';
   document.getElementById('syncMsg').textContent=msg;
   if(type==='ok')setTimeout(function(){b.classList.add('hide');},4000);
 }
 function conectarSheet(){
-  const url=document.getElementById('sheetUrl').value.trim();
+  var url=document.getElementById('sheetUrl').value.trim();
   if(!url){alert('Pegá la URL del Web App.');return;}
   sheetUrl=url;localStorage.setItem('cvm3_sheet',sheetUrl);
   setSyncBar('','⏳ Probando conexión...');
-  fetch(url+'?type=ping').then(r=>r.json()).then(function(d){
+  fetch(url+'?type=ping').then(function(r){return r.json();}).then(function(d){
     if(d.ok){setSyncBar('ok','✅ Conectado a Google Sheets');syncAll();}
     else setSyncBar('err','❌ Error al conectar');
-  }).catch(function(){setSyncBar('err','❌ No se pudo conectar. Verificá la URL.');});
+  }).catch(function(){setSyncBar('err','❌ No se pudo conectar.');});
   renderConfig();
 }
 function syncSheet(type){
   if(!sheetUrl)return;
-  setSyncBar('','⏳ Guardando...');
-  const data=type==='pacientes'?pacientes:type==='turnos'?turnos:pagos;
+  var data=type==='pacientes'?pacientes:type==='turnos'?turnos:pagos;
   fetch(sheetUrl,{method:'POST',body:JSON.stringify({type:type,records:data})})
-    .then(r=>r.json())
+    .then(function(r){return r.json();})
     .then(function(d){if(d.ok)setSyncBar('ok','✅ Guardado en Google Sheets');else setSyncBar('err','❌ Error al guardar');})
     .catch(function(){setSyncBar('err','❌ Sin conexión a Google Sheets');});
 }
@@ -902,23 +1134,19 @@ function syncAll(){syncSheet('pacientes');setTimeout(function(){syncSheet('turno
 
 // INFORMES
 function imprimirInforme(pid,tipo){
-  const p=getPac(pid);if(!p)return;
-  const pr=getPr(p.profId);
-  const logo=localStorage.getItem('cvm3_logo')||'';
-  const edad=p.fnac?Math.floor((new Date()-new Date(p.fnac))/(365.25*24*3600*1e3)):'—';
-  const sesiones=p.sesiones||[];
-  const asistidas=sesiones.filter(s=>s.asistencia==='asistio');
-  const fechaHoy=new Date().toLocaleDateString('es-AR',{day:'numeric',month:'long',year:'numeric'});
-  const logoHTML=logo?'<img src="'+logo+'" style="width:65px;height:65px;object-fit:contain" alt="Logo">'
+  var p=getPac(pid);if(!p)return;
+  var pr=getPr(p.profId);
+  var logo=localStorage.getItem('cvm3_logo')||'';
+  var edad=p.fnac?Math.floor((new Date()-new Date(p.fnac))/(365.25*24*3600*1e3)):'—';
+  var sesiones=p.sesiones||[];
+  var asistidas=sesiones.filter(function(s){return s.asistencia==='asistio';});
+  var fechaHoy=new Date().toLocaleDateString('es-AR',{day:'numeric',month:'long',year:'numeric'});
+  var logoHTML=logo?'<img src="'+logo+'" style="width:65px;height:65px;object-fit:contain" alt="Logo">'
     :'<div style="width:65px;height:65px;background:#e8f8f8;border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:28px">🌀</div>';
-
-  const estilos='*{box-sizing:border-box;margin:0;padding:0;}body{font-family:Segoe UI,Arial,sans-serif;color:#1a2a3a;background:#fff;padding:32px;}@media print{body{padding:16px;}.no-print{display:none;}@page{margin:1.5cm;}}.header{display:flex;align-items:center;justify-content:space-between;padding-bottom:16px;border-bottom:3px solid #1e3a5f;margin-bottom:20px;}.sec-tit{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:#2abfbf;border-bottom:1.5px solid #e8f8f8;padding-bottom:4px;margin-bottom:10px;}.seccion{margin-bottom:20px;}.dato{background:#f7f8fc;border-radius:6px;padding:8px 10px;}.dato-k{font-size:10px;font-weight:700;text-transform:uppercase;color:#5a6a80;letter-spacing:.05em;}.dato-v{font-size:12px;color:#1a2a3a;margin-top:2px;}.dx-box{background:#e8f8f8;border-left:4px solid #2abfbf;padding:10px 14px;border-radius:6px;font-size:13px;font-weight:600;color:#1e3a5f;}.firma-area{margin-top:50px;display:flex;justify-content:flex-end;}.firma-box{text-align:center;min-width:220px;}.firma-linea{border-top:1.5px solid #1e3a5f;margin-bottom:8px;}.footer-doc{margin-top:24px;padding-top:12px;border-top:1px solid #e8ecf2;text-align:center;font-size:10px;color:#9baab8;}.btn-print{background:#1e3a5f;color:#fff;border:none;padding:10px 24px;border-radius:8px;font-size:13px;font-weight:600;cursor:pointer;margin-right:8px;}table{width:100%;border-collapse:collapse;}thead th{background:#1e3a5f;color:#fff;padding:8px 10px;text-align:left;font-size:11px;}';
-
-  const headerDoc='<div class="header"><div style="display:flex;align-items:center;gap:14px">'+logoHTML+'<div><div style="font-size:18px;font-weight:700;color:#1e3a5f">Centro de Vértigo y Mareo</div><div style="font-size:11px;color:#4a6fa5;text-transform:uppercase;letter-spacing:1px;margin-top:2px">Medicina Vestibular · Tucumán</div><div style="font-size:11px;color:#5a6a80;margin-top:4px;line-height:1.7">📍 San Juan 28, San Miguel de Tucumán<br>📱 381 302-1908</div></div></div><div style="text-align:right"><div style="font-size:11px;color:#5a6a80">Tucumán, '+fechaHoy+'</div><div style="font-size:14px;font-weight:700;color:#1e3a5f;margin-top:4px">'+(tipo==='paciente'?'CONSTANCIA DE ATENCIÓN':'INFORME CLÍNICO')+'</div></div></div>';
-
-  const firmaDoc='<div class="firma-area"><div class="firma-box"><div style="height:60px"></div><div class="firma-linea"></div><div style="font-size:11px;color:#5a6a80;margin-top:4px">Firma y sello profesional</div><div style="font-size:11px;color:#5a6a80;margin-top:2px">Centro de Vértigo y Mareo</div></div></div><div class="footer-doc">Centro de Vértigo y Mareo — Medicina Vestibular · San Juan 28, Tucumán · 381 302-1908</div>';
-
-  let contenido='';
+  var estilos='*{box-sizing:border-box;margin:0;padding:0;}body{font-family:Segoe UI,Arial,sans-serif;color:#1a2a3a;background:#fff;padding:32px;}@media print{body{padding:16px;}.no-print{display:none;}@page{margin:1.5cm;}}.header{display:flex;align-items:center;justify-content:space-between;padding-bottom:16px;border-bottom:3px solid #1e3a5f;margin-bottom:20px;}.sec-tit{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:#2abfbf;border-bottom:1.5px solid #e8f8f8;padding-bottom:4px;margin-bottom:10px;}.seccion{margin-bottom:20px;}.dato{background:#f7f8fc;border-radius:6px;padding:8px 10px;}.dato-k{font-size:10px;font-weight:700;text-transform:uppercase;color:#5a6a80;letter-spacing:.05em;}.dato-v{font-size:12px;color:#1a2a3a;margin-top:2px;}.dx-box{background:#e8f8f8;border-left:4px solid #2abfbf;padding:10px 14px;border-radius:6px;font-size:13px;font-weight:600;color:#1e3a5f;}.firma-area{margin-top:50px;display:flex;justify-content:flex-end;}.firma-box{text-align:center;min-width:220px;}.firma-linea{border-top:1.5px solid #1e3a5f;margin-bottom:8px;}.footer-doc{margin-top:24px;padding-top:12px;border-top:1px solid #e8ecf2;text-align:center;font-size:10px;color:#9baab8;}.btn-print{background:#1e3a5f;color:#fff;border:none;padding:10px 24px;border-radius:8px;font-size:13px;font-weight:600;cursor:pointer;margin-right:8px;}table{width:100%;border-collapse:collapse;}thead th{background:#1e3a5f;color:#fff;padding:8px 10px;text-align:left;font-size:11px;}';
+  var headerDoc='<div class="header"><div style="display:flex;align-items:center;gap:14px">'+logoHTML+'<div><div style="font-size:18px;font-weight:700;color:#1e3a5f">Centro de Vértigo y Mareo</div><div style="font-size:11px;color:#4a6fa5;text-transform:uppercase;letter-spacing:1px;margin-top:2px">Medicina Vestibular · Tucumán</div><div style="font-size:11px;color:#5a6a80;margin-top:4px;line-height:1.7">📍 San Juan 28, San Miguel de Tucumán<br>📱 381 302-1908</div></div></div><div style="text-align:right"><div style="font-size:11px;color:#5a6a80">Tucumán, '+fechaHoy+'</div><div style="font-size:14px;font-weight:700;color:#1e3a5f;margin-top:4px">'+(tipo==='paciente'?'CONSTANCIA DE ATENCIÓN':'INFORME CLÍNICO')+'</div></div></div>';
+  var firmaDoc='<div class="firma-area"><div class="firma-box"><div style="height:60px"></div><div class="firma-linea"></div><div style="font-size:11px;color:#5a6a80;margin-top:4px">Firma y sello profesional</div><div style="font-size:11px;color:#5a6a80;margin-top:2px">Centro de Vértigo y Mareo</div></div></div><div class="footer-doc">Centro de Vértigo y Mareo — Medicina Vestibular · San Juan 28, Tucumán · 381 302-1908</div>';
+  var contenido='';
   if(tipo==='paciente'){
     contenido='<div class="seccion"><div class="sec-tit">Datos del Paciente</div><div style="display:grid;grid-template-columns:repeat(2,1fr);gap:8px">'
       +'<div class="dato"><div class="dato-k">Apellido y Nombre</div><div class="dato-v">'+p.nombre+'</div></div>'
@@ -933,7 +1161,7 @@ function imprimirInforme(pid,tipo){
       +'</div></div>'
       +'<div class="seccion"><div class="sec-tit">Indicaciones / Recomendaciones</div><div style="border:1px solid #d8e2ef;border-radius:8px;padding:14px;min-height:80px;font-size:12px;color:#5a6a80">'+(p.obs||'')+'</div></div>';
   } else {
-    const sesRows=sesiones.length?sesiones.map(function(s){
+    var sesRows=sesiones.length?sesiones.map(function(s){
       return '<tr><td style="padding:6px 10px;border-bottom:1px solid #e8ecf2;font-size:12px">'+fdisp(s.fecha)+'</td><td style="padding:6px 10px;border-bottom:1px solid #e8ecf2;font-size:12px">'+(s.tipo||'—')+'</td><td style="padding:6px 10px;border-bottom:1px solid #e8ecf2;font-size:12px;color:'+(s.asistencia==='asistio'?'#0f7b4a':'#c0392b')+'">'+(s.asistencia==='asistio'?'✓ Asistió':'✗ Ausente')+'</td><td style="padding:6px 10px;border-bottom:1px solid #e8ecf2;font-size:12px">'+(s.nota||'—')+'</td></tr>';
     }).join(''):'<tr><td colspan="4" style="padding:12px;text-align:center;color:#999;font-size:12px">Sin sesiones</td></tr>';
     contenido='<div class="seccion"><div class="sec-tit">Datos del Paciente</div><div style="display:grid;grid-template-columns:repeat(3,1fr);gap:8px">'
@@ -953,16 +1181,11 @@ function imprimirInforme(pid,tipo){
       +'<div style="display:flex;gap:10px;margin-bottom:12px;flex-wrap:wrap">'
       +'<div class="dato" style="text-align:center"><div style="font-size:22px;font-weight:700;color:#1e3a5f">'+sesiones.length+'</div><div class="dato-k">Total</div></div>'
       +'<div class="dato" style="text-align:center"><div style="font-size:22px;font-weight:700;color:#0f7b4a">'+asistidas.length+'</div><div class="dato-k">Asistencias</div></div>'
-      +'<div class="dato" style="text-align:center"><div style="font-size:22px;font-weight:700;color:#c0392b">'+(sesiones.length-asistidas.length)+'</div><div class="dato-k">Ausencias</div></div>'
-      +'</div>'
+      +'<div class="dato" style="text-align:center"><div style="font-size:22px;font-weight:700;color:#c0392b">'+(sesiones.length-asistidas.length)+'</div><div class="dato-k">Ausencias</div></div></div>'
       +'<table><thead><tr><th>Fecha</th><th>Tipo</th><th>Asistencia</th><th>Evolución / Notas</th></tr></thead><tbody>'+sesRows+'</tbody></table></div>';
   }
-
-  const w=window.open('','_blank');
-  w.document.write('<!DOCTYPE html><html lang="es"><head><meta charset="UTF-8"><title>'+(tipo==='paciente'?'Constancia':'Informe Clínico')+' — '+p.nombre+'</title><style>'+estilos+'</style></head><body>'
-    +'<div class="no-print" style="margin-bottom:20px"><button class="btn-print" onclick="window.print()">🖨️ Imprimir / Guardar PDF</button><button onclick="window.close()" style="background:#f7f8fc;border:1px solid #d8e2ef;padding:10px 20px;border-radius:8px;font-size:13px;cursor:pointer">✕ Cerrar</button></div>'
-    +headerDoc+contenido+firmaDoc
-    +'</body></html>');
+  var w=window.open('','_blank');
+  w.document.write('<!DOCTYPE html><html lang="es"><head><meta charset="UTF-8"><title>'+(tipo==='paciente'?'Constancia':'Informe Clínico')+' — '+p.nombre+'</title><style>'+estilos+'</style></head><body><div class="no-print" style="margin-bottom:20px"><button class="btn-print" onclick="window.print()">🖨️ Imprimir / Guardar PDF</button><button onclick="window.close()" style="background:#f7f8fc;border:1px solid #d8e2ef;padding:10px 20px;border-radius:8px;font-size:13px;cursor:pointer">✕ Cerrar</button></div>'+headerDoc+contenido+firmaDoc+'</body></html>');
   w.document.close();
 }
 
@@ -971,15 +1194,29 @@ function abrirModal(id){document.getElementById(id).classList.add('open');}
 function cerrarModal(id){document.getElementById(id).classList.remove('open');}
 document.querySelectorAll('.overlay').forEach(function(o){o.addEventListener('click',function(e){if(e.target===o)o.classList.remove('open');});});
 
-// FECHA HEADER
+// FECHA
 function updateDate(){
-  const n=new Date();
-  const dias=['Domingo','Lunes','Martes','Miércoles','Jueves','Viernes','Sábado'];
+  var n=new Date();
+  var dias=['Domingo','Lunes','Martes','Miércoles','Jueves','Viernes','Sábado'];
   document.getElementById('headerDate').textContent=dias[n.getDay()]+' '+n.getDate()+' '+MESES[n.getMonth()].substring(0,3)+' '+n.getFullYear();
 }
-updateDate();
-if(sheetUrl)syncAll();
-renderInicio();
+
+// INIT — mostrar pantalla de login
+(function(){
+  // Verificar si hay sesión guardada
+  var sesion=localStorage.getItem('cvm_session');
+  if(sesion){
+    try{
+      usuarioActual=JSON.parse(sesion);
+      document.getElementById('loginScreen').style.display='none';
+      document.getElementById('userBadgeName').textContent=usuarioActual.nombre;
+      aplicarPermisos();
+      cargarDesdeSheetsYArrancar();
+    }catch(e){
+      localStorage.removeItem('cvm_session');
+    }
+  }
+})();
 </script>
 </body>
 </html>
