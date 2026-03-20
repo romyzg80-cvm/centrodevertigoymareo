@@ -389,6 +389,7 @@ tbody td{padding:9px 12px;vertical-align:middle;}
     <div class="modal-actions">
       <button class="btn btn-success btn-sm" onclick="marcarAsistencia('asistio')">✅ Asistió</button>
       <button class="btn btn-danger btn-sm" onclick="marcarAsistencia('ausente')">❌ Ausente</button>
+      <button class="btn btn-danger btn-sm" onclick="eliminarTurno()">🗑️ Eliminar turno</button>
       <button class="btn btn-secondary btn-sm" onclick="cerrarModal('modalTurno')">Cerrar</button>
     </div>
   </div>
@@ -566,6 +567,14 @@ function abrirModalTurno(tid){
   if(p)b+='<button class="btn btn-secondary btn-sm" onclick="verFicha('+p.id+');cerrarModal(\'modalTurno\')">Ver ficha completa →</button>';
   document.getElementById('modalTurnoBody').innerHTML=b;
   abrirModal('modalTurno');
+}
+function eliminarTurno(){
+  if(!confirm('¿Eliminar este turno?'))return;
+  turnos=turnos.filter(t=>t.id!==turnoActual);
+  ST();syncSheet('turnos');
+  cerrarModal('modalTurno');
+  const s=document.querySelector('.section.active')&&document.querySelector('.section.active').id.replace('s-','');
+  if(s&&renders[s])renders[s]();
 }
 function marcarAsistencia(estado){
   const t=turnos.find(x=>x.id===turnoActual);
