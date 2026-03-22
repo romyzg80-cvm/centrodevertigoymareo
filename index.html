@@ -595,20 +595,40 @@ function toast(msg, dur) {
 function cargarLogo(e) {
   var f = e.target.files[0]; if (!f) return;
   var r = new FileReader();
-  r.onload = function(ev) {
+  r.onload = async function(ev) {
     var d = ev.target.result;
     document.getElementById('logoImg').src = d;
     document.getElementById('loginLogo').src = d;
     localStorage.setItem('cvm_logo', d);
+    // Guardar en Supabase para todos los dispositivos
+    try {
+      await db.update('config', {valor: d}, 'clave=eq.logo');
+      toast('✅ Logo guardado para todos los dispositivos');
+    } catch(e) { console.log('Error guardando logo:', e); }
   };
   r.readAsDataURL(f);
 }
-(function() {
-  var s = localStorage.getItem('cvm_logo');
+async function initLogo() {
   var fb = "data:image/svg+xml,%3Csvg viewBox='0 0 100 100' xmlns='http://www.w3.org/2000/svg'%3E%3Cellipse cx='38' cy='38' rx='22' ry='10' fill='none' stroke='%232abfbf' stroke-width='5' transform='rotate(-35 38 38)'/%3E%3Cellipse cx='50' cy='32' rx='22' ry='10' fill='none' stroke='%231e3a5f' stroke-width='5' transform='rotate(-20 50 32)'/%3E%3Cellipse cx='60' cy='44' rx='22' ry='10' fill='none' stroke='%239baab8' stroke-width='5' transform='rotate(-5 60 44)'/%3E%3C/svg%3E";
-  document.getElementById('logoImg').src = s || fb;
-  document.getElementById('loginLogo').src = s || fb;
-})();
+  // Primero mostrar el local mientras carga
+  var local = localStorage.getItem('cvm_logo');
+  if (local) {
+    document.getElementById('logoImg').src = local;
+    document.getElementById('loginLogo').src = local;
+  } else {
+    document.getElementById('logoImg').src = fb;
+    document.getElementById('loginLogo').src = fb;
+  }
+  // Luego intentar traer desde Supabase
+  try {
+    var res = await db.get('config', 'clave=eq.logo');
+    if (res && res.length && res[0].valor) {
+      document.getElementById('logoImg').src = res[0].valor;
+      document.getElementById('loginLogo').src = res[0].valor;
+      localStorage.setItem('cvm_logo', res[0].valor);
+    }
+  } catch(e) { console.log('Logo desde local'); }
+}
 
 // ══════════════════════════════════
 // CARGA DE DATOS DESDE SUPABASE
@@ -1357,6 +1377,7 @@ function updateDate(){
 // INIT
 // ══════════════════════════════════
 (function(){
+  initLogo(); // Cargar logo desde Supabase
   var sesion = localStorage.getItem('cvm_session');
   if (sesion) {
     try {
