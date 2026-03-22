@@ -146,6 +146,28 @@ tbody td{padding:9px 12px;vertical-align:middle;}
 .tchip .th{font-weight:700;color:var(--navy);font-size:.68rem;}
 .tchip .tp{white-space:nowrap;overflow:hidden;text-overflow:ellipsis;color:var(--text-soft);}
 .tchip.asistio{opacity:.75;}.tchip.ausente{opacity:.5;}
+.dia-check{display:flex;align-items:center;gap:5px;padding:6px 12px;border-radius:20px;border:1.5px solid var(--border);cursor:pointer;font-size:.80rem;font-weight:500;color:var(--text-soft);transition:all .18s;user-select:none;}
+.dia-check input{display:none;}
+.dia-check.sel{background:var(--navy);color:#fff;border-color:var(--navy);}
+.dia-grid{display:flex;flex-direction:column;gap:4px;}
+.dia-hora-row{display:flex;gap:8px;align-items:flex-start;min-height:40px;border-bottom:1px solid var(--sand-d);padding:4px 0;}
+.dia-hora-label{font-size:.74rem;font-weight:700;color:var(--navy);width:50px;flex-shrink:0;padding-top:5px;}
+.dia-hora-slots{display:flex;flex-wrap:wrap;gap:5px;flex:1;}
+.dia-chip{background:#fff;border:1.5px solid var(--border);border-radius:9px;padding:6px 11px;font-size:.80rem;cursor:pointer;transition:all .15s;border-left:3px solid var(--teal);}
+.dia-chip:hover{background:var(--slate-pale);}
+.dia-chip .dc-pac{font-weight:600;color:var(--navy);}
+.dia-chip .dc-tipo{font-size:.70rem;color:var(--text-soft);}
+.dia-chip.asistio{border-left-color:var(--success);opacity:.8;}
+.dia-chip.ausente{border-left-color:var(--danger);opacity:.6;}
+.mes-cal{display:grid;grid-template-columns:repeat(7,1fr);gap:3px;}
+.mes-cal-hd{text-align:center;font-size:.68rem;font-weight:700;color:var(--text-soft);padding:5px 0;text-transform:uppercase;}
+.mes-dia{background:#fff;border:1px solid var(--border);border-radius:7px;min-height:75px;padding:4px;cursor:pointer;transition:all .15s;}
+.mes-dia:hover{border-color:var(--teal);background:var(--teal-pale);}
+.mes-dia.hoy .mes-dia-num{background:var(--teal);color:#fff;width:20px;height:20px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:.68rem;}
+.mes-dia.otro-mes{opacity:.45;}
+.mes-dia-num{font-size:.78rem;font-weight:700;color:var(--navy);margin-bottom:2px;}
+.mes-turno{font-size:.62rem;border-radius:3px;padding:1px 4px;margin-bottom:1px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;color:#fff;}
+@media(max-width:600px){.mes-dia{min-height:50px;}.mes-turno{display:none;}}
 
 .ficha-header{display:flex;align-items:flex-start;justify-content:space-between;flex-wrap:wrap;gap:10px;margin-bottom:14px;}
 .ficha-nombre{font-family:'Playfair Display',serif;font-size:1.45rem;color:var(--navy);}
@@ -272,15 +294,23 @@ tbody td{padding:9px 12px;vertical-align:middle;}
   <div class="card">
     <div class="flex-between" style="margin-bottom:10px">
       <div class="card-title" style="margin-bottom:0">📅 Agenda</div>
-      <button class="btn btn-teal btn-sm" onclick="go('nuevo-turno')">+ Turno</button>
+      <div style="display:flex;gap:6px;flex-wrap:wrap">
+        <div style="display:flex;border:1.5px solid var(--border);border-radius:8px;overflow:hidden">
+          <button id="vista-dia-btn" class="btn btn-secondary btn-sm" style="border-radius:0;border:none;border-right:1px solid var(--border)" onclick="setVista('dia')">📋 Día</button>
+          <button id="vista-semana-btn" class="btn btn-primary btn-sm" style="border-radius:0;border:none;border-right:1px solid var(--border)" onclick="setVista('semana')">📅 Semana</button>
+          <button id="vista-mes-btn" class="btn btn-secondary btn-sm" style="border-radius:0;border:none" onclick="setVista('mes')">🗓️ Mes</button>
+        </div>
+        <button class="btn btn-teal btn-sm" onclick="go('nuevo-turno')">+ Turno</button>
+      </div>
     </div>
     <div class="prof-tabs" id="profTabs"></div>
     <div class="week-nav">
-      <button class="btn btn-secondary btn-sm" onclick="cambiarSemana(-1)">◀</button>
+      <button class="btn btn-secondary btn-sm" onclick="cambiarPeriodo(-1)">◀</button>
       <div class="week-lbl" id="weekLbl"></div>
-      <button class="btn btn-secondary btn-sm" onclick="cambiarSemana(1)">▶</button>
+      <button class="btn btn-secondary btn-sm" onclick="cambiarPeriodo(1)">▶</button>
+      <button class="btn btn-secondary btn-sm" onclick="irHoy()">Hoy</button>
     </div>
-    <div class="week-grid" id="weekGrid"></div>
+    <div id="agendaGrid"></div>
   </div>
 </div>
 
@@ -345,7 +375,6 @@ tbody td{padding:9px 12px;vertical-align:middle;}
           <div id="nt-pac-resultados" style="display:none;position:absolute;top:100%;left:0;right:0;background:#fff;border:1.5px solid var(--teal);border-radius:var(--radius-sm);box-shadow:var(--shadow-md);z-index:200;max-height:200px;overflow-y:auto;"></div>
         </div>
       </div>
-      <div class="fg"><label>Fecha *</label><input type="date" id="nt-fecha"></div>
       <div class="fg"><label>Hora *</label><input type="time" id="nt-hora"></div>
       <div class="fg"><label>Tipo</label>
         <select id="nt-tipo"><option>Evaluación inicial</option><option>Rehabilitación vestibular</option><option>Control / Seguimiento</option><option>Maniobra de reposicionamiento</option><option>Evaluación postural</option><option>Tratamiento ATM</option><option>Tratamiento tinnitus</option><option>Posturología</option><option>Alta</option></select>
@@ -355,6 +384,47 @@ tbody td{padding:9px 12px;vertical-align:middle;}
       </div>
       <div class="fg full"><label>Notas</label><textarea id="nt-notas" placeholder="Observaciones..."></textarea></div>
     </div>
+
+    <!-- FECHAS -->
+    <div style="margin-top:14px;border-top:1.5px solid var(--sand-d);padding-top:14px">
+      <div style="display:flex;align-items:center;gap:10px;margin-bottom:12px;flex-wrap:wrap">
+        <strong style="font-size:.85rem;color:var(--navy)">📅 Fechas del turno</strong>
+        <label style="display:flex;align-items:center;gap:6px;font-size:.82rem;cursor:pointer">
+          <input type="checkbox" id="nt-repetir" onchange="toggleRepetir()"> Repetir semanalmente
+        </label>
+      </div>
+      <div id="nt-fechas-wrap">
+        <!-- Fecha única -->
+        <div id="nt-fecha-unica" class="fg" style="max-width:200px">
+          <label>Fecha *</label>
+          <input type="date" id="nt-fecha">
+        </div>
+        <!-- Fechas repetitivas -->
+        <div id="nt-fecha-repetir" style="display:none">
+          <div class="form-grid" style="margin-bottom:10px">
+            <div class="fg">
+              <label>Desde *</label>
+              <input type="date" id="nt-desde">
+            </div>
+            <div class="fg">
+              <label>Hasta *</label>
+              <input type="date" id="nt-hasta">
+            </div>
+          </div>
+          <label style="font-size:.78rem;font-weight:600;color:var(--text-soft);text-transform:uppercase;letter-spacing:.05em;display:block;margin-bottom:6px">Días de la semana</label>
+          <div style="display:flex;gap:8px;flex-wrap:wrap" id="nt-dias-semana">
+            <label class="dia-check"><input type="checkbox" value="1"> Lun</label>
+            <label class="dia-check"><input type="checkbox" value="2"> Mar</label>
+            <label class="dia-check"><input type="checkbox" value="3"> Mié</label>
+            <label class="dia-check"><input type="checkbox" value="4"> Jue</label>
+            <label class="dia-check"><input type="checkbox" value="5"> Vie</label>
+            <label class="dia-check"><input type="checkbox" value="6"> Sáb</label>
+          </div>
+          <div id="nt-preview-fechas" style="margin-top:10px;font-size:.78rem;color:var(--teal-d)"></div>
+        </div>
+      </div>
+    </div>
+
     <div class="form-actions">
       <button class="btn btn-secondary" onclick="go('agenda')">Cancelar</button>
       <button class="btn btn-primary" onclick="guardarTurno()">💾 Guardar</button>
@@ -815,8 +885,21 @@ function renderInicio() {
 }
 
 // ══════════════════════════════════
-// AGENDA
+// AGENDA — 3 VISTAS
 // ══════════════════════════════════
+var vistaActual = 'semana';
+var periodoOffset = 0;
+
+function setVista(v) {
+  vistaActual = v;
+  periodoOffset = 0;
+  ['dia','semana','mes'].forEach(function(x) {
+    var b = document.getElementById('vista-'+x+'-btn');
+    if (b) { b.className = v===x ? 'btn btn-primary btn-sm' : 'btn btn-secondary btn-sm'; b.style.cssText = 'border-radius:0;border:none;'+(x!=='mes'?'border-right:1px solid var(--border)':''); }
+  });
+  renderAgenda();
+}
+
 function renderProfTabs() {
   document.getElementById('profTabs').innerHTML = profs.map(function(pr) {
     var act = pr.id === profActual;
@@ -829,19 +912,73 @@ function selProf(id) {
   if (usuarioActual && usuarioActual.rol==='kine' && usuarioActual.profId && id!==usuarioActual.profId) {
     alert('Solo podés ver tu propia agenda.'); return;
   }
-  profActual = id; renderProfTabs(); renderWeekGrid();
+  profActual = id; renderProfTabs(); renderAgendaGrid();
 }
 
-function renderAgenda() { renderProfTabs(); renderWeekGrid(); }
+function renderAgenda() { renderProfTabs(); renderAgendaGrid(); }
 
-function renderWeekGrid() {
+function irHoy() { periodoOffset = 0; renderAgendaGrid(); }
+
+function cambiarPeriodo(d) { periodoOffset += d; renderAgendaGrid(); }
+
+// Mantener compatibilidad
+function cambiarSemana(d) { cambiarPeriodo(d); }
+
+function renderAgendaGrid() {
+  if (vistaActual === 'dia') renderVistaDia();
+  else if (vistaActual === 'semana') renderVistaSemana();
+  else renderVistaMes();
+}
+
+// ── VISTA DÍA ──
+function renderVistaDia() {
+  var today = new Date();
+  var dia = new Date(today);
+  dia.setDate(today.getDate() + periodoOffset);
+  var ds = fd(dia);
+  var diasNom = ['Domingo','Lunes','Martes','Miércoles','Jueves','Viernes','Sábado'];
+  document.getElementById('weekLbl').textContent = diasNom[dia.getDay()]+' '+dia.getDate()+'/'+(dia.getMonth()+1)+'/'+dia.getFullYear();
+
+  var dt = turnos.filter(function(t){return t.fecha===ds && t.profId===profActual;}).sort(function(a,b){return a.hora.localeCompare(b.hora);});
+  var pr = getPr(profActual);
+
+  if (!dt.length) {
+    document.getElementById('agendaGrid').innerHTML = '<div class="empty"><div class="ei">📭</div>Sin turnos este día</div>';
+    return;
+  }
+
+  // Agrupar por hora
+  var porHora = {};
+  dt.forEach(function(t) {
+    if (!porHora[t.hora]) porHora[t.hora] = [];
+    porHora[t.hora].push(t);
+  });
+
+  var h = '<div class="dia-grid">';
+  Object.keys(porHora).sort().forEach(function(hora) {
+    h += '<div class="dia-hora-row"><div class="dia-hora-label">'+hora+'</div><div class="dia-hora-slots">';
+    porHora[hora].forEach(function(t) {
+      var p = getPac(t.pacId);
+      h += '<div class="dia-chip '+(t.estado!=='pendiente'?t.estado:'')+'" style="border-left-color:'+(pr?pr.color:'var(--teal)')+'" onclick="abrirModalTurno('+t.id+')">'
+        +'<div class="dc-pac">'+(p?p.nombre:'—')+'</div>'
+        +'<div class="dc-tipo">'+t.tipo+' · '+(t.estado==='pendiente'?'🕐 Pendiente':t.estado==='asistio'?'✅ Asistió':'❌ Ausente')+'</div>'
+        +'</div>';
+    });
+    h += '</div></div>';
+  });
+  h += '</div>';
+  document.getElementById('agendaGrid').innerHTML = h;
+}
+
+// ── VISTA SEMANA ──
+function renderVistaSemana() {
   var today = new Date(), base = new Date(today);
-  base.setDate(today.getDate() + semanaOffset*7);
+  base.setDate(today.getDate() + periodoOffset*7);
   var dow = base.getDay(), mon = new Date(base);
   mon.setDate(base.getDate() - (dow===0?6:dow-1));
   var we = new Date(mon); we.setDate(mon.getDate()+5);
   document.getElementById('weekLbl').textContent = mon.getDate()+'/'+(mon.getMonth()+1)+' — '+we.getDate()+'/'+(we.getMonth()+1)+'/'+mon.getFullYear();
-  var pr = getPr(profActual), h = '';
+  var pr = getPr(profActual), h = '<div class="week-grid">';
   for (var i=0; i<6; i++) {
     var d = new Date(mon); d.setDate(mon.getDate()+i);
     var ds = fd(d), isToday = ds===fd(today);
@@ -852,14 +989,58 @@ function renderWeekGrid() {
       var p = getPac(t.pacId);
       h += '<div class="tchip '+(t.estado!=='pendiente'?t.estado:'')+'" style="border-left-color:'+(pr?pr.color:'var(--border)')+'" onclick="abrirModalTurno('+t.id+')">'
         +'<div class="th">'+t.hora+'</div>'
-        +'<div class="tp">'+(p?p.nombre.split(',')[0]:'—')+'</div></div>';
+        +'<div class="tp">'+(p?p.nombre:'—')+'</div></div>';
     });
     h += '</div></div>';
   }
-  document.getElementById('weekGrid').innerHTML = h;
+  h += '</div>';
+  document.getElementById('agendaGrid').innerHTML = h;
 }
 
-function cambiarSemana(d) { semanaOffset += d; renderWeekGrid(); }
+// ── VISTA MES ──
+function renderVistaMes() {
+  var today = new Date();
+  var base = new Date(today.getFullYear(), today.getMonth() + periodoOffset, 1);
+  var mes = base.getMonth(), año = base.getFullYear();
+  document.getElementById('weekLbl').textContent = MESES[mes] + ' ' + año;
+
+  var primerDia = new Date(año, mes, 1).getDay();
+  var diasMes = new Date(año, mes+1, 0).getDate();
+  var offset = primerDia===0?6:primerDia-1; // Lunes=0
+
+  var pr = getPr(profActual);
+  var h = '<div class="mes-cal">';
+  // Cabecera
+  ['Lun','Mar','Mié','Jue','Vie','Sáb','Dom'].forEach(function(d){
+    h += '<div class="mes-cal-hd">'+d+'</div>';
+  });
+  // Días vacíos al inicio
+  for (var i=0; i<offset; i++) h += '<div class="mes-dia otro-mes"></div>';
+  // Días del mes
+  for (var d2=1; d2<=diasMes; d2++) {
+    var fecha = año+'-'+String(mes+1).padStart(2,'0')+'-'+String(d2).padStart(2,'0');
+    var isToday = fecha===fd(today);
+    var dt = turnos.filter(function(t){return t.fecha===fecha && t.profId===profActual;}).sort(function(a,b){return a.hora.localeCompare(b.hora);});
+    h += '<div class="mes-dia'+(isToday?' hoy':'')+'" onclick="irDia(\''+fecha+'\')">';
+    h += '<div class="mes-dia-num">'+d2+'</div>';
+    dt.slice(0,3).forEach(function(t) {
+      var p = getPac(t.pacId);
+      h += '<div class="mes-turno" style="background:'+(pr?pr.color:'var(--navy)')+'">'+t.hora+' '+(p?p.nombre.split(',')[0]:'—')+'</div>';
+    });
+    if (dt.length>3) h += '<div style="font-size:.60rem;color:var(--text-soft)">+' +(dt.length-3)+' más</div>';
+    h += '</div>';
+  }
+  h += '</div>';
+  document.getElementById('agendaGrid').innerHTML = h;
+}
+
+function irDia(fecha) {
+  var today = new Date();
+  var target = new Date(fecha+'T12:00:00');
+  var diff = Math.round((target - today) / (1000*60*60*24));
+  periodoOffset = diff;
+  setVista('dia');
+}
 
 // ══════════════════════════════════
 // MODAL TURNO
@@ -1280,16 +1461,118 @@ async function eliminarPaciente(id) {
 // ══════════════════════════════════
 // NUEVO TURNO
 // ══════════════════════════════════
+function toggleRepetir() {
+  var rep = document.getElementById('nt-repetir').checked;
+  document.getElementById('nt-fecha-unica').style.display = rep ? 'none' : 'block';
+  document.getElementById('nt-fecha-repetir').style.display = rep ? 'block' : 'none';
+  if (rep) {
+    var hoyStr = hoy();
+    document.getElementById('nt-desde').value = hoyStr;
+    var fin = new Date(); fin.setMonth(fin.getMonth()+1);
+    document.getElementById('nt-hasta').value = fd(fin);
+  }
+}
+
+function calcFechasRepetir() {
+  var desde = new Date(document.getElementById('nt-desde').value+'T12:00:00');
+  var hasta = new Date(document.getElementById('nt-hasta').value+'T12:00:00');
+  var dias = [];
+  document.querySelectorAll('#nt-dias-semana input:checked').forEach(function(el){ dias.push(parseInt(el.value)); });
+  if (!dias.length) return [];
+  var fechas = [];
+  var cur = new Date(desde);
+  while (cur <= hasta) {
+    var dow = cur.getDay();
+    var lun = dow===0?7:dow; // 1=Lun...7=Dom
+    if (dias.indexOf(lun) >= 0) fechas.push(fd(cur));
+    cur.setDate(cur.getDate()+1);
+  }
+  return fechas;
+}
+
 function initNuevoTurno() {
   document.getElementById('nt-prof').innerHTML = '<option value="">Seleccionar...</option>'
     + profs.map(function(pr){return '<option value="'+pr.id+'">'+pr.nombre+' — '+pr.rol+'</option>';}).join('');
   document.getElementById('nt-pac').value = '';
   document.getElementById('nt-pac-search').value = '';
   document.getElementById('nt-pac-resultados').style.display = 'none';
+  document.getElementById('nt-repetir').checked = false;
+  document.getElementById('nt-fecha-unica').style.display = 'block';
+  document.getElementById('nt-fecha-repetir').style.display = 'none';
+  document.getElementById('nt-preview-fechas').textContent = '';
   if (!document.getElementById('nt-fecha').value) document.getElementById('nt-fecha').value = hoy();
   if (usuarioActual&&usuarioActual.rol==='kine'&&usuarioActual.profId) {
     document.getElementById('nt-prof').value = usuarioActual.profId;
   }
+  // Actualizar preview al cambiar días/fechas
+  ['nt-desde','nt-hasta'].forEach(function(id) {
+    document.getElementById(id).addEventListener('change', actualizarPreview);
+  });
+  document.querySelectorAll('#nt-dias-semana input').forEach(function(el) {
+    el.addEventListener('change', function() {
+      var lbl = el.closest('.dia-check');
+      if (lbl) lbl.classList.toggle('sel', el.checked);
+      actualizarPreview();
+    });
+  });
+}
+
+function actualizarPreview() {
+  var fechas = calcFechasRepetir();
+  var prev = document.getElementById('nt-preview-fechas');
+  if (!fechas.length) { prev.textContent = ''; return; }
+  prev.textContent = '✅ Se van a crear '+fechas.length+' turnos ('+fechas[0]+' → '+fechas[fechas.length-1]+')';
+}
+
+async function guardarTurno() {
+  var pid = parseInt(document.getElementById('nt-pac').value);
+  var prid = document.getElementById('nt-prof').value;
+  var hora = document.getElementById('nt-hora').value;
+  if (!pid) { alert('Buscá y seleccioná un paciente.'); return; }
+  if (!prid||!hora) { alert('Completá profesional y hora.'); return; }
+
+  var esRepetir = document.getElementById('nt-repetir').checked;
+  var fechas = [];
+
+  if (esRepetir) {
+    fechas = calcFechasRepetir();
+    if (!fechas.length) { alert('Seleccioná al menos un día de la semana y un rango de fechas.'); return; }
+    if (!confirm('Se van a crear '+fechas.length+' turnos. ¿Confirmás?')) return;
+  } else {
+    var fecha = document.getElementById('nt-fecha').value;
+    if (!fecha) { alert('Seleccioná una fecha.'); return; }
+    fechas = [fecha];
+  }
+
+  mostrarLoading('Guardando '+(fechas.length>1?fechas.length+' turnos':'turno')+'...');
+  try {
+    var nuevos = fechas.map(function(f) {
+      return {
+        id: Date.now() + Math.floor(Math.random()*10000),
+        prof_id: prid, pac_id: pid, fecha: f, hora: hora,
+        tipo: document.getElementById('nt-tipo').value,
+        dur: parseInt(document.getElementById('nt-dur').value),
+        notas: document.getElementById('nt-notas').value,
+        estado: 'pendiente'
+      };
+    });
+    // Insertar en lotes de 50
+    for (var i=0; i<nuevos.length; i+=50) {
+      var batch = nuevos.slice(i, i+50);
+      var res = await db.insert('turnos', batch);
+      res.forEach(function(r){ turnos.push(mapTurno(r)); });
+    }
+    ocultarLoading();
+    toast('✅ '+(fechas.length>1?fechas.length+' turnos creados':'Turno guardado'));
+    document.getElementById('nt-hora').value='';
+    document.getElementById('nt-notas').value='';
+    document.getElementById('nt-pac').value='';
+    document.getElementById('nt-pac-search').value='';
+    document.getElementById('nt-repetir').checked=false;
+    document.getElementById('nt-fecha-unica').style.display='block';
+    document.getElementById('nt-fecha-repetir').style.display='none';
+    go('agenda');
+  } catch(e) { ocultarLoading(); toast('❌ Error: '+e.message); }
 }
 
 function buscarPacTurno(q) {
@@ -1341,36 +1624,6 @@ function ntParaPac(pid) {
       document.getElementById('nt-pac-search').value = p.nombre;
     }
   }, 80);
-}
-
-async function guardarTurno() {
-  var pid = parseInt(document.getElementById('nt-pac').value);
-  var prid = document.getElementById('nt-prof').value;
-  var fecha = document.getElementById('nt-fecha').value;
-  var hora = document.getElementById('nt-hora').value;
-  if (!pid) { alert('Buscá y seleccioná un paciente.'); return; }
-  if (!prid||!fecha||!hora) { alert('Completá profesional, fecha y hora.'); return; }
-  mostrarLoading('Guardando turno...');
-  try {
-    var res = await db.insert('turnos', {
-      id: Date.now(),
-      prof_id: prid,
-      pac_id: pid,
-      fecha: fecha,
-      hora: hora,
-      tipo: document.getElementById('nt-tipo').value,
-      dur: parseInt(document.getElementById('nt-dur').value),
-      notas: document.getElementById('nt-notas').value,
-      estado: 'pendiente'
-    });
-    turnos.push(mapTurno(res[0]));
-    ocultarLoading();
-    toast('✅ Turno guardado');
-    document.getElementById('nt-hora').value = '';
-    document.getElementById('nt-notas').value = '';
-    document.getElementById('nt-pac').value = '';
-    go('agenda');
-  } catch(e) { ocultarLoading(); toast('❌ Error: '+e.message); }
 }
 
 // ══════════════════════════════════
