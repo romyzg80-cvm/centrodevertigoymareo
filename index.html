@@ -276,6 +276,7 @@ tbody td{padding:9px 12px;vertical-align:middle;}
   <button class="nav-btn nav-admin" onclick="go('caja')">💰 Caja</button>
   <button class="nav-btn nav-admin" onclick="go('estadisticas')">📊 Estadísticas</button>
   <button class="nav-btn nav-admin" onclick="go('bloqueos')">🚫 Feriados</button>
+  <button class="nav-btn nav-romina" onclick="go('egresos')">💸 Egresos</button>
   <button class="nav-btn" onclick="go('nuevo-turno')">➕ Turno</button>
   <button class="nav-btn" onclick="go('nuevo-paciente')">🆕 Paciente</button>
 </nav>
@@ -482,6 +483,33 @@ tbody td{padding:9px 12px;vertical-align:middle;}
   </div>
 </div>
 
+<!-- EGRESOS -->
+<div class="section" id="s-egresos">
+  <div class="card">
+    <div class="flex-between" style="margin-bottom:14px">
+      <div class="card-title" style="margin-bottom:0">💸 Egresos</div>
+      <button class="btn btn-danger btn-sm" onclick="abrirModalEgreso()">+ Registrar egreso</button>
+    </div>
+
+    <!-- RESUMEN SEMANAL -->
+    <div id="egresoResumen" style="margin-bottom:16px"></div>
+
+    <!-- FILTROS -->
+    <div style="display:flex;gap:8px;margin-bottom:12px;flex-wrap:wrap">
+      <select id="egresoMes" onchange="renderEgresos()" style="padding:7px 11px;border-radius:7px;border:1.5px solid var(--border);font-family:'Inter',sans-serif;font-size:.82rem;background:var(--sand);outline:none;"></select>
+      <select id="egresoCategoria" onchange="renderEgresos()" style="padding:7px 11px;border-radius:7px;border:1.5px solid var(--border);font-family:'Inter',sans-serif;font-size:.82rem;background:var(--sand);outline:none;">
+        <option value="">Todos</option>
+        <option value="kine">👩‍⚕️ Kinesiólogos</option>
+        <option value="limpieza">🧹 Limpieza</option>
+        <option value="otro">📦 Otros</option>
+      </select>
+      <button class="btn btn-secondary btn-sm" onclick="exportarEgresos()">📥 CSV</button>
+    </div>
+
+    <div id="listaEgresos"></div>
+  </div>
+</div>
+
 <!-- BLOQUEOS: FERIADOS Y AUSENCIAS -->
 <div class="section" id="s-bloqueos">
   <div class="card">
@@ -594,6 +622,51 @@ tbody td{padding:9px 12px;vertical-align:middle;}
 </div>
 
 <input type="file" id="archivoInput" accept="image/*,application/pdf,.doc,.docx" multiple style="display:none" onchange="procesarArchivos(event)">
+
+<!-- MODAL EGRESO -->
+<div class="overlay" id="modalEgreso">
+  <div class="modal">
+    <div class="modal-title">💸 Registrar Egreso <button class="modal-close" onclick="cerrarModal('modalEgreso')">✕</button></div>
+    <div class="form-grid">
+      <div class="fg">
+        <label>Categoría *</label>
+        <select id="eg-cat" onchange="toggleEgresoCat()">
+          <option value="kine">👩‍⚕️ Pago a Kinesiólogo</option>
+          <option value="limpieza">🧹 Pago Limpieza</option>
+          <option value="otro">📦 Otro gasto</option>
+        </select>
+      </div>
+      <div class="fg" id="eg-kine-wrap">
+        <label>Kinesiólogo</label>
+        <select id="eg-kine"></select>
+      </div>
+      <div class="fg" id="eg-dest-wrap" style="display:none">
+        <label>Destinatario</label>
+        <input type="text" id="eg-dest" placeholder="Nombre...">
+      </div>
+      <div class="fg">
+        <label>Fecha *</label>
+        <input type="date" id="eg-fecha">
+      </div>
+      <div class="fg">
+        <label>Monto ($) *</label>
+        <input type="number" id="eg-monto" placeholder="0.00" min="0" step="0.01">
+      </div>
+      <div class="fg full">
+        <label>Concepto</label>
+        <input type="text" id="eg-concepto" placeholder="Ej: Semana del 17 al 21 de marzo, sesiones de rehabilitación...">
+      </div>
+      <div class="fg full">
+        <label>Observaciones</label>
+        <input type="text" id="eg-obs" placeholder="N° recibo, notas...">
+      </div>
+    </div>
+    <div class="modal-actions">
+      <button class="btn btn-secondary" onclick="cerrarModal('modalEgreso')">Cancelar</button>
+      <button class="btn btn-danger" onclick="guardarEgreso()">💾 Registrar</button>
+    </div>
+  </div>
+</div>
 
 <!-- MODAL EDITAR PACIENTE -->
 <div class="overlay" id="modalEditPac">
@@ -721,8 +794,12 @@ async function login() {
 
 function aplicarPermisos() {
   var esAdmin = usuarioActual.rol === 'admin';
+  var esRominaOCeci = usuarioActual.username === 'romina' || usuarioActual.username === 'cecilia';
   document.querySelectorAll('.nav-admin').forEach(function(b) {
     b.style.display = esAdmin ? '' : 'none';
+  });
+  document.querySelectorAll('.nav-romina').forEach(function(b) {
+    b.style.display = esRominaOCeci ? '' : 'none';
   });
 }
 
@@ -864,17 +941,21 @@ function mapPago(r) {
 // ══════════════════════════════════
 // NAVEGACIÓN
 // ══════════════════════════════════
-const NAV_MAP = {inicio:0,agenda:1,pacientes:2,caja:3,estadisticas:4,bloqueos:5,'nuevo-turno':6,'nuevo-paciente':7};
+const NAV_MAP = {inicio:0,agenda:1,pacientes:2,caja:3,estadisticas:4,bloqueos:5,egresos:6,'nuevo-turno':7,'nuevo-paciente':8};
 var bloqueos = [];
 const renders = {
   inicio:renderInicio, agenda:renderAgenda, pacientes:renderPacientes,
   caja:renderCaja, estadisticas:renderEstadisticas, bloqueos:renderBloqueos,
+  egresos:renderEgresos,
   'nuevo-turno':initNuevoTurno, 'nuevo-paciente':initNuevoPaciente,
   ficha:renderFicha
 };
 
 function go(id) {
-  if ((id==='caja'||id==='estadisticas') && usuarioActual && usuarioActual.rol!=='admin') {
+  if ((id==='caja'||id==='estadisticas'||id==='bloqueos') && usuarioActual && usuarioActual.rol!=='admin') {
+    alert('No tenés permiso para esta sección.'); return;
+  }
+  if (id==='egresos' && usuarioActual && usuarioActual.username!=='romina' && usuarioActual.username!=='cecilia') {
     alert('No tenés permiso para esta sección.'); return;
   }
   document.querySelectorAll('.section').forEach(function(s){s.classList.remove('active');});
@@ -2094,6 +2175,152 @@ async function eliminarBloqueo(id) {
     toast('🗑️ Bloqueo eliminado');
     renderListaBloqueos();
   } catch(e) { toast('❌ Error: '+e.message); }
+}
+
+// ══════════════════════════════════
+// EGRESOS
+// ══════════════════════════════════
+var egresos = [];
+
+function abrirModalEgreso() {
+  document.getElementById('eg-fecha').value = hoy();
+  document.getElementById('eg-monto').value = '';
+  document.getElementById('eg-concepto').value = '';
+  document.getElementById('eg-obs').value = '';
+  document.getElementById('eg-cat').value = 'kine';
+  document.getElementById('eg-kine').innerHTML = profs.map(function(pr){
+    return '<option value="'+pr.id+'">'+pr.nombre+'</option>';
+  }).join('');
+  toggleEgresoCat();
+  abrirModal('modalEgreso');
+}
+
+function toggleEgresoCat() {
+  var cat = document.getElementById('eg-cat').value;
+  document.getElementById('eg-kine-wrap').style.display = cat==='kine' ? 'block' : 'none';
+  document.getElementById('eg-dest-wrap').style.display = cat!=='kine' ? 'block' : 'none';
+  if (cat==='limpieza') document.getElementById('eg-dest').value = 'Limpieza';
+  else if (cat!=='kine') document.getElementById('eg-dest').value = '';
+}
+
+async function guardarEgreso() {
+  var cat = document.getElementById('eg-cat').value;
+  var monto = parseFloat(document.getElementById('eg-monto').value);
+  var fecha = document.getElementById('eg-fecha').value;
+  if (!monto||!fecha) { alert('Completá fecha y monto.'); return; }
+  var destinatario = cat==='kine'
+    ? (getPr(document.getElementById('eg-kine').value)||{nombre:'—'}).nombre
+    : document.getElementById('eg-dest').value.trim()||'—';
+  var nuevo = {
+    id: Date.now(),
+    fecha: fecha,
+    categoria: cat,
+    destinatario: destinatario,
+    monto: monto,
+    concepto: document.getElementById('eg-concepto').value.trim(),
+    obs: document.getElementById('eg-obs').value.trim()
+  };
+  try {
+    var res = await db.insert('egresos', nuevo);
+    egresos.unshift(res[0]||nuevo);
+    cerrarModal('modalEgreso');
+    toast('✅ Egreso registrado');
+    renderEgresos();
+  } catch(e) { toast('❌ Error: '+e.message); }
+}
+
+function initEgresos() {
+  var sel = document.getElementById('egresoMes');
+  if (!sel.options.length) {
+    MESES.forEach(function(m,i){sel.add(new Option(m,i));});
+    sel.value = new Date().getMonth();
+  }
+}
+
+async function renderEgresos() {
+  // Cargar si no hay datos
+  if (!egresos.length) {
+    try {
+      var res = await db.get('egresos','order=fecha.desc');
+      egresos = res||[];
+    } catch(e) {}
+  }
+  initEgresos();
+  var mes = parseInt(document.getElementById('egresoMes').value);
+  var cat = document.getElementById('egresoCategoria').value;
+  var año = new Date().getFullYear();
+  var ef = egresos.filter(function(e){
+    var d = new Date(e.fecha);
+    return d.getMonth()===mes && d.getFullYear()===año && (!cat||e.categoria===cat);
+  });
+
+  var total = ef.reduce(function(s,e){return s+Number(e.monto);},0);
+
+  // Resumen por destinatario
+  var porDest = {};
+  ef.forEach(function(e){
+    if (!porDest[e.destinatario]) porDest[e.destinatario] = {total:0, cat:e.categoria, count:0};
+    porDest[e.destinatario].total += Number(e.monto);
+    porDest[e.destinatario].count++;
+  });
+
+  var resHtml = '<div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(130px,1fr));gap:8px;margin-bottom:14px">'
+    +'<div class="caja-stat"><div class="cn" style="color:var(--danger)">$'+total.toLocaleString('es-AR')+'</div><div class="cl">Total egresos</div></div>'
+    +'<div class="caja-stat"><div class="cn">'+ef.length+'</div><div class="cl">Pagos</div></div>';
+
+  // Por kine
+  profs.forEach(function(pr) {
+    var tot = ef.filter(function(e){return e.destinatario===pr.nombre&&e.categoria==='kine';}).reduce(function(s,e){return s+Number(e.monto);},0);
+    if (tot>0) resHtml += '<div class="caja-stat"><div class="cn" style="color:'+pr.color+';font-size:1.1rem">$'+tot.toLocaleString('es-AR')+'</div><div class="cl">'+pr.nombre+'</div></div>';
+  });
+  // Limpieza
+  var totLimp = ef.filter(function(e){return e.categoria==='limpieza';}).reduce(function(s,e){return s+Number(e.monto);},0);
+  if (totLimp>0) resHtml += '<div class="caja-stat"><div class="cn" style="color:#7a5c00;font-size:1.1rem">$'+totLimp.toLocaleString('es-AR')+'</div><div class="cl">🧹 Limpieza</div></div>';
+  resHtml += '</div>';
+  document.getElementById('egresoResumen').innerHTML = resHtml;
+
+  if (!ef.length) {
+    document.getElementById('listaEgresos').innerHTML = '<div class="empty"><div class="ei">💸</div>Sin egresos este mes</div>';
+    return;
+  }
+
+  var catIcon = {kine:'👩‍⚕️', limpieza:'🧹', otro:'📦'};
+  document.getElementById('listaEgresos').innerHTML = ef.map(function(e) {
+    return '<div class="pago-item">'
+      +'<span class="pago-fecha">'+fdisp(e.fecha)+'</span>'
+      +'<div style="flex:1">'
+      +'<div style="font-size:.83rem;font-weight:600">'+(catIcon[e.categoria]||'📦')+' '+e.destinatario+'</div>'
+      +(e.concepto?'<div style="font-size:.74rem;color:var(--text-soft)">'+e.concepto+'</div>':'')
+      +(e.obs?'<div style="font-size:.72rem;color:var(--text-soft)">'+e.obs+'</div>':'')
+      +'</div>'
+      +'<span style="font-weight:700;font-size:.92rem;color:var(--danger)">-$'+Number(e.monto).toLocaleString('es-AR')+'</span>'
+      +'<button class="btn btn-danger btn-xs" onclick="eliminarEgreso('+e.id+')">✕</button>'
+      +'</div>';
+  }).join('');
+}
+
+async function eliminarEgreso(id) {
+  if (!confirm('¿Eliminar este egreso?')) return;
+  try {
+    await db.delete('egresos','id=eq.'+id);
+    egresos = egresos.filter(function(e){return e.id!==id;});
+    toast('🗑️ Egreso eliminado');
+    renderEgresos();
+  } catch(e) { toast('❌ Error: '+e.message); }
+}
+
+function exportarEgresos() {
+  var mes = parseInt(document.getElementById('egresoMes').value);
+  var año = new Date().getFullYear();
+  var ef = egresos.filter(function(e){var d=new Date(e.fecha);return d.getMonth()===mes&&d.getFullYear()===año;});
+  var csv = 'Fecha,Categoría,Destinatario,Concepto,Monto,Obs\n';
+  ef.forEach(function(e){
+    csv += e.fecha+',"'+e.categoria+'","'+e.destinatario+'","'+(e.concepto||'')+'",'+e.monto+',"'+(e.obs||'')+'"'+'\n';
+  });
+  var a = document.createElement('a');
+  a.href = 'data:text/csv;charset=utf-8,\uFEFF'+encodeURIComponent(csv);
+  a.download = 'Egresos_CVM_'+MESES[mes]+'_'+año+'.csv';
+  a.click();
 }
 
 function renderEstadisticas() {
