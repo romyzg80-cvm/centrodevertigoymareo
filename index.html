@@ -428,7 +428,7 @@ tbody td{padding:9px 12px;vertical-align:middle;}
 
 <div class="overlay" id="modalSesion">
   <div class="modal">
-    <div class="modal-title">📝 Registrar Sesión <button class="modal-close" onclick="cerrarModal('modalSesion')">✕</button></div>
+    <div class="modal-title"><span id="modalSesionTitulo">📝 Registrar Sesión</span> <button class="modal-close" onclick="cerrarModal('modalSesion')">✕</button></div>
     <div class="form-grid">
       <div class="fg"><label>Fecha</label><input type="date" id="ses-fecha"></div>
       <div class="fg"><label>Tipo</label>
@@ -473,6 +473,46 @@ tbody td{padding:9px 12px;vertical-align:middle;}
 
 <input type="file" id="archivoInput" accept="image/*,application/pdf,.doc,.docx" multiple style="display:none" onchange="procesarArchivos(event)">
 
+<!-- MODAL EDITAR PACIENTE -->
+<div class="overlay" id="modalEditPac">
+  <div class="modal" style="max-width:600px">
+    <div class="modal-title">✏️ Editar Paciente <button class="modal-close" onclick="cerrarModal('modalEditPac')">✕</button></div>
+    <div class="form-grid">
+      <div class="fg"><label>Apellido y Nombre *</label><input type="text" id="ep-nombre"></div>
+      <div class="fg"><label>DNI</label><input type="text" id="ep-dni"></div>
+      <div class="fg"><label>Teléfono</label><input type="tel" id="ep-tel"></div>
+      <div class="fg"><label>Email</label><input type="email" id="ep-email"></div>
+      <div class="fg"><label>Fecha nacimiento</label><input type="date" id="ep-fnac"></div>
+      <div class="fg"><label>Sexo</label><select id="ep-sexo"><option value="">—</option><option>Femenino</option><option>Masculino</option><option>Otro</option></select></div>
+      <div class="fg"><label>Obra social</label>
+        <select id="ep-os">
+          <option value="">Particular</option>
+          <optgroup label="Nacionales"><option>OSDE</option><option>Swiss Medical</option><option>Galeno</option><option>Medifé</option><option>Sancor Salud</option><option>Jerárquicos Salud</option><option>OSECAC</option><option>OSPEDYC</option><option>OSMATA</option><option>OSFATLYF</option><option>OSPE</option><option>UPCN</option><option>ATE</option><option>FATSA</option><option>Luz y Fuerza</option><option>OSMECON</option><option>OSPLAD</option><option>IOMA</option></optgroup>
+          <optgroup label="Tucumán"><option>IPSST</option><option>OSEP Tucumán</option><option>Empleados Públicos Tucumán</option></optgroup>
+          <optgroup label="Especiales"><option>PAMI</option><option>CUD</option><option>IOSFA</option><option>OSPAT</option><option>Provincia ART</option></optgroup>
+          <option>Otra</option>
+        </select>
+      </div>
+      <div class="fg"><label>N° afiliado</label><input type="text" id="ep-afil"></div>
+      <div class="fg"><label>Médico derivante</label><input type="text" id="ep-medico"></div>
+      <div class="fg"><label>Profesional asignado</label><select id="ep-prof"></select></div>
+      <div class="fg full"><label>Diagnóstico</label>
+        <select id="ep-dx">
+          <option value="">Seleccionar...</option>
+          <optgroup label="Patología Vestibular"><option>VPPB — Canal posterior</option><option>VPPB — Canal horizontal</option><option>VPPB — Canal anterior</option><option>Neuritis vestibular</option><option>Laberintitis</option><option>Enfermedad de Ménière</option><option>Migraña vestibular</option><option>Hipofunción vestibular unilateral</option><option>Hipofunción vestibular bilateral</option><option>Desequilibrio crónico</option><option>Presbivértigo</option></optgroup>
+          <optgroup label="Otras"><option>Tinnitus (acúfenos)</option><option>Disfunción ATM</option><option>Alteración postural / Posturología</option><option>Mareos cervicogénicos</option><option>Mareo fóbico postural</option><option>Síndrome de desembarco</option></optgroup>
+          <option>A determinar / Evaluación inicial</option>
+        </select>
+      </div>
+      <div class="fg full"><label>Antecedentes / Observaciones</label><textarea id="ep-obs"></textarea></div>
+    </div>
+    <div class="modal-actions">
+      <button class="btn btn-secondary" onclick="cerrarModal('modalEditPac')">Cancelar</button>
+      <button class="btn btn-primary" onclick="guardarEdicionPaciente()">💾 Guardar cambios</button>
+    </div>
+  </div>
+</div>
+
 <script>
 // ══════════════════════════════════
 // SUPABASE CONFIG
@@ -510,33 +550,51 @@ const db = {
 };
 
 // ══════════════════════════════════
-// USUARIOS
 // ══════════════════════════════════
-const USUARIOS = {
-  'romina':  {pass:'otolitos', nombre:'Romina',  rol:'admin', profId:null},
-  'cecilia': {pass:'otolitos', nombre:'Cecilia', rol:'admin', profId:'p1'},
-  'alvaro':  {pass:'otolitos', nombre:'Álvaro',  rol:'kine',  profId:'p2'},
-  'zulma':   {pass:'otolitos', nombre:'Zulma',   rol:'kine',  profId:'p3'},
-  'lucas':   {pass:'otolitos', nombre:'Lucas',   rol:'kine',  profId:'p4'},
-};
+// USUARIOS — desde Supabase
+// ══════════════════════════════════
 let usuarioActual = null;
 
-function login() {
+async function login() {
   var user = document.getElementById('loginUser').value.trim().toLowerCase();
   var pass = document.getElementById('loginPass').value;
-  var u = USUARIOS[user];
-  if (!u || u.pass !== pass) {
-    document.getElementById('loginError').style.display = 'block';
-    document.getElementById('loginPass').value = '';
-    return;
+  var errEl = document.getElementById('loginError');
+  if (!user || !pass) { errEl.textContent='Completá usuario y contraseña.'; errEl.style.display='block'; return; }
+  mostrarLoading('Verificando credenciales...');
+  try {
+    var res = await db.get('usuarios', 'username=eq.'+user+'&password=eq.'+pass+'&activo=eq.true');
+    ocultarLoading();
+    if (!res || !res.length) {
+      errEl.textContent = 'Usuario o contraseña incorrectos, o usuario inactivo.';
+      errEl.style.display = 'block';
+      document.getElementById('loginPass').value = '';
+      return;
+    }
+    var u = res[0];
+    errEl.style.display = 'none';
+    usuarioActual = {username:u.username, nombre:u.nombre, rol:u.rol, profId:u.prof_id};
+    localStorage.setItem('cvm_session', JSON.stringify(usuarioActual));
+    document.getElementById('loginScreen').style.display = 'none';
+    document.getElementById('userBadgeName').textContent = usuarioActual.nombre;
+    aplicarPermisos();
+    cargarTodo();
+  } catch(e) {
+    ocultarLoading();
+    // Si falla Supabase usar fallback local
+    var fallback = {romina:{pass:'otolitos',nombre:'Romina',rol:'admin',profId:null},cecilia:{pass:'otolitos',nombre:'Cecilia',rol:'admin',profId:'p1'},alvaro:{pass:'otolitos',nombre:'Álvaro',rol:'kine',profId:'p2'},zulma:{pass:'otolitos',nombre:'Zulma',rol:'kine',profId:'p3'},lucas:{pass:'otolitos',nombre:'Lucas',rol:'kine',profId:'p4'}};
+    var fu = fallback[user];
+    if (fu && fu.pass === pass) {
+      usuarioActual = {username:user, nombre:fu.nombre, rol:fu.rol, profId:fu.profId};
+      localStorage.setItem('cvm_session', JSON.stringify(usuarioActual));
+      document.getElementById('loginScreen').style.display = 'none';
+      document.getElementById('userBadgeName').textContent = usuarioActual.nombre;
+      aplicarPermisos();
+      cargarTodo();
+    } else {
+      errEl.textContent = 'Error de conexión. Verificá tu internet.';
+      errEl.style.display = 'block';
+    }
   }
-  document.getElementById('loginError').style.display = 'none';
-  usuarioActual = Object.assign({}, u, {username: user});
-  localStorage.setItem('cvm_session', JSON.stringify(usuarioActual));
-  document.getElementById('loginScreen').style.display = 'none';
-  document.getElementById('userBadgeName').textContent = usuarioActual.nombre;
-  aplicarPermisos();
-  cargarTodo();
 }
 
 function aplicarPermisos() {
@@ -810,11 +868,15 @@ function abrirModalTurno(tid) {
     +'<div class="dato"><div class="k">Estado</div><div class="v"><span class="badge b-'+t.estado+'">'+t.estado+'</span></div></div>'
     +(t.notas?'<div class="dato" style="grid-column:1/-1"><div class="k">Notas</div><div class="v">'+t.notas+'</div></div>':'')
     +'</div>';
-  if (p) b += '<div style="display:flex;gap:6px;flex-wrap:wrap;margin-top:10px">'
-    +'<button class="btn btn-secondary btn-sm" onclick="verFicha('+p.id+');cerrarModal(\'modalTurno\')">Ver ficha →</button>'
-    +'<button class="btn btn-success btn-sm" onclick="enviarWhatsApp(\''+p.tel+'\',\''+p.nombre+'\',\''+t.fecha+'\',\''+t.hora+'\')">📱 WhatsApp</button>'
-    +(p.email?'<button class="btn btn-secondary btn-sm" onclick="enviarEmail(\''+p.email+'\',\''+p.nombre+'\',\''+t.fecha+'\',\''+t.hora+'\')">📧 Email</button>':'')
-    +'</div>';
+  if (p) {
+    var telLimpio = (p.tel||'').replace(/\D/g,'');
+    var emailOk = p.email && p.email.includes('@');
+    b += '<div style="display:flex;gap:6px;flex-wrap:wrap;margin-top:10px">'
+      +'<button class="btn btn-secondary btn-sm" onclick="verFicha('+p.id+');cerrarModal(\'modalTurno\')">Ver ficha →</button>'
+      +(telLimpio?'<button class="btn btn-success btn-sm" onclick="enviarWhatsApp(\''+p.tel+'\',\''+p.nombre+'\',\''+t.fecha+'\',\''+t.hora+'\')">📱 WhatsApp</button>':'<span class="text-muted" style="font-size:.75rem;padding:5px">Sin tel</span>')
+      +(emailOk?'<button class="btn btn-secondary btn-sm" onclick="enviarEmail(\''+p.email+'\',\''+p.nombre+'\',\''+t.fecha+'\',\''+t.hora+'\')">📧 Email</button>':'')
+      +'</div>';
+  }
   document.getElementById('modalTurnoBody').innerHTML = b;
   abrirModal('modalTurno');
 }
@@ -889,6 +951,7 @@ function renderFicha() {
     +'<button class="btn btn-teal btn-sm" onclick="abrirModalSesion()">+ Sesión</button>'
     +(usuarioActual&&usuarioActual.rol==='admin'?'<button class="btn btn-success btn-sm" onclick="abrirModalPago('+p.id+')">💰 Pago</button>':'')
     +'<button class="btn btn-secondary btn-sm" onclick="ntParaPac('+p.id+')">+ Turno</button>'
+    +'<button class="btn btn-warning btn-sm" onclick="editarPaciente('+p.id+')">✏️ Editar</button>'
     +'<button class="btn btn-purple btn-sm" onclick="imprimirInforme('+p.id+',\'paciente\')">📄 Paciente</button>'
     +'<button class="btn btn-secondary btn-sm" onclick="imprimirInforme('+p.id+',\'clinico\')">📋 Clínico</button>'
     +(usuarioActual&&usuarioActual.rol==='admin'?'<button class="btn btn-danger btn-sm" onclick="eliminarPaciente('+p.id+')">🗑️ Eliminar</button>':'')
@@ -927,14 +990,33 @@ function switchFTab(btn, id) {
 
 function renderSesiones(p) {
   if (!p.sesiones||!p.sesiones.length) return '<div class="empty"><div class="ei">📭</div>Sin sesiones</div>';
-  return [].concat(p.sesiones).reverse().map(function(s) {
-    return '<div class="sesion-card '+s.asistencia+'">'
-      +'<div class="sesion-top"><span class="sesion-fecha">'+fdisp(s.fecha)+'</span>'
-      +'<span class="badge b-'+s.asistencia+'">'+(s.asistencia==='asistio'?'✅ Asistió':'❌ Ausente')+'</span></div>'
-      +'<div style="font-size:.72rem;color:var(--slate)">'+(s.tipo||'')+'</div>'
-      +(s.nota?'<div class="sesion-nota">'+s.nota+'</div>':'')
+  return [].concat(p.sesiones).map(function(s, i) {
+    var idxReal = p.sesiones.length - 1 - i;
+    var reversed = [].concat(p.sesiones).reverse();
+    var s2 = reversed[i];
+    var realIdx = p.sesiones.indexOf(s2);
+    return '<div class="sesion-card '+s2.asistencia+'" style="position:relative">'
+      +'<div class="sesion-top">'
+      +'<span class="sesion-fecha">'+fdisp(s2.fecha)+'</span>'
+      +'<div style="display:flex;align-items:center;gap:6px">'
+      +'<span class="badge b-'+s2.asistencia+'">'+(s2.asistencia==='asistio'?'✅ Asistió':'❌ Ausente')+'</span>'
+      +(s2.autor?'<span style="font-size:.68rem;color:var(--text-soft)">'+s2.autor+'</span>':'')
+      +'<button class="btn btn-secondary btn-xs" onclick="abrirModalSesion('+realIdx+')" title="Editar">✏️</button>'
+      +'<button class="btn btn-danger btn-xs" onclick="eliminarSesion('+realIdx+')" title="Eliminar">🗑️</button>'
+      +'</div></div>'
+      +'<div style="font-size:.72rem;color:var(--slate);margin-top:2px">'+(s2.tipo||'')+'</div>'
+      +(s2.nota?'<div class="sesion-nota">'+s2.nota+'</div>':'')
       +'</div>';
   }).join('');
+}
+
+async function eliminarSesion(idx) {
+  if (!confirm('¿Eliminar esta sesión?')) return;
+  var p = getPac(pacActual); if (!p) return;
+  p.sesiones.splice(idx, 1);
+  await actualizarPaciente(p);
+  toast('🗑️ Sesión eliminada');
+  renderFicha();
 }
 
 function renderArchivos(p) {
@@ -972,50 +1054,122 @@ function renderPagosPac(p) {
 }
 
 // ARCHIVOS
+// ══════════════════════════════════
+// ARCHIVOS — Supabase Storage
+// ══════════════════════════════════
+async function supaUpload(path, file) {
+  var res = await fetch(SUPA_URL+'/storage/v1/object/cvm-archivos/'+path, {
+    method: 'POST',
+    headers: {'apikey':SUPA_KEY,'Authorization':'Bearer '+SUPA_KEY,'Content-Type':file.type,'x-upsert':'true'},
+    body: file
+  });
+  if (!res.ok) throw new Error(await res.text());
+  return SUPA_URL+'/storage/v1/object/public/cvm-archivos/'+path;
+}
+
+async function supaDeleteFile(path) {
+  await fetch(SUPA_URL+'/storage/v1/object/cvm-archivos/'+path, {
+    method:'DELETE',
+    headers:{'apikey':SUPA_KEY,'Authorization':'Bearer '+SUPA_KEY}
+  });
+}
+
 function procesarArchivos(e) {
   var pid = pacArchivoActual; var p = getPac(pid); if (!p) return;
   if (!p.archivos) p.archivos = [];
-  Array.from(e.target.files).forEach(function(f) {
-    var r = new FileReader();
-    r.onload = async function(ev) {
-      p.archivos.push({nombre:f.name, data:ev.target.result, tipo:f.type, fecha:hoy()});
-      await actualizarPaciente(p);
-      renderFicha();
-    };
-    r.readAsDataURL(f);
-  });
+  var files = Array.from(e.target.files);
   e.target.value = '';
+  mostrarLoading('Subiendo archivos...');
+  var promesas = files.map(async function(f) {
+    try {
+      var path = 'pacientes/'+pid+'/'+Date.now()+'_'+f.name.replace(/\s/g,'_');
+      var url = await supaUpload(path, f);
+      p.archivos.push({nombre:f.name, url:url, path:path, tipo:f.type, fecha:hoy()});
+    } catch(err) {
+      toast('❌ Error subiendo '+f.name+': '+err.message);
+    }
+  });
+  Promise.all(promesas).then(async function() {
+    await actualizarPaciente(p);
+    ocultarLoading();
+    toast('✅ Archivos subidos');
+    renderFicha();
+  });
 }
-function verArchivo(pid,idx) {
-  var p=getPac(pid); var a=p.archivos[idx]; if(!a||!a.data)return;
-  var w=window.open();
-  if(a.tipo&&a.tipo.startsWith('image/')){w.document.write('<img src="'+a.data+'" style="max-width:100%">');}
-  else{w.location.href=a.data;}
+
+function verArchivo(pid, idx) {
+  var p = getPac(pid); var a = p.archivos[idx]; if (!a) return;
+  var url = a.url || (a.data ? a.data : null);
+  if (!url) { toast('❌ Archivo no disponible'); return; }
+  window.open(url, '_blank');
 }
-async function eliminarArchivo(pid,idx) {
+
+async function eliminarArchivo(pid, idx) {
   if (!confirm('¿Eliminar este archivo?')) return;
-  var p = getPac(pid); p.archivos.splice(idx,1);
-  await actualizarPaciente(p); renderFicha();
+  var p = getPac(pid);
+  var a = p.archivos[idx];
+  // Eliminar del Storage si tiene path
+  if (a && a.path) {
+    try { await supaDeleteFile(a.path); } catch(e) {}
+  }
+  p.archivos.splice(idx, 1);
+  await actualizarPaciente(p);
+  toast('🗑️ Archivo eliminado');
+  renderFicha();
 }
 
 // SESIÓN
-function abrirModalSesion() {
-  document.getElementById('ses-fecha').value = hoy();
-  document.getElementById('ses-nota').value = '';
+var sesionEditIdx = null; // null = nueva, número = editar
+
+function abrirModalSesion(editIdx) {
+  sesionEditIdx = (editIdx !== undefined) ? editIdx : null;
+  var p = getPac(pacActual);
+
+  if (sesionEditIdx !== null && p && p.sesiones && p.sesiones[sesionEditIdx]) {
+    // MODO EDICIÓN
+    var s = p.sesiones[sesionEditIdx];
+    document.getElementById('modalSesionTitulo').textContent = '✏️ Editar Sesión';
+    document.getElementById('ses-fecha').value = s.fecha || hoy();
+    document.getElementById('ses-tipo').value = s.tipo || 'Rehabilitación vestibular';
+    document.getElementById('ses-asist').value = s.asistencia || 'asistio';
+    document.getElementById('ses-nota').value = s.nota || '';
+  } else {
+    // MODO NUEVA
+    document.getElementById('modalSesionTitulo').textContent = '📝 Registrar Sesión';
+    document.getElementById('ses-fecha').value = hoy();
+    document.getElementById('ses-nota').value = '';
+    document.getElementById('ses-asist').value = 'asistio';
+    // Tipo automático según usuario
+    var tipoDefault = 'Rehabilitación vestibular';
+    if (usuarioActual && usuarioActual.profId === 'p1') {
+      tipoDefault = 'Evaluación inicial';
+    }
+    document.getElementById('ses-tipo').value = tipoDefault;
+  }
   abrirModal('modalSesion');
 }
+
 async function guardarSesion() {
   var p = getPac(pacActual); if (!p) return;
   if (!p.sesiones) p.sesiones = [];
-  p.sesiones.push({
+  var nuevaSesion = {
     fecha: document.getElementById('ses-fecha').value,
     tipo: document.getElementById('ses-tipo').value,
     asistencia: document.getElementById('ses-asist').value,
-    nota: document.getElementById('ses-nota').value
-  });
+    nota: document.getElementById('ses-nota').value,
+    autor: usuarioActual ? usuarioActual.nombre : ''
+  };
+  if (sesionEditIdx !== null) {
+    // Editar existente
+    p.sesiones[sesionEditIdx] = nuevaSesion;
+    toast('✅ Sesión actualizada');
+  } else {
+    // Nueva sesión
+    p.sesiones.push(nuevaSesion);
+    toast('✅ Sesión guardada');
+  }
   await actualizarPaciente(p);
   cerrarModal('modalSesion');
-  toast('✅ Sesión guardada');
   renderFicha();
 }
 
@@ -1027,6 +1181,77 @@ async function actualizarPaciente(p) {
       pagos_pac: JSON.stringify(p.pagos||[])
     }, 'id=eq.'+p.id);
   } catch(e) { toast('❌ Error al guardar: '+e.message); }
+}
+
+// EDITAR PACIENTE
+function editarPaciente(id) {
+  var p = getPac(id); if (!p) return;
+  // Poblar formulario con datos actuales
+  document.getElementById('ep-nombre').value = p.nombre||'';
+  document.getElementById('ep-dni').value = p.dni||'';
+  document.getElementById('ep-tel').value = p.tel||'';
+  document.getElementById('ep-email').value = p.email||'';
+  document.getElementById('ep-fnac').value = p.fnac||'';
+  document.getElementById('ep-sexo').value = p.sexo||'';
+  document.getElementById('ep-afil').value = p.afil||'';
+  document.getElementById('ep-medico').value = p.medico||'';
+  document.getElementById('ep-obs').value = p.obs||'';
+  // Obra social
+  var osEl = document.getElementById('ep-os');
+  osEl.value = p.os||'';
+  if (!osEl.value && p.os) {
+    var opt = document.createElement('option');
+    opt.value = p.os; opt.text = p.os; osEl.add(opt); osEl.value = p.os;
+  }
+  // Diagnóstico
+  var dxEl = document.getElementById('ep-dx');
+  dxEl.value = p.dx||'';
+  if (!dxEl.value && p.dx) {
+    var opt2 = document.createElement('option');
+    opt2.value = p.dx; opt2.text = p.dx; dxEl.add(opt2); dxEl.value = p.dx;
+  }
+  // Profesional
+  document.getElementById('ep-prof').innerHTML = '<option value="">Seleccionar...</option>'
+    + profs.map(function(pr){return '<option value="'+pr.id+'"'+(pr.id===p.profId?' selected':'')+'>'+pr.nombre+'</option>';}).join('');
+  // Guardar ID en el modal
+  document.getElementById('modalEditPac').dataset.pacId = id;
+  abrirModal('modalEditPac');
+}
+
+async function guardarEdicionPaciente() {
+  var id = parseInt(document.getElementById('modalEditPac').dataset.pacId);
+  var p = getPac(id); if (!p) return;
+  var nombre = document.getElementById('ep-nombre').value.trim();
+  if (!nombre) { alert('El nombre es obligatorio.'); return; }
+  mostrarLoading('Guardando cambios...');
+  try {
+    var cambios = {
+      nombre: nombre,
+      dni: document.getElementById('ep-dni').value.trim(),
+      tel: document.getElementById('ep-tel').value.trim(),
+      email: document.getElementById('ep-email').value.trim(),
+      fnac: document.getElementById('ep-fnac').value,
+      sexo: document.getElementById('ep-sexo').value,
+      os: document.getElementById('ep-os').value,
+      afil: document.getElementById('ep-afil').value.trim(),
+      medico: document.getElementById('ep-medico').value.trim(),
+      prof_id: document.getElementById('ep-prof').value,
+      dx: document.getElementById('ep-dx').value,
+      obs: document.getElementById('ep-obs').value.trim()
+    };
+    await db.update('pacientes', cambios, 'id=eq.'+id);
+    // Actualizar en memoria
+    Object.assign(p, {
+      nombre:cambios.nombre, dni:cambios.dni, tel:cambios.tel,
+      email:cambios.email, fnac:cambios.fnac, sexo:cambios.sexo,
+      os:cambios.os, afil:cambios.afil, medico:cambios.medico,
+      profId:cambios.prof_id, dx:cambios.dx, obs:cambios.obs
+    });
+    ocultarLoading();
+    cerrarModal('modalEditPac');
+    toast('✅ Paciente actualizado');
+    renderFicha();
+  } catch(e) { ocultarLoading(); toast('❌ Error: '+e.message); }
 }
 
 // ELIMINAR PACIENTE
@@ -1393,11 +1618,8 @@ function imprimirInforme(pid, tipo) {
       +'<div class="dato"><div class="dato-k">Obra Social</div><div class="dato-v">'+(p.os||'Particular')+'</div></div>'
       +(p.afil?'<div class="dato"><div class="dato-k">N° Afiliado</div><div class="dato-v">'+p.afil+'</div></div>':'')
       +(p.medico?'<div class="dato"><div class="dato-k">Médico derivante</div><div class="dato-v">'+p.medico+'</div></div>':'')
-      +'<div class="dato"><div class="dato-k">Alta en el centro</div><div class="dato-v">'+fdisp(p.alta)+'</div></div>'
       +'</div></div>'
-      +'<div class="seccion"><div class="sec-tit">Diagnóstico</div><div class="dx-box">🩺 '+p.dx+'</div>'
-      +(p.obs?'<div style="background:#f7f8fc;border:1px solid #d8e2ef;padding:10px 14px;border-radius:6px;font-size:12px;line-height:1.6;margin-top:8px"><strong>Antecedentes:</strong><br>'+p.obs+'</div>':'')
-      +'</div>'
+      +(p.obs?'<div class="seccion"><div class="sec-tit">Antecedentes / Observaciones</div><div style="background:#f7f8fc;border:1px solid #d8e2ef;padding:10px 14px;border-radius:6px;font-size:12px;line-height:1.6;">'+p.obs+'</div></div>':'')
       +'<div class="seccion"><div class="sec-tit">Evolución Clínica</div>'+sesHtml+'</div>';
   }
 
@@ -1463,9 +1685,15 @@ function renderCumpleanios() {
 // ══════════════════════════════════
 function enviarWhatsApp(tel, nombre, fecha, hora) {
   if (!tel) { toast('⚠️ El paciente no tiene teléfono cargado'); return; }
-  var telLimpio = '54' + tel.replace(/\D/g,'');
-  var msg = 'Hola '+nombre.split(',')[1].trim()+'! 😊 Te recordamos tu turno en el Centro de Vértigo y Mareo el día '+fdisp(fecha)+' a las '+hora+'hs. Ante cualquier consulta llamanos al 381 302-1908.';
-  window.open('https://wa.me/'+telLimpio+'?text='+encodeURIComponent(msg), '_blank');
+  // Limpiar número — sacar todo lo que no sea dígito
+  var telLimpio = tel.toString().replace(/\D/g,'');
+  // Si empieza con 0, sacarlo
+  if (telLimpio.startsWith('0')) telLimpio = telLimpio.substring(1);
+  // Si empieza con 54, dejarlo; si no, agregar 54 (Argentina)
+  if (!telLimpio.startsWith('54')) telLimpio = '54' + telLimpio;
+  var nombreCorto = nombre.includes(',') ? nombre.split(',')[1].trim() : nombre.trim();
+  var msg = 'Hola ' + nombreCorto + '! 😊 Te recordamos tu turno en el Centro de Vértigo y Mareo el día ' + fdisp(fecha) + ' a las ' + hora + 'hs. Ante cualquier consulta llamanos al 381 302-1908.';
+  window.open('https://wa.me/' + telLimpio + '?text=' + encodeURIComponent(msg), '_blank');
 }
 
 function enviarEmail(email, nombre, fecha, hora) {
