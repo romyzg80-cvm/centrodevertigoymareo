@@ -275,6 +275,7 @@ tbody td{padding:9px 12px;vertical-align:middle;}
   <button class="nav-btn" onclick="go('pacientes')">👥 Pacientes</button>
   <button class="nav-btn nav-admin" onclick="go('caja')">💰 Caja</button>
   <button class="nav-btn nav-admin" onclick="go('estadisticas')">📊 Estadísticas</button>
+  <button class="nav-btn nav-admin" onclick="go('bloqueos')">🚫 Feriados</button>
   <button class="nav-btn" onclick="go('nuevo-turno')">➕ Turno</button>
   <button class="nav-btn" onclick="go('nuevo-paciente')">🆕 Paciente</button>
 </nav>
@@ -478,6 +479,50 @@ tbody td{padding:9px 12px;vertical-align:middle;}
       <button class="btn btn-secondary" onclick="go('pacientes')">Cancelar</button>
       <button class="btn btn-primary" onclick="guardarPaciente()">💾 Registrar</button>
     </div>
+  </div>
+</div>
+
+<!-- BLOQUEOS: FERIADOS Y AUSENCIAS -->
+<div class="section" id="s-bloqueos">
+  <div class="card">
+    <div class="card-title">🚫 Feriados y Ausencias</div>
+    <p class="text-muted" style="margin-bottom:16px">Marcá días que no se trabaja en el centro o ausencias de kinesiólogos. En la agenda esos días aparecen bloqueados.</p>
+
+    <!-- AGREGAR -->
+    <div style="background:var(--sand);border-radius:12px;padding:16px;margin-bottom:16px;border:1px solid var(--border)">
+      <div style="font-size:.88rem;font-weight:600;color:var(--navy);margin-bottom:12px">➕ Agregar bloqueo</div>
+      <div class="form-grid">
+        <div class="fg">
+          <label>Tipo</label>
+          <select id="bl-tipo" onchange="toggleBloqueoTipo()">
+            <option value="feriado">🗓️ Feriado — Todo el centro</option>
+            <option value="ausencia">🙋 Ausencia — Un kinesiólogo</option>
+          </select>
+        </div>
+        <div class="fg" id="bl-prof-wrap" style="display:none">
+          <label>Kinesiólogo</label>
+          <select id="bl-prof"></select>
+        </div>
+        <div class="fg">
+          <label>Fecha desde *</label>
+          <input type="date" id="bl-desde">
+        </div>
+        <div class="fg">
+          <label>Fecha hasta (opcional)</label>
+          <input type="date" id="bl-hasta">
+        </div>
+        <div class="fg full">
+          <label>Motivo</label>
+          <input type="text" id="bl-motivo" placeholder="Ej: Feriado nacional, Capacitación, Congreso...">
+        </div>
+      </div>
+      <div class="flex-end" style="margin-top:10px">
+        <button class="btn btn-primary" onclick="guardarBloqueo()">💾 Guardar</button>
+      </div>
+    </div>
+
+    <!-- LISTA -->
+    <div id="listaBloqueos"></div>
   </div>
 </div>
 
@@ -781,11 +826,13 @@ async function cargarTodo() {
     var res = await Promise.all([
       db.get('pacientes', 'order=nombre'),
       db.get('turnos', 'order=fecha,hora'),
-      db.get('pagos', 'order=fecha.desc')
+      db.get('pagos', 'order=fecha.desc'),
+      db.get('bloqueos', 'order=fecha')
     ]);
     pacientes = res[0].map(mapPac);
     turnos    = res[1].map(mapTurno);
     pagos     = res[2].map(mapPago);
+    bloqueos  = res[3] || [];
     ocultarLoading();
     if (usuarioActual.rol === 'kine' && usuarioActual.profId) {
       profActual = usuarioActual.profId;
@@ -817,10 +864,11 @@ function mapPago(r) {
 // ══════════════════════════════════
 // NAVEGACIÓN
 // ══════════════════════════════════
-const NAV_MAP = {inicio:0,agenda:1,pacientes:2,caja:3,estadisticas:4,'nuevo-turno':5,'nuevo-paciente':6};
+const NAV_MAP = {inicio:0,agenda:1,pacientes:2,caja:3,estadisticas:4,bloqueos:5,'nuevo-turno':6,'nuevo-paciente':7};
+var bloqueos = [];
 const renders = {
   inicio:renderInicio, agenda:renderAgenda, pacientes:renderPacientes,
-  caja:renderCaja, estadisticas:renderEstadisticas,
+  caja:renderCaja, estadisticas:renderEstadisticas, bloqueos:renderBloqueos,
   'nuevo-turno':initNuevoTurno, 'nuevo-paciente':initNuevoPaciente,
   ficha:renderFicha
 };
@@ -982,9 +1030,18 @@ function renderVistaSemana() {
   for (var i=0; i<6; i++) {
     var d = new Date(mon); d.setDate(mon.getDate()+i);
     var ds = fd(d), isToday = ds===fd(today);
+    var bloqueo = getBloqueo(ds, profActual);
     var dt = turnos.filter(function(t){return t.fecha===ds && t.profId===profActual;}).sort(function(a,b){return a.hora.localeCompare(b.hora);});
-    h += '<div class="day-col"><div class="day-hd'+(isToday?' today':'')+'">'+DIAS[d.getDay()]+'<span class="dn">'+d.getDate()+'</span></div><div class="day-body">';
-    if (!dt.length) h += '<div style="text-align:center;padding:8px 3px;font-size:.68rem;color:var(--text-soft)">Libre</div>';
+    h += '<div class="day-col" style="'+(bloqueo?'background:#fff5f5;':'')+'">';
+    h += '<div class="day-hd'+(isToday?' today':'')+'" style="'+(bloqueo?'background:#c0392b;':'')+'">'+DIAS[d.getDay()]+'<span class="dn">'+d.getDate()+'</span></div>';
+    h += '<div class="day-body">';
+    if (bloqueo) {
+      h += '<div style="text-align:center;padding:8px 4px;font-size:.68rem;color:#c0392b;font-weight:600">'
+        +(bloqueo.tipo==='feriado'?'🗓️ Feriado':'🙋 Ausente')+'<br>'
+        +'<span style="font-weight:400;color:var(--text-soft)">'+(bloqueo.motivo||'')+'</span></div>';
+    } else if (!dt.length) {
+      h += '<div style="text-align:center;padding:8px 3px;font-size:.68rem;color:var(--text-soft)">Libre</div>';
+    }
     dt.forEach(function(t) {
       var p = getPac(t.pacId);
       h += '<div class="tchip '+(t.estado!=='pendiente'?t.estado:'')+'" style="border-left-color:'+(pr?pr.color:'var(--border)')+'" onclick="abrirModalTurno('+t.id+')">'
@@ -1799,6 +1856,203 @@ async function guardarPago() {
 // ══════════════════════════════════
 // ESTADÍSTICAS
 // ══════════════════════════════════
+// ══════════════════════════════════
+// BLOQUEOS — FERIADOS Y AUSENCIAS
+// ══════════════════════════════════
+function esDiaBloquedo(fecha, profId) {
+  // Si está marcado como "se trabaja igual", no bloquear
+  var trabaja = bloqueos.find(function(b){return b.fecha===fecha && b.tipo==='trabaja';});
+  if (trabaja) return false;
+  // Feriado nacional Argentina 2026
+  var esFeriado = FERIADOS_AR_2026.some(function(f){return f.fecha===fecha;});
+  if (esFeriado) return true;
+  // Bloqueo manual
+  return bloqueos.some(function(b) {
+    var desde = b.fecha;
+    var hasta = b.hasta || b.fecha;
+    var dentroRango = fecha >= desde && fecha <= hasta;
+    var afectaProf = b.tipo === 'feriado' || b.prof_id === profId;
+    return dentroRango && afectaProf;
+  });
+}
+
+function getBloqueo(fecha, profId) {
+  // Si está marcado como "se trabaja", no hay bloqueo
+  var trabaja = bloqueos.find(function(b){return b.fecha===fecha && b.tipo==='trabaja';});
+  if (trabaja) return null;
+  // Feriado nacional
+  var ferNac = FERIADOS_AR_2026.find(function(f){return f.fecha===fecha;});
+  if (ferNac) return {tipo:'feriado', motivo:ferNac.motivo};
+  // Bloqueo manual
+  return bloqueos.find(function(b) {
+    var desde = b.fecha;
+    var hasta = b.hasta || b.fecha;
+    var dentroRango = fecha >= desde && fecha <= hasta;
+    var afectaProf = b.tipo === 'feriado' || b.prof_id === profId;
+    return dentroRango && afectaProf;
+  }) || null;
+}
+
+// Feriados nacionales Argentina 2026 (oficial)
+const FERIADOS_AR_2026 = [
+  {fecha:'2026-01-01', motivo:'Año Nuevo', tipo:'inamovible'},
+  {fecha:'2026-02-16', motivo:'Lunes de Carnaval', tipo:'inamovible'},
+  {fecha:'2026-02-17', motivo:'Martes de Carnaval', tipo:'inamovible'},
+  {fecha:'2026-03-23', motivo:'Puente turístico', tipo:'puente'},
+  {fecha:'2026-03-24', motivo:'Día de la Memoria por la Verdad y la Justicia', tipo:'inamovible'},
+  {fecha:'2026-04-02', motivo:'Día del Veterano y Caídos en Malvinas', tipo:'inamovible'},
+  {fecha:'2026-04-03', motivo:'Viernes Santo', tipo:'inamovible'},
+  {fecha:'2026-05-01', motivo:'Día del Trabajador', tipo:'inamovible'},
+  {fecha:'2026-05-25', motivo:'Día de la Revolución de Mayo', tipo:'inamovible'},
+  {fecha:'2026-06-15', motivo:'Paso a la Inmortalidad del Gral. Güemes (trasladado)', tipo:'trasladable'},
+  {fecha:'2026-06-20', motivo:'Paso a la Inmortalidad del Gral. Belgrano', tipo:'inamovible'},
+  {fecha:'2026-07-09', motivo:'Día de la Independencia', tipo:'inamovible'},
+  {fecha:'2026-07-10', motivo:'Puente turístico', tipo:'puente'},
+  {fecha:'2026-08-17', motivo:'Paso a la Inmortalidad del Gral. San Martín', tipo:'trasladable'},
+  {fecha:'2026-10-12', motivo:'Día del Respeto a la Diversidad Cultural', tipo:'trasladable'},
+  {fecha:'2026-11-23', motivo:'Día de la Soberanía Nacional (trasladado)', tipo:'trasladable'},
+  {fecha:'2026-12-07', motivo:'Puente turístico', tipo:'puente'},
+  {fecha:'2026-12-08', motivo:'Día de la Inmaculada Concepción de María', tipo:'inamovible'},
+  {fecha:'2026-12-25', motivo:'Navidad', tipo:'inamovible'},
+];
+
+function toggleBloqueoTipo() {
+  var tipo = document.getElementById('bl-tipo').value;
+  document.getElementById('bl-prof-wrap').style.display = tipo === 'ausencia' ? 'block' : 'none';
+}
+
+function renderBloqueos() {
+  document.getElementById('bl-prof').innerHTML = profs.map(function(pr) {
+    return '<option value="'+pr.id+'">'+pr.nombre+'</option>';
+  }).join('');
+  document.getElementById('bl-desde').value = hoy();
+  document.getElementById('bl-hasta').value = '';
+  renderCalendarioFeriados();
+  renderListaBloqueos();
+}
+
+function renderCalendarioFeriados() {
+  var hoyStr = hoy();
+  var colores = {inamovible:'var(--danger)', trasladable:'var(--warning)', puente:'var(--teal-d)'};
+  var prox = FERIADOS_AR_2026.filter(function(f){return f.fecha >= hoyStr;});
+  var html = '<div style="margin-bottom:16px">'
+    +'<div style="font-family:\'Playfair Display\',serif;font-size:.95rem;color:var(--navy);margin-bottom:10px">🇦🇷 Feriados Nacionales Argentina 2026</div>'
+    +'<div style="display:flex;gap:8px;margin-bottom:10px;flex-wrap:wrap;font-size:.72rem">'
+    +'<span style="display:flex;align-items:center;gap:4px"><span style="width:10px;height:10px;background:var(--danger);border-radius:50%;display:inline-block"></span>Inamovible</span>'
+    +'<span style="display:flex;align-items:center;gap:4px"><span style="width:10px;height:10px;background:var(--warning);border-radius:50%;display:inline-block"></span>Trasladable</span>'
+    +'<span style="display:flex;align-items:center;gap:4px"><span style="width:10px;height:10px;background:var(--teal-d);border-radius:50%;display:inline-block"></span>Puente turístico</span>'
+    +'</div>'
+    +'<div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:8px">';
+
+  FERIADOS_AR_2026.forEach(function(f) {
+    var pasado = f.fecha < hoyStr;
+    var blq = bloqueos.find(function(b){return b.fecha===f.fecha && b.tipo==='feriado';});
+    var trabaja = blqueos_trabaja_find(f.fecha);
+    html += '<div style="display:flex;align-items:center;justify-content:space-between;padding:9px 12px;background:'+(pasado?'var(--sand)':'#fff')+';border-radius:9px;border:1px solid var(--border);border-left:3px solid '+(colores[f.tipo]||'var(--border)')+';opacity:'+(pasado?.6:1)+'">'
+      +'<div>'
+      +'<div style="font-size:.80rem;font-weight:600;color:var(--navy)">'+fdisp(f.fecha)+'</div>'
+      +'<div style="font-size:.73rem;color:var(--text-soft)">'+f.motivo+'</div>'
+      +'</div>'
+      +(pasado?'<span style="font-size:.70rem;color:var(--text-soft)">Pasado</span>'
+        : trabaja
+          ? '<div style="display:flex;align-items:center;gap:6px"><span style="font-size:.70rem;color:var(--success);font-weight:600">✅ Se trabaja</span><button class="btn btn-danger btn-xs" onclick="cancelarTrabaja(\''+f.fecha+'\')">✕</button></div>'
+          : '<div style="display:flex;align-items:center;gap:6px">'
+            +'<button class="btn btn-success btn-xs" onclick="marcarTrabaja(\''+f.fecha+'\',\''+f.motivo.replace(/'/g,"\\'")+'\')">✅ Trabajamos</button>'
+            +'</div>')
+      +'</div>';
+  });
+  html += '</div></div>';
+  document.getElementById('listaBloqueos').innerHTML = html + '<div id="listaBloqueos2"></div>';
+  renderListaBloqueos2();
+}
+
+function blqueos_trabaja_find(fecha) {
+  return bloqueos.find(function(b){return b.fecha===fecha && b.tipo==='trabaja';});
+}
+
+async function marcarTrabaja(fecha, motivo) {
+  try {
+    var nuevo = {id:Date.now(), fecha:fecha, hasta:fecha, tipo:'trabaja', prof_id:null, motivo:'Se trabaja — '+motivo};
+    var res = await db.insert('bloqueos', nuevo);
+    bloqueos.push(res[0]||nuevo);
+    toast('✅ Marcado como día de trabajo');
+    renderCalendarioFeriados();
+  } catch(e) { toast('❌ Error: '+e.message); }
+}
+
+async function cancelarTrabaja(fecha) {
+  var b = blqueos_trabaja_find(fecha);
+  if (!b) return;
+  try {
+    await db.delete('bloqueos', 'id=eq.'+b.id);
+    bloqueos = bloqueos.filter(function(x){return x.id!==b.id;});
+    toast('✅ Actualizado');
+    renderCalendarioFeriados();
+  } catch(e) { toast('❌ Error: '+e.message); }
+}
+
+function renderListaBloqueos2() {
+  var hoy2 = hoy();
+  var custom = bloqueos.filter(function(b){return b.tipo==='feriado'||b.tipo==='ausencia';});
+  var activos = custom.filter(function(b){return (b.hasta||b.fecha) >= hoy2;});
+  var html = '<div style="font-family:\'Playfair Display\',serif;font-size:.95rem;color:var(--navy);margin:16px 0 10px">🚫 Bloqueos personalizados</div>';
+  if (!activos.length) {
+    html += '<div class="empty" style="padding:16px"><div class="ei">✅</div>Sin bloqueos personalizados activos</div>';
+  } else {
+    html += activos.map(renderBloqueoItem).join('');
+  }
+  var el = document.getElementById('listaBloqueos2');
+  if (el) el.innerHTML = html;
+}
+
+function renderListaBloqueos() {
+  renderListaBloqueos2();
+}
+
+function renderBloqueoItem(b) {
+  var pr = b.prof_id ? getPr(b.prof_id) : null;
+  var esFeriado = b.tipo === 'feriado';
+  var rango = b.hasta && b.hasta !== b.fecha ? fdisp(b.fecha)+' → '+fdisp(b.hasta) : fdisp(b.fecha);
+  return '<div style="display:flex;align-items:center;justify-content:space-between;padding:10px 14px;background:var(--sand);border-radius:9px;margin-bottom:6px;border-left:3px solid '+(esFeriado?'var(--warning)':'var(--danger)')+';">'
+    +'<div>'
+    +'<span style="font-size:.82rem;font-weight:700;color:var(--navy)">'
+    +(esFeriado?'🗓️ Feriado — Todo el centro':'🙋 Ausencia — '+(pr?pr.nombre:'—'))
+    +'</span>'
+    +'<div style="font-size:.78rem;color:var(--text-soft);margin-top:2px">'+rango+(b.motivo?' · '+b.motivo:'')+'</div>'
+    +'</div>'
+    +'<button class="btn btn-danger btn-xs" onclick="eliminarBloqueo('+b.id+')">🗑️</button>'
+    +'</div>';
+}
+
+async function guardarBloqueo() {
+  var tipo = document.getElementById('bl-tipo').value;
+  var desde = document.getElementById('bl-desde').value;
+  var hasta = document.getElementById('bl-hasta').value || desde;
+  var motivo = document.getElementById('bl-motivo').value.trim();
+  var profId = tipo === 'ausencia' ? document.getElementById('bl-prof').value : null;
+  if (!desde) { alert('Seleccioná la fecha.'); return; }
+  if (tipo === 'ausencia' && !profId) { alert('Seleccioná el kinesiólogo.'); return; }
+  try {
+    var nuevo = {id:Date.now(), fecha:desde, hasta:hasta, tipo:tipo, prof_id:profId, motivo:motivo};
+    var res = await db.insert('bloqueos', nuevo);
+    bloqueos.push(res[0]||nuevo);
+    toast('✅ Bloqueo guardado');
+    document.getElementById('bl-motivo').value = '';
+    document.getElementById('bl-hasta').value = '';
+    renderListaBloqueos();
+  } catch(e) { toast('❌ Error: '+e.message); }
+}
+
+async function eliminarBloqueo(id) {
+  if (!confirm('¿Eliminar este bloqueo?')) return;
+  try {
+    await db.delete('bloqueos', 'id=eq.'+id);
+    bloqueos = bloqueos.filter(function(b){return b.id!==id;});
+    toast('🗑️ Bloqueo eliminado');
+    renderListaBloqueos();
+  } catch(e) { toast('❌ Error: '+e.message); }
+}
+
 function renderEstadisticas() {
   var año = new Date().getFullYear();
   document.getElementById('mesGrid').innerHTML = MESES.map(function(m,i) {
