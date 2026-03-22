@@ -261,6 +261,7 @@ tbody td{padding:9px 12px;vertical-align:middle;}
 
 <!-- INICIO -->
 <div class="section active" id="s-inicio">
+  <div id="cumpleanios"></div>
   <div class="stats-grid" id="statsGrid"></div>
   <div class="card"><div class="card-title">📅 Turnos de Hoy</div><div id="turnosHoy"></div></div>
   <div class="card"><div class="card-title">👥 Últimos Pacientes</div><div id="ultPacientes"></div></div>
@@ -741,6 +742,11 @@ function renderInicio() {
       +'<td><button class="btn btn-secondary btn-xs" onclick="verFicha('+p.id+')">📋 Ficha</button></td></tr>';
   });
   document.getElementById('ultPacientes').innerHTML = h2 + '</tbody></table></div>';
+
+  // Cumpleaños
+  var cumpleHtml = renderCumpleanios();
+  var cumpleDiv = document.getElementById('cumpleanios');
+  if (cumpleDiv) cumpleDiv.innerHTML = cumpleHtml;
 }
 
 // ══════════════════════════════════
@@ -804,7 +810,11 @@ function abrirModalTurno(tid) {
     +'<div class="dato"><div class="k">Estado</div><div class="v"><span class="badge b-'+t.estado+'">'+t.estado+'</span></div></div>'
     +(t.notas?'<div class="dato" style="grid-column:1/-1"><div class="k">Notas</div><div class="v">'+t.notas+'</div></div>':'')
     +'</div>';
-  if (p) b += '<button class="btn btn-secondary btn-sm" style="margin-top:8px" onclick="verFicha('+p.id+');cerrarModal(\'modalTurno\')">Ver ficha →</button>';
+  if (p) b += '<div style="display:flex;gap:6px;flex-wrap:wrap;margin-top:10px">'
+    +'<button class="btn btn-secondary btn-sm" onclick="verFicha('+p.id+');cerrarModal(\'modalTurno\')">Ver ficha →</button>'
+    +'<button class="btn btn-success btn-sm" onclick="enviarWhatsApp(\''+p.tel+'\',\''+p.nombre+'\',\''+t.fecha+'\',\''+t.hora+'\')">📱 WhatsApp</button>'
+    +(p.email?'<button class="btn btn-secondary btn-sm" onclick="enviarEmail(\''+p.email+'\',\''+p.nombre+'\',\''+t.fecha+'\',\''+t.hora+'\')">📧 Email</button>':'')
+    +'</div>';
   document.getElementById('modalTurnoBody').innerHTML = b;
   abrirModal('modalTurno');
 }
@@ -1295,40 +1305,87 @@ function renderEstDetalle() {
 // ══════════════════════════════════
 function imprimirInforme(pid, tipo) {
   var p = getPac(pid); if (!p) return;
-  var pr = getPr(p.profId);
   var logo = localStorage.getItem('cvm_logo')||'';
   var edad = p.fnac ? Math.floor((new Date()-new Date(p.fnac))/(365.25*24*3600*1e3)) : '—';
   var sesiones = p.sesiones||[];
   var asistidas = sesiones.filter(function(s){return s.asistencia==='asistio';});
   var fechaHoy = new Date().toLocaleDateString('es-AR',{day:'numeric',month:'long',year:'numeric'});
-  var logoHTML = logo ? '<img src="'+logo+'" style="width:65px;height:65px;object-fit:contain" alt="Logo">'
+  var logoHTML = logo
+    ? '<img src="'+logo+'" style="width:65px;height:65px;object-fit:contain" alt="Logo">'
     : '<div style="width:65px;height:65px;background:#e8f8f8;border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:28px">🌀</div>';
-  var estilos = '*{box-sizing:border-box;margin:0;padding:0;}body{font-family:Segoe UI,Arial,sans-serif;color:#1a2a3a;background:#fff;padding:32px;}@media print{body{padding:16px;}.no-print{display:none;}@page{margin:1.5cm;}}.sec-tit{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:#2abfbf;border-bottom:1.5px solid #e8f8f8;padding-bottom:4px;margin-bottom:10px;}.seccion{margin-bottom:20px;}.dato{background:#f7f8fc;border-radius:6px;padding:8px 10px;}.dato-k{font-size:10px;font-weight:700;text-transform:uppercase;color:#5a6a80;letter-spacing:.05em;}.dato-v{font-size:12px;color:#1a2a3a;margin-top:2px;}.dx-box{background:#e8f8f8;border-left:4px solid #2abfbf;padding:10px 14px;border-radius:6px;font-size:13px;font-weight:600;color:#1e3a5f;}.firma-area{margin-top:50px;display:flex;justify-content:flex-end;}.firma-box{text-align:center;min-width:220px;}.firma-linea{border-top:1.5px solid #1e3a5f;margin-bottom:8px;}.footer-doc{margin-top:24px;padding-top:12px;border-top:1px solid #e8ecf2;text-align:center;font-size:10px;color:#9baab8;}.btn-print{background:#1e3a5f;color:#fff;border:none;padding:10px 24px;border-radius:8px;font-size:13px;font-weight:600;cursor:pointer;margin-right:8px;}table{width:100%;border-collapse:collapse;}thead th{background:#1e3a5f;color:#fff;padding:8px 10px;text-align:left;font-size:11px;}';
-  var headerDoc = '<div style="display:flex;align-items:center;justify-content:space-between;padding-bottom:16px;border-bottom:3px solid #1e3a5f;margin-bottom:20px;"><div style="display:flex;align-items:center;gap:14px">'+logoHTML+'<div><div style="font-size:18px;font-weight:700;color:#1e3a5f">Centro de Vértigo y Mareo</div><div style="font-size:11px;color:#4a6fa5;text-transform:uppercase;letter-spacing:1px;margin-top:2px">Medicina Vestibular · Tucumán</div><div style="font-size:11px;color:#5a6a80;margin-top:4px;line-height:1.7">📍 San Juan 28, San Miguel de Tucumán<br>📱 381 302-1908</div></div></div><div style="text-align:right"><div style="font-size:11px;color:#5a6a80">Tucumán, '+fechaHoy+'</div><div style="font-size:14px;font-weight:700;color:#1e3a5f;margin-top:4px">'+(tipo==='paciente'?'CONSTANCIA DE ATENCIÓN':'INFORME CLÍNICO')+'</div></div></div>';
-  var firmaDoc = '<div class="firma-area"><div class="firma-box"><div style="height:60px"></div><div class="firma-linea"></div><div style="font-size:11px;color:#5a6a80;margin-top:4px">Firma y sello profesional</div><div style="font-size:11px;color:#5a6a80;margin-top:2px">Centro de Vértigo y Mareo</div></div></div><div class="footer-doc">Centro de Vértigo y Mareo — Medicina Vestibular · San Juan 28, Tucumán · 381 302-1908</div>';
+
+  var estilos = '*{box-sizing:border-box;margin:0;padding:0;}'
+    +'body{font-family:Segoe UI,Arial,sans-serif;color:#1a2a3a;background:#fff;padding:32px;}'
+    +'@media print{body{padding:16px;}.no-print{display:none!important;}@page{margin:1.5cm;}}'
+    +'.sec-tit{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:#2abfbf;border-bottom:1.5px solid #e8f8f8;padding-bottom:4px;margin-bottom:10px;}'
+    +'.seccion{margin-bottom:20px;}.dato{background:#f7f8fc;border-radius:6px;padding:8px 10px;}'
+    +'.dato-k{font-size:10px;font-weight:700;text-transform:uppercase;color:#5a6a80;letter-spacing:.05em;}'
+    +'.dato-v{font-size:12px;color:#1a2a3a;margin-top:2px;}'
+    +'.dx-box{background:#e8f8f8;border-left:4px solid #2abfbf;padding:10px 14px;border-radius:6px;font-size:13px;font-weight:600;color:#1e3a5f;}'
+    +'.firma-area{margin-top:50px;display:flex;justify-content:flex-end;}'
+    +'.firma-box{text-align:center;min-width:220px;}'
+    +'.firma-linea{border-top:1.5px solid #1e3a5f;margin-bottom:8px;}'
+    +'.footer-doc{margin-top:24px;padding-top:12px;border-top:1px solid #e8ecf2;text-align:center;font-size:10px;color:#9baab8;}'
+    +'.btn-acc{background:#1e3a5f;color:#fff;border:none;padding:10px 20px;border-radius:8px;font-size:13px;font-weight:600;cursor:pointer;margin-right:8px;}'
+    +'.btn-dl{background:#2abfbf;color:#fff;border:none;padding:10px 20px;border-radius:8px;font-size:13px;font-weight:600;cursor:pointer;margin-right:8px;}'
+    +'table{width:100%;border-collapse:collapse;}thead th{background:#1e3a5f;color:#fff;padding:8px 10px;text-align:left;font-size:11px;}'
+    +'.ses-row{border-bottom:1px solid #e8ecf2;page-break-inside:avoid;}'
+    +'.ses-fecha{font-weight:700;font-size:11px;color:#1e3a5f;padding:8px 10px 2px;}'
+    +'.ses-tipo{font-size:10px;color:#4a6fa5;padding:0 10px 4px;}'
+    +'.ses-nota{font-size:12px;color:#1a2a3a;padding:4px 10px 10px;line-height:1.6;border-left:3px solid #2abfbf;margin:4px 10px 8px;}';
+
+  var headerDoc = '<div style="display:flex;align-items:center;justify-content:space-between;padding-bottom:16px;border-bottom:3px solid #1e3a5f;margin-bottom:20px;">'
+    +'<div style="display:flex;align-items:center;gap:14px">'+logoHTML
+    +'<div><div style="font-size:18px;font-weight:700;color:#1e3a5f">Centro de Vértigo y Mareo</div>'
+    +'<div style="font-size:11px;color:#4a6fa5;text-transform:uppercase;letter-spacing:1px;margin-top:2px">Medicina Vestibular · Tucumán</div>'
+    +'<div style="font-size:11px;color:#5a6a80;margin-top:4px;line-height:1.7">📍 San Juan 28, San Miguel de Tucumán · 📱 381 302-1908</div></div></div>'
+    +'<div style="text-align:right"><div style="font-size:11px;color:#5a6a80">Tucumán, '+fechaHoy+'</div>'
+    +'<div style="font-size:14px;font-weight:700;color:#1e3a5f;margin-top:4px">'+(tipo==='paciente'?'CONSTANCIA DE ATENCIÓN':'INFORME CLÍNICO')+'</div></div></div>';
+
+  var firmaDoc = '<div class="firma-area"><div class="firma-box">'
+    +'<div style="height:60px"></div>'
+    +'<div class="firma-linea"></div>'
+    +'<div style="font-size:11px;color:#5a6a80;margin-top:4px">Firma y sello profesional</div>'
+    +'<div style="font-size:11px;color:#5a6a80;margin-top:2px">Centro de Vértigo y Mareo</div>'
+    +'</div></div>'
+    +'<div class="footer-doc">Centro de Vértigo y Mareo — Medicina Vestibular · San Juan 28, Tucumán · 381 302-1908</div>';
+
   var contenido = '';
+
   if (tipo==='paciente') {
-    contenido = '<div class="seccion"><div class="sec-tit">Datos del Paciente</div><div style="display:grid;grid-template-columns:repeat(2,1fr);gap:8px">'
+    // INFORME PARA EL PACIENTE — simple y limpio
+    contenido = '<div class="seccion"><div class="sec-tit">Datos del Paciente</div>'
+      +'<div style="display:grid;grid-template-columns:repeat(2,1fr);gap:8px">'
       +'<div class="dato"><div class="dato-k">Apellido y Nombre</div><div class="dato-v">'+p.nombre+'</div></div>'
       +'<div class="dato"><div class="dato-k">DNI</div><div class="dato-v">'+p.dni+'</div></div>'
       +'<div class="dato"><div class="dato-k">Obra Social</div><div class="dato-v">'+(p.os||'Particular')+'</div></div>'
       +(p.afil?'<div class="dato"><div class="dato-k">N° Afiliado</div><div class="dato-v">'+p.afil+'</div></div>':'')
       +'</div></div>'
       +'<div class="seccion"><div class="sec-tit">Diagnóstico</div><div class="dx-box">🩺 '+p.dx+'</div></div>'
-      +'<div class="seccion"><div class="sec-tit">Resumen de Atención</div><div style="display:flex;gap:12px;flex-wrap:wrap">'
+      +'<div class="seccion"><div class="sec-tit">Resumen de Atención</div>'
+      +'<div style="display:flex;gap:12px;flex-wrap:wrap">'
       +'<div class="dato" style="text-align:center;min-width:100px"><div style="font-size:26px;font-weight:700;color:#1e3a5f">'+asistidas.length+'</div><div class="dato-k">Sesiones realizadas</div></div>'
       +(sesiones.length?'<div class="dato" style="text-align:center;min-width:100px"><div style="font-size:15px;font-weight:700;color:#1e3a5f">'+fdisp(sesiones[0].fecha)+'</div><div class="dato-k">Primera sesión</div></div>':'')
       +(sesiones.length?'<div class="dato" style="text-align:center;min-width:100px"><div style="font-size:15px;font-weight:700;color:#1e3a5f">'+fdisp(sesiones[sesiones.length-1].fecha)+'</div><div class="dato-k">Última sesión</div></div>':'')
       +'</div></div>'
-      +'<div class="seccion"><div class="sec-tit">Indicaciones / Recomendaciones</div><div style="border:1px solid #d8e2ef;border-radius:8px;padding:14px;min-height:80px;font-size:12px;color:#5a6a80">'+(p.obs||'')+'</div></div>';
+      +'<div class="seccion"><div class="sec-tit">Indicaciones / Recomendaciones</div>'
+      +'<div style="border:1px solid #d8e2ef;border-radius:8px;padding:14px;min-height:80px;font-size:12px;color:#5a6a80">'+(p.obs||'')+'</div></div>';
   } else {
-    var sesRows = sesiones.length ? sesiones.map(function(s){
-      return '<tr><td style="padding:6px 10px;border-bottom:1px solid #e8ecf2;font-size:12px">'+fdisp(s.fecha)+'</td>'
-        +'<td style="padding:6px 10px;border-bottom:1px solid #e8ecf2;font-size:12px">'+(s.tipo||'—')+'</td>'
-        +'<td style="padding:6px 10px;border-bottom:1px solid #e8ecf2;font-size:12px;color:'+(s.asistencia==='asistio'?'#0f7b4a':'#c0392b')+'">'+(s.asistencia==='asistio'?'✓ Asistió':'✗ Ausente')+'</td>'
-        +'<td style="padding:6px 10px;border-bottom:1px solid #e8ecf2;font-size:12px">'+(s.nota||'—')+'</td></tr>';
-    }).join('') : '<tr><td colspan="4" style="padding:12px;text-align:center;color:#999;font-size:12px">Sin sesiones</td></tr>';
-    contenido = '<div class="seccion"><div class="sec-tit">Datos del Paciente</div><div style="display:grid;grid-template-columns:repeat(3,1fr);gap:8px">'
+    // INFORME CLÍNICO — solo notas de evolución sin contadores
+    var sesHtml = '';
+    if (!sesiones.length) {
+      sesHtml = '<div style="padding:14px;text-align:center;color:#999;font-size:12px">Sin sesiones registradas</div>';
+    } else {
+      sesHtml = sesiones.map(function(s) {
+        return '<div class="ses-row">'
+          +'<div class="ses-fecha">'+fdisp(s.fecha)+'</div>'
+          +'<div class="ses-tipo">'+(s.tipo||'')+(s.asistencia==='ausente'?' · <span style="color:#c0392b">Ausente</span>':'')+'</div>'
+          +(s.nota?'<div class="ses-nota">'+s.nota+'</div>':'<div style="padding:2px 10px 8px;font-size:11px;color:#9baab8;font-style:italic">Sin notas registradas</div>')
+          +'</div>';
+      }).join('');
+    }
+    contenido = '<div class="seccion"><div class="sec-tit">Datos del Paciente</div>'
+      +'<div style="display:grid;grid-template-columns:repeat(3,1fr);gap:8px">'
       +'<div class="dato"><div class="dato-k">Apellido y Nombre</div><div class="dato-v">'+p.nombre+'</div></div>'
       +'<div class="dato"><div class="dato-k">DNI</div><div class="dato-v">'+p.dni+'</div></div>'
       +'<div class="dato"><div class="dato-k">Edad / Sexo</div><div class="dato-v">'+edad+' años · '+(p.sexo||'—')+'</div></div>'
@@ -1341,18 +1398,81 @@ function imprimirInforme(pid, tipo) {
       +'<div class="seccion"><div class="sec-tit">Diagnóstico</div><div class="dx-box">🩺 '+p.dx+'</div>'
       +(p.obs?'<div style="background:#f7f8fc;border:1px solid #d8e2ef;padding:10px 14px;border-radius:6px;font-size:12px;line-height:1.6;margin-top:8px"><strong>Antecedentes:</strong><br>'+p.obs+'</div>':'')
       +'</div>'
-      +'<div class="seccion"><div class="sec-tit">Historial de Sesiones</div>'
-      +'<div style="display:flex;gap:10px;margin-bottom:12px;flex-wrap:wrap">'
-      +'<div class="dato" style="text-align:center"><div style="font-size:22px;font-weight:700;color:#1e3a5f">'+sesiones.length+'</div><div class="dato-k">Total</div></div>'
-      +'<div class="dato" style="text-align:center"><div style="font-size:22px;font-weight:700;color:#0f7b4a">'+asistidas.length+'</div><div class="dato-k">Asistencias</div></div>'
-      +'<div class="dato" style="text-align:center"><div style="font-size:22px;font-weight:700;color:#c0392b">'+(sesiones.length-asistidas.length)+'</div><div class="dato-k">Ausencias</div></div>'
-      +'</div><table><thead><tr><th>Fecha</th><th>Tipo</th><th>Asistencia</th><th>Evolución / Notas</th></tr></thead><tbody>'+sesRows+'</tbody></table></div>';
+      +'<div class="seccion"><div class="sec-tit">Evolución Clínica</div>'+sesHtml+'</div>';
   }
+
+  // Generar HTML completo
+  var htmlCompleto = '<!DOCTYPE html><html lang="es"><head><meta charset="UTF-8">'
+    +'<title>'+(tipo==='paciente'?'Constancia':'Informe Clínico')+' — '+p.nombre+'</title>'
+    +'<style>'+estilos+'</style></head><body>'
+    +'<div class="no-print" style="margin-bottom:20px;display:flex;gap:8px;flex-wrap:wrap;">'
+    +'<button class="btn-acc" onclick="window.print()">🖨️ Imprimir / PDF</button>'
+    +'<button class="btn-dl" onclick="window.print()">💾 Descargar PDF</button>'
+    +'<button onclick="window.close()" style="background:#f7f8fc;border:1px solid #d8e2ef;padding:10px 20px;border-radius:8px;font-size:13px;cursor:pointer">✕ Cerrar</button>'
+    +'</div>'
+    +headerDoc+contenido+firmaDoc
+    +'<'+'/body><'+'/html>';
+
   var w = window.open('','_blank');
-  w.document.write('<!DOCTYPE html><html lang="es"><head><meta charset="UTF-8"><title>'+(tipo==='paciente'?'Constancia':'Informe')+' — '+p.nombre+'</title><style>'+estilos+'</style></head><body>'
-    +'<div class="no-print" style="margin-bottom:20px"><button class="btn-print" onclick="window.print()">🖨️ Imprimir / PDF</button><button onclick="window.close()" style="background:#f7f8fc;border:1px solid #d8e2ef;padding:10px 20px;border-radius:8px;font-size:13px;cursor:pointer">✕ Cerrar</button></div>'
-    +headerDoc+contenido+firmaDoc+'</body></html>');
+  w.document.write(htmlCompleto);
   w.document.close();
+}
+
+// ══════════════════════════════════
+// CUMPLEAÑOS
+// ══════════════════════════════════
+function renderCumpleanios() {
+  var hoyDate = new Date();
+  var hoyMes = hoyDate.getMonth()+1;
+  var hoyDia = hoyDate.getDate();
+  var cumples = pacientes.filter(function(p) {
+    if (!p.fnac) return false;
+    var parts = p.fnac.split('-');
+    if (parts.length < 3) return false;
+    var mes = parseInt(parts[1]);
+    var dia = parseInt(parts[2]);
+    // Hoy o próximos 7 días
+    var fechaPac = new Date(hoyDate.getFullYear(), mes-1, dia);
+    var diff = Math.floor((fechaPac - hoyDate) / (1000*60*60*24));
+    return diff >= 0 && diff <= 7;
+  });
+  if (!cumples.length) return '';
+  var html = '<div class="card" style="border-left:4px solid #f59e0b;background:#fffbea;">'
+    +'<div class="card-title" style="color:#92400e">🎂 Cumpleaños esta semana</div>';
+  cumples.forEach(function(p) {
+    var parts = p.fnac.split('-');
+    var dia = parseInt(parts[2]), mes = parseInt(parts[1]);
+    var esHoy = dia===hoyDia && mes===(hoyDate.getMonth()+1);
+    var años = hoyDate.getFullYear() - parseInt(parts[0]);
+    html += '<div style="display:flex;align-items:center;justify-content:space-between;padding:8px 0;border-bottom:1px solid #fde68a">'
+      +'<div>'
+      +(esHoy?'<span style="background:#f59e0b;color:#fff;border-radius:10px;padding:2px 8px;font-size:.70rem;font-weight:700;margin-right:8px">HOY 🎉</span>':'')
+      +'<strong>'+p.nombre+'</strong>'
+      +'<span style="font-size:.78rem;color:#92400e;margin-left:8px">'+dia+'/'+mes+' · '+años+' años</span>'
+      +'</div>'
+      +'<a href="https://wa.me/54'+p.tel.replace(/\D/g,'')+'" target="_blank" style="background:#25d366;color:#fff;border-radius:8px;padding:4px 10px;font-size:.75rem;text-decoration:none;'+(p.tel?'':'opacity:.4;pointer-events:none')+'">'
+      +'📱 Saludar</a>'
+      +'</div>';
+  });
+  html += '</div>';
+  return html;
+}
+
+// ══════════════════════════════════
+// WHATSAPP Y EMAIL EN TURNOS
+// ══════════════════════════════════
+function enviarWhatsApp(tel, nombre, fecha, hora) {
+  if (!tel) { toast('⚠️ El paciente no tiene teléfono cargado'); return; }
+  var telLimpio = '54' + tel.replace(/\D/g,'');
+  var msg = 'Hola '+nombre.split(',')[1].trim()+'! 😊 Te recordamos tu turno en el Centro de Vértigo y Mareo el día '+fdisp(fecha)+' a las '+hora+'hs. Ante cualquier consulta llamanos al 381 302-1908.';
+  window.open('https://wa.me/'+telLimpio+'?text='+encodeURIComponent(msg), '_blank');
+}
+
+function enviarEmail(email, nombre, fecha, hora) {
+  if (!email) { toast('⚠️ El paciente no tiene email cargado'); return; }
+  var asunto = 'Recordatorio de turno — Centro de Vértigo y Mareo';
+  var cuerpo = 'Hola '+nombre.split(',')[1].trim()+'!\n\nTe recordamos tu turno en el Centro de Vértigo y Mareo.\n\nFecha: '+fdisp(fecha)+'\nHora: '+hora+'hs\nDirección: San Juan 28, Tucumán\n\nAnte cualquier consulta comunicate al 381 302-1908.\n\nSaludos,\nCentro de Vértigo y Mareo';
+  window.open('mailto:'+email+'?subject='+encodeURIComponent(asunto)+'&body='+encodeURIComponent(cuerpo));
 }
 
 // ══════════════════════════════════
