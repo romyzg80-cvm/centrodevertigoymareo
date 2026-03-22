@@ -287,7 +287,7 @@ tbody td{padding:9px 12px;vertical-align:middle;}
   <div id="cumpleanios"></div>
   <div class="stats-grid" id="statsGrid"></div>
   <div class="card"><div class="card-title">📅 Turnos de Hoy</div><div id="turnosHoy"></div></div>
-  <div class="card"><div class="card-title">👥 Últimos Pacientes</div><div id="ultPacientes"></div></div>
+  <div class="card"><div class="card-title">📅 Agenda Completa de Hoy</div><div id="agendaHoy"></div></div>
 </div>
 
 <!-- AGENDA -->
@@ -902,6 +902,7 @@ function renderInicio() {
   }
   document.getElementById('statsGrid').innerHTML = st;
 
+  // Turnos de hoy — resumen rápido
   if (!th.length) {
     document.getElementById('turnosHoy').innerHTML = '<div class="empty"><div class="ei">📭</div>Sin turnos para hoy</div>';
   } else {
@@ -917,14 +918,45 @@ function renderInicio() {
     document.getElementById('turnosHoy').innerHTML = h + '</tbody></table></div>';
   }
 
-  var h2 = '<div class="tbl-wrap"><table><thead><tr><th>Paciente</th><th>Diagnóstico</th><th>Obra Social</th><th></th></tr></thead><tbody>';
-  pacientes.slice(0,5).forEach(function(p) {
-    h2 += '<tr><td><strong>'+p.nombre+'</strong></td>'
-      +'<td style="max-width:160px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">'+p.dx+'</td>'
-      +'<td>'+(p.os||'<span class="text-muted">Particular</span>')+'</td>'
-      +'<td><button class="btn btn-secondary btn-xs" onclick="verFicha('+p.id+')">📋 Ficha</button></td></tr>';
+  // Agenda completa de hoy por profesional
+  var agendaHtml = '';
+  var profConTurnos = profs.filter(function(pr){
+    return th.some(function(t){return t.profId===pr.id;});
   });
-  document.getElementById('ultPacientes').innerHTML = h2 + '</tbody></table></div>';
+
+  if (!profConTurnos.length) {
+    agendaHtml = '<div class="empty"><div class="ei">🌴</div>No hay turnos agendados para hoy</div>';
+  } else {
+    // Mostrar todos los profes, aunque sea para mostrar que no tienen turnos
+    profs.forEach(function(pr) {
+      var turnosProf = th.filter(function(t){return t.profId===pr.id;}).sort(function(a,b){return a.hora.localeCompare(b.hora);});
+      if (!turnosProf.length) return; // saltar profes sin turnos hoy
+
+      agendaHtml += '<div style="margin-bottom:14px">'
+        +'<div style="display:flex;align-items:center;gap:8px;margin-bottom:8px">'
+        +'<span style="width:12px;height:12px;border-radius:50%;background:'+pr.color+';display:inline-block;flex-shrink:0"></span>'
+        +'<span style="font-weight:700;color:'+pr.color+';font-size:.88rem">'+pr.nombre+'</span>'
+        +'<span style="font-size:.75rem;color:var(--text-soft)">'+turnosProf.length+' turno'+(turnosProf.length>1?'s':'')+'</span>'
+        +'</div>'
+        +'<div style="display:flex;flex-direction:column;gap:5px">';
+
+      turnosProf.forEach(function(t) {
+        var p = getPac(t.pacId);
+        var estadoColor = t.estado==='asistio'?'var(--success)':t.estado==='ausente'?'var(--danger)':'var(--warning)';
+        var estadoIcon = t.estado==='asistio'?'✅':t.estado==='ausente'?'❌':'🕐';
+        agendaHtml += '<div style="display:flex;align-items:center;gap:10px;padding:9px 12px;background:var(--sand);border-radius:9px;border-left:3px solid '+pr.color+';cursor:pointer;transition:background .15s" '
+          +'onmouseover="this.style.background=\'var(--slate-pale)\'" onmouseout="this.style.background=\'var(--sand)\'" '
+          +'onclick="abrirModalTurno('+t.id+')">'
+          +'<span style="font-weight:700;font-size:.85rem;color:var(--navy);min-width:45px">'+t.hora+'</span>'
+          +'<span style="flex:1;font-size:.85rem;font-weight:500">'+( p?p.nombre:'—')+'</span>'
+          +'<span style="font-size:.73rem;color:var(--text-soft);max-width:130px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">'+t.tipo+'</span>'
+          +'<span style="font-size:.78rem;font-weight:600;color:'+estadoColor+'">'+estadoIcon+' '+(t.estado==='pendiente'?'Pendiente':t.estado==='asistio'?'Asistió':'Ausente')+'</span>'
+          +'</div>';
+      });
+      agendaHtml += '</div></div>';
+    });
+  }
+  document.getElementById('agendaHoy').innerHTML = agendaHtml;
 
   // Cumpleaños
   var cumpleHtml = renderCumpleanios();
@@ -1118,8 +1150,8 @@ function abrirModalTurno(tid) {
     var emailOk = p.email && p.email.includes('@');
     b += '<div style="display:flex;gap:6px;flex-wrap:wrap;margin-top:10px">'
       +'<button class="btn btn-secondary btn-sm" onclick="verFicha('+p.id+');cerrarModal(\'modalTurno\')">Ver ficha →</button>'
-      +(telLimpio?'<button class="btn btn-success btn-sm" onclick="enviarWhatsApp(\''+p.tel+'\',\''+p.nombre+'\',\''+t.fecha+'\',\''+t.hora+'\')">📱 WhatsApp</button>':'<span class="text-muted" style="font-size:.75rem;padding:5px">Sin tel</span>')
-      +(emailOk?'<button class="btn btn-secondary btn-sm" onclick="enviarEmail(\''+p.email+'\',\''+p.nombre+'\',\''+t.fecha+'\',\''+t.hora+'\')">📧 Email</button>':'')
+      +(telLimpio?'<button class="btn btn-success btn-sm" onclick="enviarWhatsApp(\''+p.tel+'\',\''+p.nombre+'\',\''+t.fecha+'\',\''+t.hora+'\',\''+t.tipo+'\')">📱 WhatsApp</button>':'<span class="text-muted" style="font-size:.75rem;padding:5px">Sin tel</span>')
+      +(emailOk?'<button class="btn btn-secondary btn-sm" onclick="enviarEmail(\''+p.email+'\',\''+p.nombre+'\',\''+t.fecha+'\',\''+t.hora+'\',\''+t.tipo+'\')">📧 Email</button>':'')
       +'</div>';
   }
   document.getElementById('modalTurnoBody').innerHTML = b;
@@ -2256,23 +2288,70 @@ function renderCumpleanios() {
 // ══════════════════════════════════
 // WHATSAPP Y EMAIL EN TURNOS
 // ══════════════════════════════════
-function enviarWhatsApp(tel, nombre, fecha, hora) {
+function getDiaSemana(fecha) {
+  var dias = ['Domingo','Lunes','Martes','Miércoles','Jueves','Viernes','Sábado'];
+  var d = new Date(fecha+'T12:00:00');
+  return dias[d.getDay()].toUpperCase();
+}
+
+function getNombreCorto(nombre) {
+  if (!nombre) return '';
+  // Si formato "Apellido, Nombre" → devolver solo el primer nombre
+  if (nombre.includes(',')) {
+    var partes = nombre.split(',')[1].trim().split(' ');
+    return partes[0];
+  }
+  return nombre.trim().split(' ')[0];
+}
+
+function getMensajeWsp(nombre, fecha, hora, tipo) {
+  var nombreCorto = getNombreCorto(nombre);
+  var dia = getDiaSemana(fecha);
+  var fechaDisp = fdisp(fecha);
+  var esEval = tipo && tipo.toLowerCase().includes('evaluac');
+  var INST = 'https://www.instagram.com/centrodemedicinavestibular/';
+
+  if (esEval) {
+    return 'Tiene turno para la evaluación neurovestibular en el Centro de Vértigo y Mareo 🌀:\n'
+      +'📅 Fecha: '+dia.charAt(0)+dia.slice(1).toLowerCase()+' '+fechaDisp+'\n'
+      +'⏰ Hora: '+hora+'\n'
+      +'📍 Dirección: San Juan 28 SMT\n'
+      +'💰 Honorarios: $45.000\n\n'
+      +'Esta evaluación es clave para conocer cómo está funcionando tu sistema vestibular y diseñar un plan de Rehabilitación Vestibular que te ayude a recuperar tu equilibrio y bienestar 🧠⚖️.\n\n'
+      +'No olvides traer:\n'
+      +'✅ Estudios relacionados a tus síntomas\n'
+      +'👓 Tus anteojos recetados, si usás\n\n'
+      +'¡Te espero con muchas ganas de ayudarte! 🌟\n'
+      +'🔗 Te invito a visitar nuestro Instagram\n'
+      +INST;
+  } else {
+    return 'BUENOS DÍAS 😊\n'
+      +'👤 '+nombreCorto.toUpperCase()+', tenés turno:\n'
+      +'🗓 El día '+dia+' '+fechaDisp+' a las '+hora+'\n'
+      +'🏥 En el CENTRO DE VÉRTIGO Y MAREO, situado en San Juan 28, Tucumán.\n\n'
+      +'🔗 Te invito a visitar nuestro Instagram\n'
+      +INST+'\n\n'
+      +'¿Confirmás turno? 😊';
+  }
+}
+
+function enviarWhatsApp(tel, nombre, fecha, hora, tipo) {
   if (!tel) { toast('⚠️ El paciente no tiene teléfono cargado'); return; }
-  // Limpiar número — sacar todo lo que no sea dígito
   var telLimpio = tel.toString().replace(/\D/g,'');
-  // Si empieza con 0, sacarlo
   if (telLimpio.startsWith('0')) telLimpio = telLimpio.substring(1);
-  // Si empieza con 54, dejarlo; si no, agregar 54 (Argentina)
   if (!telLimpio.startsWith('54')) telLimpio = '54' + telLimpio;
-  var nombreCorto = nombre.includes(',') ? nombre.split(',')[1].trim() : nombre.trim();
-  var msg = 'Hola ' + nombreCorto + '! 😊 Te recordamos tu turno en el Centro de Vértigo y Mareo el día ' + fdisp(fecha) + ' a las ' + hora + 'hs. Ante cualquier consulta llamanos al 381 302-1908.';
+  var msg = getMensajeWsp(nombre, fecha, hora, tipo||'');
   window.open('https://wa.me/' + telLimpio + '?text=' + encodeURIComponent(msg), '_blank');
 }
 
-function enviarEmail(email, nombre, fecha, hora) {
+function enviarEmail(email, nombre, fecha, hora, tipo) {
   if (!email) { toast('⚠️ El paciente no tiene email cargado'); return; }
-  var asunto = 'Recordatorio de turno — Centro de Vértigo y Mareo';
-  var cuerpo = 'Hola '+nombre.split(',')[1].trim()+'!\n\nTe recordamos tu turno en el Centro de Vértigo y Mareo.\n\nFecha: '+fdisp(fecha)+'\nHora: '+hora+'hs\nDirección: San Juan 28, Tucumán\n\nAnte cualquier consulta comunicate al 381 302-1908.\n\nSaludos,\nCentro de Vértigo y Mareo';
+  var nombreCorto = getNombreCorto(nombre);
+  var esEval = tipo && tipo.toLowerCase().includes('evaluac');
+  var asunto = esEval
+    ? 'Turno de Evaluación Neurovestibular — Centro de Vértigo y Mareo'
+    : 'Recordatorio de turno — Centro de Vértigo y Mareo';
+  var cuerpo = 'Hola '+nombreCorto+'!\n\n'+getMensajeWsp(nombre, fecha, hora, tipo||'')+'\n\nSaludos,\nCentro de Vértigo y Mareo\nTel: 381 302-1908';
   window.open('mailto:'+email+'?subject='+encodeURIComponent(asunto)+'&body='+encodeURIComponent(cuerpo));
 }
 
