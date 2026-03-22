@@ -337,7 +337,14 @@ tbody td{padding:9px 12px;vertical-align:middle;}
     <div class="card-title">➕ Nuevo Turno</div>
     <div class="form-grid">
       <div class="fg"><label>Profesional *</label><select id="nt-prof"></select></div>
-      <div class="fg"><label>Paciente *</label><select id="nt-pac"></select></div>
+      <div class="fg">
+        <label>Paciente *</label>
+        <div style="position:relative">
+          <input type="text" id="nt-pac-search" placeholder="Escribí nombre o DNI para buscar..." oninput="buscarPacTurno(this.value)" autocomplete="off" style="width:100%;padding:9px 11px;border-radius:var(--radius-sm);border:1.5px solid var(--border);font-family:'Inter',sans-serif;font-size:.88rem;background:var(--sand);color:var(--text);outline:none;">
+          <input type="hidden" id="nt-pac">
+          <div id="nt-pac-resultados" style="display:none;position:absolute;top:100%;left:0;right:0;background:#fff;border:1.5px solid var(--teal);border-radius:var(--radius-sm);box-shadow:var(--shadow-md);z-index:200;max-height:200px;overflow-y:auto;"></div>
+        </div>
+      </div>
       <div class="fg"><label>Fecha *</label><input type="date" id="nt-fecha"></div>
       <div class="fg"><label>Hora *</label><input type="time" id="nt-hora"></div>
       <div class="fg"><label>Tipo</label>
@@ -1276,17 +1283,64 @@ async function eliminarPaciente(id) {
 function initNuevoTurno() {
   document.getElementById('nt-prof').innerHTML = '<option value="">Seleccionar...</option>'
     + profs.map(function(pr){return '<option value="'+pr.id+'">'+pr.nombre+' — '+pr.rol+'</option>';}).join('');
-  document.getElementById('nt-pac').innerHTML = '<option value="">Seleccionar paciente...</option>'
-    + pacientes.map(function(p){return '<option value="'+p.id+'">'+p.nombre+'</option>';}).join('');
+  document.getElementById('nt-pac').value = '';
+  document.getElementById('nt-pac-search').value = '';
+  document.getElementById('nt-pac-resultados').style.display = 'none';
   if (!document.getElementById('nt-fecha').value) document.getElementById('nt-fecha').value = hoy();
   if (usuarioActual&&usuarioActual.rol==='kine'&&usuarioActual.profId) {
     document.getElementById('nt-prof').value = usuarioActual.profId;
   }
 }
 
+function buscarPacTurno(q) {
+  var res = document.getElementById('nt-pac-resultados');
+  document.getElementById('nt-pac').value = '';
+  if (!q || q.length < 2) { res.style.display='none'; return; }
+  var q2 = q.toLowerCase();
+  var encontrados = pacientes.filter(function(p) {
+    return p.nombre.toLowerCase().includes(q2) || (p.dni||'').includes(q2);
+  }).slice(0, 8);
+  if (!encontrados.length) {
+    res.innerHTML = '<div style="padding:10px 14px;font-size:.82rem;color:var(--text-soft)">Sin resultados</div>';
+    res.style.display = 'block';
+    return;
+  }
+  res.innerHTML = encontrados.map(function(p) {
+    return '<div onclick="seleccionarPacTurno('+p.id+',\''+p.nombre.replace(/'/g,"\\'")+'\')" '
+      +'style="padding:9px 14px;cursor:pointer;border-bottom:1px solid var(--sand-d);font-size:.85rem;transition:background .12s" '
+      +'onmouseover="this.style.background=\'var(--slate-pale)\'" onmouseout="this.style.background=\'#fff\'">'
+      +'<strong>'+p.nombre+'</strong>'
+      +'<span style="font-size:.75rem;color:var(--text-soft);margin-left:8px">DNI: '+(p.dni||'—')+'</span>'
+      +(p.os?'<span style="font-size:.72rem;color:var(--teal-d);margin-left:6px">'+p.os+'</span>':'')
+      +'</div>';
+  }).join('');
+  res.style.display = 'block';
+}
+
+function seleccionarPacTurno(id, nombre) {
+  document.getElementById('nt-pac').value = id;
+  document.getElementById('nt-pac-search').value = nombre;
+  document.getElementById('nt-pac-resultados').style.display = 'none';
+}
+
+// Cerrar resultados al hacer clic afuera
+document.addEventListener('click', function(e) {
+  var res = document.getElementById('nt-pac-resultados');
+  var search = document.getElementById('nt-pac-search');
+  if (res && search && !res.contains(e.target) && e.target !== search) {
+    res.style.display = 'none';
+  }
+});
+
 function ntParaPac(pid) {
   go('nuevo-turno');
-  setTimeout(function(){document.getElementById('nt-pac').value = pid;}, 80);
+  setTimeout(function() {
+    var p = getPac(pid);
+    if (p) {
+      document.getElementById('nt-pac').value = pid;
+      document.getElementById('nt-pac-search').value = p.nombre;
+    }
+  }, 80);
 }
 
 async function guardarTurno() {
@@ -1294,7 +1348,8 @@ async function guardarTurno() {
   var prid = document.getElementById('nt-prof').value;
   var fecha = document.getElementById('nt-fecha').value;
   var hora = document.getElementById('nt-hora').value;
-  if (!pid||!prid||!fecha||!hora) { alert('Completá profesional, paciente, fecha y hora.'); return; }
+  if (!pid) { alert('Buscá y seleccioná un paciente.'); return; }
+  if (!prid||!fecha||!hora) { alert('Completá profesional, fecha y hora.'); return; }
   mostrarLoading('Guardando turno...');
   try {
     var res = await db.insert('turnos', {
