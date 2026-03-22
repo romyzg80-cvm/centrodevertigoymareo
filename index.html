@@ -663,7 +663,37 @@ function parsePaciente(r){
   return {id:r.id,nombre:r.nombre,dni:r.dni,tel:r.tel,email:r.email,fnac:r.fnac,sexo:r.sexo,os:r.os,afil:r.afil,medico:r.medico,profId:r.profId,dx:r.dx,obs:r.obs,alta:r.alta,sesiones:sesiones,archivos:archivos,pagos:pagosP};
 }
 function parseTurno(r){
-  return {id:r.id,profId:r.profId,pacId:r.pacId,fecha:r.fecha,hora:r.hora,tipo:r.tipo,dur:r.dur,notas:r.notas,estado:r.estado||'pendiente'};
+  // Sheets guarda la hora como fecha completa tipo "1899-12-30T09:00:00" o como "09:00"
+  var hora = r.hora || '';
+  if(hora && hora.toString().includes('T')){
+    // Extraer solo HH:MM de la fecha completa
+    try{
+      var d = new Date(hora);
+      var hh = d.getHours().toString().padStart(2,'0');
+      var mm = d.getMinutes().toString().padStart(2,'0');
+      hora = hh+':'+mm;
+    }catch(e){ hora = hora.toString().substring(11,16)||''; }
+  }
+  // Sheets también puede devolver objeto Date
+  if(hora && typeof hora === 'object' && hora.getHours){
+    hora = hora.getHours().toString().padStart(2,'0')+':'+hora.getMinutes().toString().padStart(2,'0');
+  }
+  // Limpiar fecha también por si viene con timestamp
+  var fecha = r.fecha || '';
+  if(fecha && fecha.toString().includes('T')){
+    fecha = fecha.toString().split('T')[0];
+  }
+  return {
+    id: r.id,
+    profId: r.profId,
+    pacId: r.pacId,
+    fecha: fecha,
+    hora: hora,
+    tipo: r.tipo || 'Rehabilitación vestibular',
+    dur: r.dur || 60,
+    notas: r.notas || '',
+    estado: r.estado || 'pendiente'
+  };
 }
 function parsePago(r){
   return {id:r.id,pacId:r.pacId,profId:r.profId,fecha:r.fecha,monto:r.monto,forma:r.forma,concepto:r.concepto,obs:r.obs};
@@ -1101,7 +1131,7 @@ function guardarProfs(){
 }
 
 // GOOGLE SHEETS
-const SCRIPT_GAS='function doPost(e){\n  try{\n    var d=JSON.parse(e.postData.contents);\n    var ss=SpreadsheetApp.getActiveSpreadsheet();\n    if(d.type==="pacientes") syncS(ss,"Pacientes",d.records,["id","nombre","dni","tel","email","fnac","sexo","os","afil","medico","profId","dx","obs","alta","sesiones","archivos","pagos"]);\n    if(d.type==="turnos") syncS(ss,"Turnos",d.records,["id","profId","pacId","fecha","hora","tipo","dur","notas","estado"]);\n    if(d.type==="pagos") syncS(ss,"Pagos",d.records,["id","pacId","profId","fecha","monto","forma","concepto","obs"]);\n    if(d.type==="ping") return ok("pong");\n    return ok("synced");\n  }catch(err){return ContentService.createTextOutput(JSON.stringify({error:err.message})).setMimeType(ContentService.MimeType.JSON);}}\nfunction doGet(e){\n  try{\n    var ss=SpreadsheetApp.getActiveSpreadsheet();\n    var t=e.parameter.type;\n    var name=t==="pacientes"?"Pacientes":t==="turnos"?"Turnos":"Pagos";\n    var s=ss.getSheetByName(name);\n    if(!s)return ok([]);\n    return ok(s2j(s));\n  }catch(err){return ContentService.createTextOutput(JSON.stringify({error:err.message})).setMimeType(ContentService.MimeType.JSON);}}\nfunction syncS(ss,name,records,headers){\n  var s=ss.getSheetByName(name);\n  if(!s)s=ss.insertSheet(name);\n  s.clearContents();\n  s.appendRow(headers);\n  records.forEach(function(r){\n    s.appendRow(headers.map(function(h){\n      var v=r[h];\n      if(v===null||v===undefined)return "";\n      if(Array.isArray(v)||typeof v==="object")return JSON.stringify(v);\n      return v;\n    }));\n  });}\nfunction s2j(s){\n  var d=s.getDataRange().getValues();\n  if(d.length<2)return[];\n  var h=d[0];\n  return d.slice(1).map(function(r){\n    var o={};\n    h.forEach(function(k,i){\n      var val=r[i];\n      if(val===""||val===null||val===undefined){o[k]="";}else{o[k]=val;}\n    });\n    return o;\n  });}\nfunction ok(data){return ContentService.createTextOutput(JSON.stringify({ok:true,data:data})).setMimeType(ContentService.MimeType.JSON);}';
+const SCRIPT_GAS='function doPost(e){\n  try{\n    var d=JSON.parse(e.postData.contents);\n    var ss=SpreadsheetApp.getActiveSpreadsheet();\n    if(d.type==="pacientes") syncS(ss,"Pacientes",d.records,["id","nombre","dni","tel","email","fnac","sexo","os","afil","medico","profId","dx","obs","alta","sesiones","archivos","pagos"]);\n    if(d.type==="turnos") syncS(ss,"Turnos",d.records,["id","profId","pacId","fecha","hora","tipo","dur","notas","estado"]);\n    if(d.type==="pagos") syncS(ss,"Pagos",d.records,["id","pacId","profId","fecha","monto","forma","concepto","obs"]);\n    if(d.type==="ping") return ok("pong");\n    return ok("synced");\n  }catch(err){return ContentService.createTextOutput(JSON.stringify({error:err.message})).setMimeType(ContentService.MimeType.JSON);}}\nfunction doGet(e){\n  try{\n    var ss=SpreadsheetApp.getActiveSpreadsheet();\n    var t=e.parameter.type;\n    var name=t==="pacientes"?"Pacientes":t==="turnos"?"Turnos":"Pagos";\n    var s=ss.getSheetByName(name);\n    if(!s)return ok([]);\n    return ok(s2j(s));\n  }catch(err){return ContentService.createTextOutput(JSON.stringify({error:err.message})).setMimeType(ContentService.MimeType.JSON);}}\nfunction syncS(ss,name,records,headers){\n  var s=ss.getSheetByName(name);\n  if(!s)s=ss.insertSheet(name);\n  s.clearContents();\n  s.appendRow(headers);\n  records.forEach(function(r){\n    s.appendRow(headers.map(function(h){\n      var v=r[h];\n      if(v===null||v===undefined)return "";\n      if(Array.isArray(v)||typeof v==="object")return JSON.stringify(v);\n      // Forzar texto para hora y fecha para evitar conversion automatica\n      if(h==="hora"||h==="fecha"||h==="alta"||h==="fnac")return String(v);\n      return v;\n    }));\n  });\n  // Formatear columnas de hora y fecha como texto\n  if(s.getLastRow()>1){\n    var horaCol=headers.indexOf("hora")+1;\n    var fechaCol=headers.indexOf("fecha")+1;\n    var altaCol=headers.indexOf("alta")+1;\n    if(horaCol>0)s.getRange(2,horaCol,s.getLastRow()-1,1).setNumberFormat("@");\n    if(fechaCol>0)s.getRange(2,fechaCol,s.getLastRow()-1,1).setNumberFormat("@");\n    if(altaCol>0)s.getRange(2,altaCol,s.getLastRow()-1,1).setNumberFormat("@");\n  }}\nfunction s2j(s){\n  var d=s.getDataRange().getValues();\n  if(d.length<2)return[];\n  var h=d[0];\n  return d.slice(1).map(function(r){\n    var o={};\n    h.forEach(function(k,i){\n      var val=r[i];\n      if(val===""||val===null||val===undefined){o[k]="";}else{o[k]=String(val);}\n    });\n    return o;\n  });}\nfunction ok(data){return ContentService.createTextOutput(JSON.stringify({ok:true,data:data})).setMimeType(ContentService.MimeType.JSON);}';
 
 function copiarScript(){
   navigator.clipboard.writeText(SCRIPT_GAS).then(function(){alert('✅ Script copiado. Pegalo en Apps Script.');});
