@@ -146,6 +146,9 @@ tbody td{padding:9px 12px;vertical-align:middle;}
 .tchip .th{font-weight:700;color:var(--navy);font-size:.68rem;}
 .tchip .tp{white-space:nowrap;overflow:hidden;text-overflow:ellipsis;color:var(--text-soft);}
 .tchip.asistio{opacity:.75;}.tchip.ausente{opacity:.5;}
+.tchip.eval{background:#f3e8ff;border-color:#d8b4fe;}
+.tchip.eval .th{color:#6b21a8;}.tchip.eval .tp{color:#6b21a8;}
+.dia-chip.eval{background:#f3e8ff;border-left-color:#6b21a8!important;}
 .dia-check{display:flex;align-items:center;gap:5px;padding:6px 12px;border-radius:20px;border:1.5px solid var(--border);cursor:pointer;font-size:.80rem;font-weight:500;color:var(--text-soft);transition:all .18s;user-select:none;}
 .dia-check input{display:none;}
 .dia-check.sel{background:var(--navy);color:#fff;border-color:var(--navy);}
@@ -1049,6 +1052,12 @@ function renderInicio() {
 // AGENDA — 3 VISTAS
 // ══════════════════════════════════
 var vistaActual = 'semana';
+
+// Detecta si un turno es evaluación (para pintar de color)
+function isEval(t) {
+  var tipo = (t.tipo||'').toLowerCase();
+  return tipo.includes('evaluac') || tipo.includes('inicial');
+}
 var periodoOffset = 0;
 
 function setVista(v) {
@@ -1070,7 +1079,11 @@ function renderProfTabs() {
 }
 
 function selProf(id) {
-  if (usuarioActual && usuarioActual.rol==='kine' && usuarioActual.profId && id!==usuarioActual.profId) {
+  // Álvaro puede ver todas las agendas, Zulma y Lucas solo la suya
+  var soloPropia = usuarioActual && usuarioActual.rol==='kine'
+    && usuarioActual.profId && id!==usuarioActual.profId
+    && usuarioActual.username !== 'alvaro';
+  if (soloPropia) {
     alert('Solo podés ver tu propia agenda.'); return;
   }
   profActual = id; renderProfTabs(); renderAgendaGrid();
@@ -1120,7 +1133,9 @@ function renderVistaDia() {
     h += '<div class="dia-hora-row"><div class="dia-hora-label">'+hora+'</div><div class="dia-hora-slots">';
     porHora[hora].forEach(function(t) {
       var p = getPac(t.pacId);
-      h += '<div class="dia-chip '+(t.estado!=='pendiente'?t.estado:'')+'" style="border-left-color:'+(pr?pr.color:'var(--teal)')+'" onclick="abrirModalTurno('+t.id+')">'
+      var evalClass = isEval(t) ? ' eval' : '';
+      var chipColor = isEval(t) ? '#6b21a8' : (pr?pr.color:'var(--teal)');
+      h += '<div class="dia-chip '+(t.estado!=='pendiente'?t.estado:'')+evalClass+'" style="border-left-color:'+chipColor+'" onclick="abrirModalTurno('+t.id+')">'
         +'<div class="dc-pac">'+(p?p.nombre:'—')+'</div>'
         +'<div class="dc-tipo">'+t.tipo+' · '+(t.estado==='pendiente'?'🕐 Pendiente':t.estado==='asistio'?'✅ Asistió':'❌ Ausente')+'</div>'
         +'</div>';
@@ -1157,7 +1172,9 @@ function renderVistaSemana() {
     }
     dt.forEach(function(t) {
       var p = getPac(t.pacId);
-      h += '<div class="tchip '+(t.estado!=='pendiente'?t.estado:'')+'" style="border-left-color:'+(pr?pr.color:'var(--border)')+'" onclick="abrirModalTurno('+t.id+')">'
+      var evalClass = isEval(t) ? ' eval' : '';
+      var chipColor = isEval(t) ? '#6b21a8' : (pr?pr.color:'var(--border)');
+      h += '<div class="tchip '+(t.estado!=='pendiente'?t.estado:'')+evalClass+'" style="border-left-color:'+chipColor+'" onclick="abrirModalTurno('+t.id+')">'
         +'<div class="th">'+t.hora+'</div>'
         +'<div class="tp">'+(p?p.nombre:'—')+'</div></div>';
     });
@@ -1195,7 +1212,8 @@ function renderVistaMes() {
     h += '<div class="mes-dia-num">'+d2+'</div>';
     dt.slice(0,3).forEach(function(t) {
       var p = getPac(t.pacId);
-      h += '<div class="mes-turno" style="background:'+(pr?pr.color:'var(--navy)')+'">'+t.hora+' '+(p?p.nombre.split(',')[0]:'—')+'</div>';
+      var bgColor = isEval(t) ? '#6b21a8' : (pr?pr.color:'var(--navy)');
+      h += '<div class="mes-turno" style="background:'+bgColor+'">'+t.hora+' '+(p?p.nombre.split(',')[0]:'—')+'</div>';
     });
     if (dt.length>3) h += '<div style="font-size:.60rem;color:var(--text-soft)">+' +(dt.length-3)+' más</div>';
     h += '</div>';
