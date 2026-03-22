@@ -562,7 +562,8 @@ let profs = JSON.parse(localStorage.getItem('cvm3_profs')||'null') || [
   {id:'p4',nombre:'Lucas',  rol:'Rehabilitación Vestibular',color:'#c0392b'},
 ];
 let pacientes=[], turnos=[], pagos=[];
-let sheetUrl = localStorage.getItem('cvm3_sheet')||'';
+let sheetUrl = 'https://script.google.com/macros/s/AKfycbxyOILApE9qIK4PupND5h8298jws_p452dTmokyg1pQKnDPoTJy1U8ryHSDfXmPOyBS4Q/exec';
+localStorage.setItem('cvm3_sheet', sheetUrl);
 let semanaOffset=0, profActual=profs[0]&&profs[0].id, pacActual=null, turnoActual=null, mesEst=new Date().getMonth(), pacArchivoActual=null;
 
 const SP  = function(){localStorage.setItem('cvm3_pac', JSON.stringify(pacientes));};
