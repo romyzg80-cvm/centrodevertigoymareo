@@ -823,10 +823,12 @@ const MESES = ['Enero','Febrero','Marzo','Abril','Mayo','Junio','Julio','Agosto'
 const DIAS = ['Dom','Lun','Mar','Mié','Jue','Vie','Sáb'];
 
 let profs = [
-  {id:'p1', nombre:'Cecilia', rol:'Evaluación y Rehabilitación vestibular', color:'#6b21a8'},
-  {id:'p2', nombre:'Álvaro',  rol:'Rehabilitación Vestibular', color:'#1e3a5f'},
-  {id:'p3', nombre:'Zulma',   rol:'Rehabilitación Vestibular', color:'#0f7b4a'},
-  {id:'p4', nombre:'Lucas',   rol:'Rehabilitación Vestibular', color:'#c0392b'},
+  { id: 'cecilia', nombre: 'Lic. Cecilia (Evaluación y RV)', rol: 'kinesiologo', color: '#2abfbf', duracionTurno: 60 },
+  { id: 'belen', nombre: 'Dra. Belén (Otoneuróloga)', rol: 'medico', color: '#6b21a8', duracionTurno: 20 },
+  { id: 'alvaro', nombre: 'Lic. Álvaro (RV)', rol: 'kinesiologo', color: '#1e3a5f', duracionTurno: 60 },
+  { id: 'natalia', nombre: 'Lic. Natalia (RV)', rol: 'kinesiologo', color: '#d97706', duracionTurno: 60 },
+  { id: 'zulma', nombre: 'Lic. Zulma (RV)', rol: 'kinesiologo', color: '#0f7b4a', duracionTurno: 60 },
+  { id: 'nito', nombre: 'Lic. Nito (RV)', rol: 'kinesiologo', color: '#718096', duracionTurno: 60 },
 ];
 
 let pacientes = [], turnos = [], pagos = [];
@@ -1110,36 +1112,72 @@ function renderVistaDia() {
   var dia = new Date(today);
   dia.setDate(today.getDate() + periodoOffset);
   var ds = fd(dia);
+  var numDiaSemana = dia.getDay(); // 0=Dom, 1=Lun, 2=Mar, etc.
   var diasNom = ['Domingo','Lunes','Martes','Miércoles','Jueves','Viernes','Sábado'];
-  document.getElementById('weekLbl').textContent = diasNom[dia.getDay()]+' '+dia.getDate()+'/'+(dia.getMonth()+1)+'/'+dia.getFullYear();
+  document.getElementById('weekLbl').textContent = diasNom[numDiaSemana]+' '+dia.getDate()+'/'+(dia.getMonth()+1)+'/'+dia.getFullYear();
 
   var dt = turnos.filter(function(t){return t.fecha===ds && t.profId===profActual;}).sort(function(a,b){return a.hora.localeCompare(b.hora);});
-  var pr = getPr(profActual);
+  var pr = PROFESIONALES.find(function(p){return p.id===profActual;});
 
-  if (!dt.length) {
-    document.getElementById('agendaGrid').innerHTML = '<div class="empty"><div class="ei">📭</div>Sin turnos este día</div>';
+  // Si no hay profesional seleccionado, mostrar vacío
+  if (!pr) {
+    document.getElementById('agendaGrid').innerHTML = '<div class="empty"><div class="ei">👤</div>Seleccioná un profesional</div>';
     return;
   }
 
-  // Agrupar por hora
-  var porHora = {};
+  // Verificar si el profesional trabaja este día de la semana
+  var bloquesHoy = pr.horarios[numDiaSemana];
+  if (!bloquesHoy || bloquesHoy.length === 0) {
+    document.getElementById('agendaGrid').innerHTML = '<div class="empty"><div class="ei">😴</div>El profesional no atiende este día</div>';
+    return;
+  }
+
+  // Agrupar los turnos agendados por hora
+  var turnosPorHora = {};
   dt.forEach(function(t) {
-    if (!porHora[t.hora]) porHora[t.hora] = [];
-    porHora[t.hora].push(t);
+    if (!turnosPorHora[t.hora]) turnosPorHora[t.hora] = [];
+    turnosPorHora[t.hora].push(t);
+  });
+
+  // GENERACIÓN AUTOMÁTICA DE CASILLEROS VACÍOS SEGÚN EL HORARIO DEL PROFESIONAL
+  var todosLosSlots = [];
+  bloquesHoy.forEach(function(bloque) {
+    var [instanteH, instanteM] = bloque.inicio.split(':').map(Number);
+    var [finH, finM] = bloque.fin.split(':').map(Number);
+    
+    var minutosInicio = instanteH * 60 + instanteM;
+    var minutosFin = finH * 60 + finM;
+    var intervalo = pr.duracionTurno || 60; // 20 min para Belén, 60 min para Kines
+
+    for (var m = minutosInicio; m < minutosFin; m += intervalo) {
+      var hString = String(Math.floor(m / 60)).padStart(2, '0');
+      var mString = String(m % 60).padStart(2, '0');
+      todosLosSlots.push(hString + ':' + mString);
+    }
   });
 
   var h = '<div class="dia-grid">';
-  Object.keys(porHora).sort().forEach(function(hora) {
-    h += '<div class="dia-hora-row"><div class="dia-hora-label">'+hora+'</div><div class="dia-hora-slots">';
-    porHora[hora].forEach(function(t) {
-      var p = getPac(t.pacId);
-      var evalClass = isEval(t) ? ' eval' : '';
-      var chipColor = isEval(t) ? '#6b21a8' : (pr?pr.color:'var(--teal)');
-      h += '<div class="dia-chip '+(t.estado!=='pendiente'?t.estado:'')+evalClass+'" style="border-left-color:'+chipColor+'" onclick="abrirModalTurno('+t.id+')">'
-        +'<div class="dc-pac">'+(p?p.nombre:'—')+'</div>'
-        +'<div class="dc-tipo">'+t.tipo+' · '+(t.estado==='pendiente'?'🕐 Pendiente':t.estado==='asistio'?'✅ Asistió':'❌ Ausente')+'</div>'
+  todosLosSlots.forEach(function(horaSlot) {
+    h += '<div class="dia-hora-row"><div class="dia-hora-label">'+horaSlot+'</div><div class="dia-hora-slots">';
+    
+    // Si hay turnos guardados en esta hora, los dibujamos
+    if (turnosPorHora[horaSlot]) {
+      turnosPorHora[horaSlot].forEach(function(t) {
+        var p = getPac(t.pacId);
+        var evalClass = (t.tipo && t.tipo.toLowerCase().includes('evaluación')) ? ' eval' : '';
+        var chipColor = evalClass ? '#6b21a8' : (pr ? pr.color : 'var(--teal)');
+        h += '<div class="dia-chip '+(t.estado!=='pendiente'?t.estado:'')+evalClass+'" style="border-left-color:'+chipColor+'" onclick="abrirModalTurno('+t.id+')">'
+          +'<div class="dc-pac">'+(p?p.nombre:'—')+'</div>'
+          +'<div class="dc-tipo">'+t.tipo+' · '+(t.estado==='pendiente'?'🕐 Pendiente':t.estado==='asistio'?'✅ Asistió':'❌ Ausente')+'</div>'
+          +'</div>';
+      });
+    } else {
+      // Casillero vacío disponible para agendar rápido
+      h += '<div class="dia-chip" style="border-left-color:var(--border); border-style:dashed; opacity:0.6;" onclick="go(\'nuevo-turno\'); setTimeout(function(){ document.getElementById(\'nt-hora\').value=\''+horaSlot+'\'; document.getElementById(\'nt-prof\').value=\''+profActual+'\'; document.getElementById(\'nt-fecha\').value=\''+ds+'\'; toggleRepetir(); },200);">'
+        +'<div class="dc-pac" style="color:var(--text-soft)">✨ Disponible</div>'
+        +'<div class="dc-tipo">Hacé clic para agendar en este horario</div>'
         +'</div>';
-    });
+    }
     h += '</div></div>';
   });
   h += '</div>';
@@ -1154,26 +1192,35 @@ function renderVistaSemana() {
   mon.setDate(base.getDate() - (dow===0?6:dow-1));
   var we = new Date(mon); we.setDate(mon.getDate()+5);
   document.getElementById('weekLbl').textContent = mon.getDate()+'/'+(mon.getMonth()+1)+' — '+we.getDate()+'/'+(we.getMonth()+1)+'/'+mon.getFullYear();
-  var pr = getPr(profActual), h = '<div class="week-grid">';
+  var pr = PROFESIONALES.find(function(p){return p.id===profActual;}), h = '<div class="week-grid">';
+  
   for (var i=0; i<6; i++) {
     var d = new Date(mon); d.setDate(mon.getDate()+i);
     var ds = fd(d), isToday = ds===fd(today);
     var bloqueo = getBloqueo(ds, profActual);
     var dt = turnos.filter(function(t){return t.fecha===ds && t.profId===profActual;}).sort(function(a,b){return a.hora.localeCompare(b.hora);});
-    h += '<div class="day-col" style="'+(bloqueo?'background:#fff5f5;':'')+'">';
-    h += '<div class="day-hd'+(isToday?' today':'')+'" style="'+(bloqueo?'background:#c0392b;':'')+'">'+DIAS[d.getDay()]+'<span class="dn">'+d.getDate()+'</span></div>';
+    
+    // Verificar si el profesional trabaja este día de la semana específico
+    var atiendeEsteDia = pr && pr.horarios && pr.horarios[d.getDay()] && pr.horarios[d.getDay()].length > 0;
+
+    h += '<div class="day-col" style="'+(bloqueo?'background:#fff5f5;':(!atiendeEsteDia?'background:var(--sand-d);opacity:0.6;':''))+'">';
+    h += '<div class="day-hd'+(isToday?' today':'')+'" style="'+(bloqueo?'background:#c0392b;':(!atiendeEsteDia?'background:var(--text-soft);':''))+'">'+DIAS[d.getDay()]+'<span class="dn">'+d.getDate()+'</span></div>';
     h += '<div class="day-body">';
+    
     if (bloqueo) {
       h += '<div style="text-align:center;padding:8px 4px;font-size:.68rem;color:#c0392b;font-weight:600">'
         +(bloqueo.tipo==='feriado'?'🗓️ Feriado':'🙋 Ausente')+'<br>'
         +'<span style="font-weight:400;color:var(--text-soft)">'+(bloqueo.motivo||'')+'</span></div>';
+    } else if (!atiendeEsteDia) {
+      h += '<div style="text-align:center;padding:12px 3px;font-size:.68rem;color:var(--text-soft);font-style:italic">No atiende</div>';
     } else if (!dt.length) {
-      h += '<div style="text-align:center;padding:8px 3px;font-size:.68rem;color:var(--text-soft)">Libre</div>';
+      h += '<div style="text-align:center;padding:12px 3px;font-size:.68rem;color:var(--success)">Disponible</div>';
     }
+    
     dt.forEach(function(t) {
       var p = getPac(t.pacId);
-      var evalClass = isEval(t) ? ' eval' : '';
-      var chipColor = isEval(t) ? '#6b21a8' : (pr?pr.color:'var(--border)');
+      var evalClass = (t.tipo && t.tipo.toLowerCase().includes('evaluación')) ? ' eval' : '';
+      var chipColor = evalClass ? '#6b21a8' : (pr?pr.color:'var(--border)');
       h += '<div class="tchip '+(t.estado!=='pendiente'?t.estado:'')+evalClass+'" style="border-left-color:'+chipColor+'" onclick="abrirModalTurno('+t.id+')">'
         +'<div class="th">'+t.hora+'</div>'
         +'<div class="tp">'+(p?p.nombre:'—')+'</div></div>';
@@ -1195,15 +1242,12 @@ function renderVistaMes() {
   var diasMes = new Date(año, mes+1, 0).getDate();
   var offset = primerDia===0?6:primerDia-1; // Lunes=0
 
-  var pr = getPr(profActual);
+  var pr = PROFESIONALES.find(function(p){return p.id===profActual;});
   var h = '<div class="mes-cal">';
-  // Cabecera
   ['Lun','Mar','Mié','Jue','Vie','Sáb','Dom'].forEach(function(d){
     h += '<div class="mes-cal-hd">'+d+'</div>';
   });
-  // Días vacíos al inicio
   for (var i=0; i<offset; i++) h += '<div class="mes-dia otro-mes"></div>';
-  // Días del mes
   for (var d2=1; d2<=diasMes; d2++) {
     var fecha = año+'-'+String(mes+1).padStart(2,'0')+'-'+String(d2).padStart(2,'0');
     var isToday = fecha===fd(today);
@@ -1212,7 +1256,7 @@ function renderVistaMes() {
     h += '<div class="mes-dia-num">'+d2+'</div>';
     dt.slice(0,3).forEach(function(t) {
       var p = getPac(t.pacId);
-      var bgColor = isEval(t) ? '#6b21a8' : (pr?pr.color:'var(--navy)');
+      var bgColor = (t.tipo && t.tipo.toLowerCase().includes('evaluación')) ? '#6b21a8' : (pr?pr.color:'var(--navy)');
       h += '<div class="mes-turno" style="background:'+bgColor+'">'+t.hora+' '+(p?p.nombre.split(',')[0]:'—')+'</div>';
     });
     if (dt.length>3) h += '<div style="font-size:.60rem;color:var(--text-soft)">+' +(dt.length-3)+' más</div>';
@@ -1235,7 +1279,7 @@ function irDia(fecha) {
 // ══════════════════════════════════
 function abrirModalTurno(tid) {
   turnoActual = tid;
-  var t = turnos.find(function(x){return x.id===tid;}), p = getPac(t.pacId), pr = getPr(t.profId);
+  var t = turnos.find(function(x){return x.id===tid;}), p = getPac(t.pacId), pr = PROFESIONALES.find(function(p){return p.id===t.profId;});
   var b = '<div class="datos-grid">'
     +'<div class="dato"><div class="k">Fecha</div><div class="v">'+fdisp(t.fecha)+'</div></div>'
     +'<div class="dato"><div class="k">Hora</div><div class="v">'+t.hora+' ('+(t.dur||60)+' min)</div></div>'
@@ -1281,7 +1325,6 @@ async function eliminarTurno() {
     if (s && renders[s.id.replace('s-','')]) renders[s.id.replace('s-','')]();
   } catch(e) { toast('❌ Error: '+e.message); }
 }
-
 // ══════════════════════════════════
 // PACIENTES
 // ══════════════════════════════════
