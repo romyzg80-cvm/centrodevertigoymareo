@@ -823,12 +823,81 @@ const MESES = ['Enero','Febrero','Marzo','Abril','Mayo','Junio','Julio','Agosto'
 const DIAS = ['Dom','Lun','Mar','Mié','Jue','Vie','Sáb'];
 
 let profs = [
-  { id: 'cecilia', nombre: 'Lic. Cecilia (Evaluación y RV)', rol: 'kinesiologo', color: '#2abfbf', duracionTurno: 60 },
-  { id: 'belen', nombre: 'Dra. Belén (Otoneuróloga)', rol: 'medico', color: '#6b21a8', duracionTurno: 20 },
-  { id: 'alvaro', nombre: 'Lic. Álvaro (RV)', rol: 'kinesiologo', color: '#1e3a5f', duracionTurno: 60 },
-  { id: 'natalia', nombre: 'Lic. Natalia (RV)', rol: 'kinesiologo', color: '#d97706', duracionTurno: 60 },
-  { id: 'zulma', nombre: 'Lic. Zulma (RV)', rol: 'kinesiologo', color: '#0f7b4a', duracionTurno: 60 },
-  { id: 'nito', nombre: 'Lic. Nito (RV)', rol: 'kinesiologo', color: '#718096', duracionTurno: 60 },
+  { 
+    id: 'cecilia', 
+    nombre: 'Lic. Cecilia (Evaluación y RV)', 
+    rol: 'kinesiologo', 
+    color: '#2abfbf', 
+    duracionTurno: 60,
+    horarios: {
+      1: [{ inicio: '08:00', fin: '12:00' }, { inicio: '14:00', fin: '20:00' }], // Lunes
+      2: [{ inicio: '08:00', fin: '12:00' }, { inicio: '14:00', fin: '20:00' }], // Martes
+      3: [{ inicio: '08:00', fin: '12:00' }, { inicio: '14:00', fin: '20:00' }], // Miércoles
+      4: [{ inicio: '08:00', fin: '12:00' }, { inicio: '14:00', fin: '20:00' }], // Jueves
+      5: [{ inicio: '08:00', fin: '12:00' }, { inicio: '14:00', fin: '20:00' }]  // Viernes
+    }
+  },
+  { 
+    id: 'belen', 
+    nombre: 'Dra. Belén (Otoneuróloga)', 
+    rol: 'medico', 
+    color: '#6b21a8', 
+    duracionTurno: 20,
+    horarios: {
+      4: [{ inicio: '08:20', fin: '12:40' }] // Atiende solo Jueves a la mañana
+    }
+  },
+  { 
+    id: 'alvaro', 
+    nombre: 'Lic. Álvaro (RV)', 
+    rol: 'kinesiologo', 
+    color: '#1e3a5f', 
+    duracionTurno: 60,
+    horarios: {
+      1: [{ inicio: '08:00', fin: '13:00' }], // Lunes mañana
+      3: [{ inicio: '08:00', fin: '13:00' }], // Miércoles mañana
+      5: [{ inicio: '08:00', fin: '13:00' }]  // Viernes mañana
+    }
+  },
+  { 
+    id: 'natalia', 
+    nombre: 'Lic. Natalia (RV)', 
+    rol: 'kinesiologo', 
+    color: '#d97706', 
+    duracionTurno: 60,
+    horarios: {
+      1: [{ inicio: '13:00', fin: '20:00' }], // Lunes tarde
+      2: [{ inicio: '13:00', fin: '20:00' }], // Martes tarde
+      3: [{ inicio: '13:00', fin: '20:00' }], // Miércoles tarde
+      4: [{ inicio: '13:00', fin: '20:00' }], // Jueves tarde
+      5: [{ inicio: '13:00', fin: '20:00' }]  // Viernes tarde
+    }
+  },
+  { 
+    id: 'zulma', 
+    nombre: 'Lic. Zulma (RV)', 
+    rol: 'kinesiologo', 
+    color: '#0f7b4a', 
+    duracionTurno: 60,
+    horarios: {
+      2: [{ inicio: '08:00', fin: '13:00' }], // Martes mañana
+      4: [{ inicio: '08:00', fin: '13:00' }]  // Jueves mañana
+    }
+  },
+  { 
+    id: 'nito', 
+    nombre: 'Lic. Nito (RV)', 
+    rol: 'kinesiologo', 
+    color: '#718096', 
+    duracionTurno: 60,
+    horarios: {
+      1: [{ inicio: '08:00', fin: '20:00' }], // Súper plantilla completa de ejemplo
+      2: [{ inicio: '08:00', fin: '20:00' }],
+      3: [{ inicio: '08:00', fin: '20:00' }],
+      4: [{ inicio: '08:00', fin: '20:00' }],
+      5: [{ inicio: '08:00', fin: '20:00' }]
+    }
+  }
 ];
 
 let pacientes = [], turnos = [], pagos = [];
