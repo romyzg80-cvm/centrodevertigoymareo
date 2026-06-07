@@ -1186,42 +1186,40 @@ function renderVistaDia() {
   document.getElementById('weekLbl').textContent = diasNom[numDiaSemana]+' '+dia.getDate()+'/'+(dia.getMonth()+1)+'/'+dia.getFullYear();
 
   var dt = turnos.filter(function(t){return t.fecha===ds && t.profId===profActual;}).sort(function(a,b){return a.hora.localeCompare(b.hora);});
-  var pr = PROFESIONALES.find(function(p){return p.id===profActual;});
+  var pr = profs.find(function(p){return p.id===profActual;});
 
-  // Si no hay profesional seleccionado, mostrar vacío
   if (!pr) {
     document.getElementById('agendaGrid').innerHTML = '<div class="empty"><div class="ei">👤</div>Seleccioná un profesional</div>';
     return;
   }
 
-  // Verificar si el profesional trabaja este día de la semana
-  var bloquesHoy = pr.horarios[numDiaSemana];
+  // Verificar si atiende hoy
+  var bloquesHoy = pr.horarios ? pr.horarios[numDiaSemana] : null;
   if (!bloquesHoy || bloquesHoy.length === 0) {
     document.getElementById('agendaGrid').innerHTML = '<div class="empty"><div class="ei">😴</div>El profesional no atiende este día</div>';
     return;
   }
 
-  // Agrupar los turnos agendados por hora
+  // Agrupar turnos guardados
   var turnosPorHora = {};
   dt.forEach(function(t) {
     if (!turnosPorHora[t.hora]) turnosPorHora[t.hora] = [];
     turnosPorHora[t.hora].push(t);
   });
 
-  // GENERACIÓN AUTOMÁTICA DE CASILLEROS VACÍOS SEGÚN EL HORARIO DEL PROFESIONAL
+  // Generar slots fijos
   var todosLosSlots = [];
   bloquesHoy.forEach(function(bloque) {
-    var [instanteH, instanteM] = bloque.inicio.split(':').map(Number);
-    var [finH, finM] = bloque.fin.split(':').map(Number);
-    
-    var minutosInicio = instanteH * 60 + instanteM;
-    var minutosFin = finH * 60 + finM;
-    var intervalo = pr.duracionTurno || 60; // 20 min para Belén, 60 min para Kines
+    var inicioArr = bloque.inicio.split(':').map(Number);
+    var finArr = bloque.fin.split(':').map(Number);
+    var minInicio = inicioArr[0] * 60 + inicioArr[1];
+    var minFin = finArr[0] * 60 + finArr[1];
+    var intervalo = pr.duracionTurno || 60;
 
-    for (var m = minutosInicio; m < minutosFin; m += intervalo) {
-      var hString = String(Math.floor(m / 60)).padStart(2, '0');
-      var mString = String(m % 60).padStart(2, '0');
-      todosLosSlots.push(hString + ':' + mString);
+    for (var m = minInicio; m < minFin; m += intervalo) {
+      var hStr = String(Math.floor(m / 60)).padStart(2, '0');
+      var mStr = String(m % 60).padStart(2, '0');
+      todosLosSlots.push(hStr + ':' + mStr);
     }
   });
 
@@ -1229,7 +1227,6 @@ function renderVistaDia() {
   todosLosSlots.forEach(function(horaSlot) {
     h += '<div class="dia-hora-row"><div class="dia-hora-label">'+horaSlot+'</div><div class="dia-hora-slots">';
     
-    // Si hay turnos guardados en esta hora, los dibujamos
     if (turnosPorHora[horaSlot]) {
       turnosPorHora[horaSlot].forEach(function(t) {
         var p = getPac(t.pacId);
@@ -1241,10 +1238,9 @@ function renderVistaDia() {
           +'</div>';
       });
     } else {
-      // Casillero vacío disponible para agendar rápido
       h += '<div class="dia-chip" style="border-left-color:var(--border); border-style:dashed; opacity:0.6;" onclick="go(\'nuevo-turno\'); setTimeout(function(){ document.getElementById(\'nt-hora\').value=\''+horaSlot+'\'; document.getElementById(\'nt-prof\').value=\''+profActual+'\'; document.getElementById(\'nt-fecha\').value=\''+ds+'\'; toggleRepetir(); },200);">'
         +'<div class="dc-pac" style="color:var(--text-soft)">✨ Disponible</div>'
-        +'<div class="dc-tipo">Hacé clic para agendar en este horario</div>'
+        +'<div class="dc-tipo">Hacé clic para agendar</div>'
         +'</div>';
     }
     h += '</div></div>';
@@ -1261,15 +1257,13 @@ function renderVistaSemana() {
   mon.setDate(base.getDate() - (dow===0?6:dow-1));
   var we = new Date(mon); we.setDate(mon.getDate()+5);
   document.getElementById('weekLbl').textContent = mon.getDate()+'/'+(mon.getMonth()+1)+' — '+we.getDate()+'/'+(we.getMonth()+1)+'/'+mon.getFullYear();
-  var pr = PROFESIONALES.find(function(p){return p.id===profActual;}), h = '<div class="week-grid">';
+  var pr = profs.find(function(p){return p.id===profActual;}), h = '<div class="week-grid">';
   
   for (var i=0; i<6; i++) {
     var d = new Date(mon); d.setDate(mon.getDate()+i);
     var ds = fd(d), isToday = ds===fd(today);
     var bloqueo = getBloqueo(ds, profActual);
     var dt = turnos.filter(function(t){return t.fecha===ds && t.profId===profActual;}).sort(function(a,b){return a.hora.localeCompare(b.hora);});
-    
-    // Verificar si el profesional trabaja este día de la semana específico
     var atiendeEsteDia = pr && pr.horarios && pr.horarios[d.getDay()] && pr.horarios[d.getDay()].length > 0;
 
     h += '<div class="day-col" style="'+(bloqueo?'background:#fff5f5;':(!atiendeEsteDia?'background:var(--sand-d);opacity:0.6;':''))+'">';
@@ -1309,9 +1303,9 @@ function renderVistaMes() {
 
   var primerDia = new Date(año, mes, 1).getDay();
   var diasMes = new Date(año, mes+1, 0).getDate();
-  var offset = primerDia===0?6:primerDia-1; // Lunes=0
+  var offset = primerDia===0?6:primerDia-1;
 
-  var pr = PROFESIONALES.find(function(p){return p.id===profActual;});
+  var pr = profs.find(function(p){return p.id===profActual;});
   var h = '<div class="mes-cal">';
   ['Lun','Mar','Mié','Jue','Vie','Sáb','Dom'].forEach(function(d){
     h += '<div class="mes-cal-hd">'+d+'</div>';
@@ -1333,66 +1327,6 @@ function renderVistaMes() {
   }
   h += '</div>';
   document.getElementById('agendaGrid').innerHTML = h;
-}
-
-function irDia(fecha) {
-  var today = new Date();
-  var target = new Date(fecha+'T12:00:00');
-  var diff = Math.round((target - today) / (1000*60*60*24));
-  periodoOffset = diff;
-  setVista('dia');
-}
-
-// ══════════════════════════════════
-// MODAL TURNO
-// ══════════════════════════════════
-function abrirModalTurno(tid) {
-  turnoActual = tid;
-  var t = turnos.find(function(x){return x.id===tid;}), p = getPac(t.pacId), pr = PROFESIONALES.find(function(p){return p.id===t.profId;});
-  var b = '<div class="datos-grid">'
-    +'<div class="dato"><div class="k">Fecha</div><div class="v">'+fdisp(t.fecha)+'</div></div>'
-    +'<div class="dato"><div class="k">Hora</div><div class="v">'+t.hora+' ('+(t.dur||60)+' min)</div></div>'
-    +'<div class="dato"><div class="k">Profesional</div><div class="v" style="color:'+(pr?pr.color:'#333')+';font-weight:600">'+(pr?pr.nombre:'—')+'</div></div>'
-    +'<div class="dato"><div class="k">Tipo</div><div class="v">'+t.tipo+'</div></div>'
-    +'<div class="dato"><div class="k">Estado</div><div class="v"><span class="badge b-'+t.estado+'">'+t.estado+'</span></div></div>'
-    +(t.notas?'<div class="dato" style="grid-column:1/-1"><div class="k">Notas</div><div class="v">'+t.notas+'</div></div>':'')
-    +'</div>';
-  if (p) {
-    var telLimpio = (p.tel||'').replace(/\D/g,'');
-    var emailOk = p.email && p.email.includes('@');
-    b += '<div style="display:flex;gap:6px;flex-wrap:wrap;margin-top:10px">'
-      +'<button class="btn btn-secondary btn-sm" onclick="verFicha('+p.id+');cerrarModal(\'modalTurno\')">Ver ficha →</button>'
-      +(telLimpio?'<button class="btn btn-success btn-sm" onclick="enviarWhatsApp(\''+p.tel+'\',\''+p.nombre+'\',\''+t.fecha+'\',\''+t.hora+'\',\''+t.tipo+'\')">📱 WhatsApp</button>':'<span class="text-muted" style="font-size:.75rem;padding:5px">Sin tel</span>')
-      +(emailOk?'<button class="btn btn-secondary btn-sm" onclick="enviarEmail(\''+p.email+'\',\''+p.nombre+'\',\''+t.fecha+'\',\''+t.hora+'\',\''+t.tipo+'\')">📧 Email</button>':'')
-      +'</div>';
-  }
-  document.getElementById('modalTurnoBody').innerHTML = b;
-  abrirModal('modalTurno');
-}
-
-async function marcarAsistencia(estado) {
-  var t = turnos.find(function(x){return x.id===turnoActual;});
-  if (!t) return;
-  try {
-    await db.update('turnos', {estado:estado}, 'id=eq.'+t.id);
-    t.estado = estado;
-    cerrarModal('modalTurno');
-    toast(estado==='asistio'?'✅ Asistencia registrada':'❌ Ausencia registrada');
-    var s = document.querySelector('.section.active');
-    if (s && renders[s.id.replace('s-','')]) renders[s.id.replace('s-','')]();
-  } catch(e) { toast('❌ Error: '+e.message); }
-}
-
-async function eliminarTurno() {
-  if (!confirm('¿Eliminar este turno?')) return;
-  try {
-    await db.delete('turnos', 'id=eq.'+turnoActual);
-    turnos = turnos.filter(function(t){return t.id!==turnoActual;});
-    cerrarModal('modalTurno');
-    toast('🗑️ Turno eliminado');
-    var s = document.querySelector('.section.active');
-    if (s && renders[s.id.replace('s-','')]) renders[s.id.replace('s-','')]();
-  } catch(e) { toast('❌ Error: '+e.message); }
 }
 // ══════════════════════════════════
 // PACIENTES
