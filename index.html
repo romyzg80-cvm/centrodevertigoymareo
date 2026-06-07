@@ -3,28 +3,17 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Sistema de Gestión - Centro de Medicina Vestibular</title>
+  <title>Agenda Central - Medicina Vestibular</title>
   <style>
-    :root {
-      --navy: #1e3a5f;
-      --teal: #2abfbf;
-      --teal-dark: #229e9e;
-      --sand: #fbfbf9;
-      --sand-d: #f3f3ee;
-      --text: #2d3748;
-      --text-soft: #718096;
-      --border: #e2e8f0;
-      --success: #2f855a;
-      --danger: #c53030;
-    }
-    * { box-sizing: border-box; margin:0; padding:0; font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif; color: var(--text); }
+    :root { --navy: #1e3a5f; --teal: #2abfbf; --teal-dark: #229e9e; --sand: #fbfbf9; --sand-d: #f3f3ee; --text: #2d3748; --text-soft: #718096; --border: #e2e8f0; --success: #2f855a; --danger: #c53030; }
+    * { box-sizing: border-box; margin:0; padding:0; font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif; color: var(--text); }
     body { background: var(--sand); display: flex; height: 100vh; overflow: hidden; }
     
     /* SIDEBAR */
     .sidebar { width: 240px; background: var(--navy); display: flex; flex-direction: column; justify-content: space-between; padding: 20px 0; }
     .brand { padding: 0 20px 20px; border-bottom: 1px solid rgba(255,255,255,0.1); text-align: center; }
-    .brand h2 { color: #fff; font-size: 1.15rem; font-weight: 700; letter-spacing: 0.5px; }
-    .brand p { color: var(--teal); font-size: 0.75rem; margin-top: 2px; font-weight: 500; }
+    .brand h2 { color: #fff; font-size: 1.1rem; font-weight: 700; }
+    .brand p { color: var(--teal); font-size: 0.75rem; margin-top: 2px; }
     .menu { list-style: none; margin-top: 20px; flex-grow: 1; }
     .menu li { padding: 12px 24px; color: #e2e8f0; font-size: 0.9rem; cursor: pointer; display: flex; align-items: center; gap: 12px; transition: 0.2s; font-weight: 500; }
     .menu li:hover, .menu li.active { background: rgba(255,255,255,0.06); color: var(--teal); border-left: 4px solid var(--teal); padding-left: 20px; }
@@ -34,8 +23,6 @@
     .main { flex-grow: 1; display: flex; flex-direction: column; background: var(--sand); overflow: hidden; }
     .topbar { height: 60px; background: #fff; border-bottom: 1px solid var(--border); display: flex; align-items: center; justify-content: space-between; padding: 0 30px; }
     .topbar h1 { font-size: 1.2rem; font-weight: 600; color: var(--navy); }
-    .user-info { display: flex; align-items: center; gap: 10px; font-size: 0.88rem; font-weight: 500; }
-    .user-avatar { width: 32px; height: 32px; background: var(--teal); color: #fff; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: 600; }
     .content { padding: 25px 30px; flex-grow: 1; overflow-y: auto; }
     .view { display: none; }
     .view.active { display: block; }
@@ -53,51 +40,43 @@
     .btn-s { background: var(--sand-d); color: var(--text); }
     .btn-s:hover { background: #e2e2d9; }
     .btn-d { background: var(--danger); color: #fff; }
-    .btn-d:hover { background: #a52828; }
 
-    /* AGENDA STYLES */
+    /* AGENDA */
     .agenda-hdr { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; flex-wrap: wrap; gap: 15px; }
-    .prof-selectors { display: flex; gap: 10px; flex-wrap: wrap; }
-    .prof-btn { padding: 8px 16px; border-radius: 20px; border: 1px solid var(--border); background: #fff; font-size: 0.85rem; font-weight: 500; cursor: pointer; display: flex; align-items: center; gap: 8px; transition: 0.2s; }
+    .prof-selectors { display: flex; gap: 8px; flex-wrap: wrap; }
+    .prof-btn { padding: 8px 14px; border-radius: 20px; border: 1px solid var(--border); background: #fff; font-size: 0.85rem; font-weight: 500; cursor: pointer; display: flex; align-items: center; gap: 6px; }
     .prof-btn .dot { width: 8px; height: 8px; border-radius: 50%; }
-    .prof-btn.active { border-color: transparent; color: #fff; }
+    .prof-btn.active { color: #fff; }
     .prof-btn.active * { color: #fff; }
     
-    .cal-controls { display: flex; align-items: center; gap: 15px; background: #fff; border: 1px solid var(--border); padding: 4px; border-radius: 8px; }
-    .cal-nav { width: 28px; height: 28px; display: flex; align-items: center; justify-content: center; cursor: pointer; border-radius: 6px; background: var(--sand-d); font-size: 0.8rem; }
-    .cal-nav:hover { background: var(--border); }
+    .cal-controls { display: flex; align-items: center; gap: 10px; background: #fff; border: 1px solid var(--border); padding: 4px; border-radius: 8px; }
+    .cal-nav { width: 28px; height: 28px; display: flex; align-items: center; justify-content: center; cursor: pointer; border-radius: 6px; background: var(--sand-d); }
     #weekLbl { font-size: 0.95rem; font-weight: 600; min-width: 140px; text-align: center; color: var(--navy); }
     .view-modes { display: flex; background: var(--sand-d); padding: 3px; border-radius: 8px; }
-    .vmode-btn { padding: 6px 14px; border-radius: 6px; border: none; font-size: 0.85rem; font-weight: 500; cursor: pointer; background: transparent; }
+    .vmode-btn { padding: 6px 12px; border-radius: 6px; border: none; font-size: 0.85rem; font-weight: 500; cursor: pointer; background: transparent; }
     .vmode-btn.active { background: #fff; color: var(--navy); box-shadow: 0 2px 4px rgba(0,0,0,0.05); }
 
-    /* GRIDS VISTAS */
-    .empty { text-align: center; padding: 60px 20px; color: var(--text-soft); font-size: 0.95rem; }
-    .empty .ei { font-size: 2.5rem; margin-bottom: 10px; opacity: 0.7; }
-    
-    /* DIA GRID */
+    /* GRIDS */
+    .empty { text-align: center; padding: 40px 20px; color: var(--text-soft); }
     .dia-grid { display: flex; flex-direction: column; background: #fff; border-radius: 12px; border: 1px solid var(--border); overflow: hidden; }
-    .dia-hora-row { display: flex; border-bottom: 1px solid var(--border); min-height: 70px; }
-    .dia-hora-row:last-child { border-bottom: none; }
+    .dia-hora-row { display: flex; border-bottom: 1px solid var(--border); min-height: 65px; }
     .dia-hora-label { width: 75px; padding: 15px 10px; text-align: right; font-size: 0.85rem; font-weight: 700; color: var(--navy); background: #fafafa; border-right: 1px solid var(--border); }
-    .dia-hora-slots { flex-grow: 1; padding: 8px 15px; display: flex; flex-direction: column; gap: 6px; justify-content: center; background: #fff; }
+    .dia-hora-slots { flex-grow: 1; padding: 6px 15px; display: flex; flex-direction: column; gap: 4px; justify-content: center; }
     
-    .dia-chip { padding: 10px 14px; border-radius: 8px; background: #fff; border: 1px solid var(--border); border-left: 4px solid var(--teal); cursor: pointer; transition: 0.15s; display: flex; flex-direction: column; gap: 2px; }
-    .dia-chip:hover { transform: translateY(-1px); box-shadow: 0 3px 6px rgba(0,0,0,0.03); opacity: 0.95; }
+    .dia-chip { padding: 8px 12px; border-radius: 6px; background: #fff; border: 1px solid var(--border); border-left: 4px solid var(--teal); cursor: pointer; }
     .dc-pac { font-size: 0.9rem; font-weight: 600; color: var(--navy); }
-    .dc-tipo { font-size: 0.74rem; color: var(--text-soft); font-weight: 500; }
+    .dc-tipo { font-size: 0.75rem; color: var(--text-soft); }
 
-    /* WEEK GRID */
     .week-grid { display: grid; grid-template-columns: repeat(6, 1fr); gap: 1px; background: var(--border); border-radius: 12px; border: 1px solid var(--border); overflow: hidden; }
-    .day-col { background: #fff; display: flex; flex-direction: column; min-height: 450px; }
-    .day-hd { padding: 12px 10px; background: var(--navy); text-align: center; color: #fff; font-size: 0.75rem; font-weight: 700; letter-spacing: 0.5px; border-bottom: 1px solid rgba(0,0,0,0.05); }
-    .day-hd span { display: block; font-size: 1.25rem; font-weight: 700; margin-top: 2px; color: #fff; }
+    .day-col { background: #fff; display: flex; flex-direction: column; min-height: 400px; }
+    .day-hd { padding: 10px; background: var(--navy); text-align: center; color: #fff; font-size: 0.75rem; font-weight: 700; }
+    .day-hd span { display: block; font-size: 1.2rem; color: #fff; }
     .day-hd.today { background: var(--teal); }
-    .day-body { padding: 10px 6px; flex-grow: 1; display: flex; flex-direction: column; gap: 6px; background: transparent; }
+    .day-body { padding: 8px 4px; flex-grow: 1; display: flex; flex-direction: column; gap: 4px; }
     
-    .tchip { padding: 6px 8px; border-radius: 6px; background: #fff; border: 1px solid var(--border); border-left: 3px solid var(--teal); cursor: pointer; display: flex; flex-direction: column; gap: 1px; }
+    .tchip { padding: 6px; border-radius: 4px; background: #fff; border: 1px solid var(--border); border-left: 3px solid var(--teal); cursor: pointer; }
     .tchip .th { font-size: 0.7rem; font-weight: 700; color: var(--text-soft); }
-    .tchip .tp { font-size: 0.78rem; font-weight: 600; color: var(--navy); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .tchip .tp { font-size: 0.75rem; font-weight: 600; color: var(--navy); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
     .tchip.asistio { background: #f0fff4; border-color: #c6f6d5; }
     .tchip.ausente { background: #fff5f5; border-color: #fed7d7; }
     .tchip.eval, .dia-chip.eval { background: #faf5ff; border-color: #e9d5ff; }
@@ -105,28 +84,25 @@
     /* TABLES */
     .table-responsive { background: #fff; border-radius: 12px; border: 1px solid var(--border); overflow: hidden; }
     table { width: 100%; border-collapse: collapse; text-align: left; }
-    th { padding: 14px 20px; background: #fafafa; font-size: 0.8rem; font-weight: 700; color: var(--text-soft); border-bottom: 1px solid var(--border); text-transform: uppercase; letter-spacing: 0.5px; }
-    td { padding: 14px 20px; border-bottom: 1px solid var(--border); font-size: 0.9rem; }
+    th { padding: 12px 20px; background: #fafafa; font-size: 0.8rem; color: var(--text-soft); border-bottom: 1px solid var(--border); }
+    td { padding: 12px 20px; border-bottom: 1px solid var(--border); font-size: 0.9rem; }
 
     /* MODAL */
     .modal-overlay { position: fixed; top:0; left:0; width:100%; height:100%; background: rgba(30,58,95,0.4); display: none; align-items: center; justify-content: center; padding: 20px; z-index: 1000; }
     .modal-overlay.active { display: flex; }
-    .modal-card { background: #fff; border-radius: 16px; max-width: 500px; width: 100%; padding: 25px; border: 1px solid var(--border); box-shadow: 0 10px 25px rgba(0,0,0,0.1); display: flex; flex-direction: column; gap: 15px; position: relative; }
-    .modal-hdr { display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid var(--border); padding-bottom: 12px; }
-    .modal-hdr h3 { font-size: 1.1rem; font-weight: 700; color: var(--navy); }
-    .modal-close { font-size: 1.3rem; cursor: pointer; color: var(--text-soft); border: none; background: transparent; }
-    .m-lbl { font-size: 0.78rem; font-weight: 700; color: var(--text-soft); text-transform: uppercase; margin-bottom: 2px; }
-    .m-val { font-size: 0.95rem; font-weight: 600; color: var(--navy); margin-bottom: 10px; }
+    .modal-card { background: #fff; border-radius: 12px; max-width: 450px; width: 100%; padding: 20px; border: 1px solid var(--border); display: flex; flex-direction: column; gap: 12px; }
+    .modal-hdr { display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid var(--border); padding-bottom: 8px; }
+    .modal-close { font-size: 1.3rem; cursor: pointer; border: none; background: transparent; color: var(--text-soft); }
+    .m-lbl { font-size: 0.75rem; font-weight: 700; color: var(--text-soft); text-transform: uppercase; }
+    .m-val { font-size: 0.9rem; font-weight: 600; color: var(--navy); margin-bottom: 6px; }
 
-    /* FOOTER FIX */
-    .inst-foot { background: #1a2a40; padding: 15px; border-top: 2px solid var(--teal); display: flex; justify-content: center; gap: 30px; flex-wrap: wrap; }
-    .inst-foot-item { color: #a0aec0; font-size: 0.78rem; display: flex; align-items: center; gap: 6px; font-weight: 500; }
+    .inst-foot { background: #1a2a40; padding: 12px; border-top: 2px solid var(--teal); display: flex; justify-content: center; gap: 25px; flex-wrap: wrap; }
+    .inst-foot-item { color: #a0aec0; font-size: 0.75rem; }
     .inst-foot-item strong { color: #fff; }
   </style>
 </head>
 <body>
 
-  <!-- SIDEBAR -->
   <div class="sidebar">
     <div>
       <div class="brand">
@@ -135,39 +111,29 @@
       </div>
       <ul class="menu">
         <li class="active" onclick="setView('agenda')">🗓️ Agenda Central</li>
-        <li onclick="setView('pacientes')">👤 Fichas de Pacientes</li>
-        <li onclick="setView('caja')">💰 Caja (Ingresos/Egresos)</li>
-        <li onclick="setView('reportes')">📊 Reportes y Estadísticas</li>
+        <li onclick="setView('pacientes')">👤 Fichas y Pacientes</li>
+        <li onclick="setView('caja')">💰 Caja Diaria</li>
       </ul>
     </div>
-    <div class="sb-foot">
-      v3.4.5 Estable<br>© 2026 Tucumán
-    </div>
+    <div class="sb-foot">© 2026 Tucumán</div>
   </div>
 
-  <!-- MAIN CONTAINER -->
   <div class="main">
     <div class="topbar">
       <h1 id="viewTitle">🗓️ Agenda Central</h1>
-      <div class="user-info">
-        <span>Secretaría General</span>
-        <div class="user-avatar">S</div>
-      </div>
     </div>
 
-    <!-- VIEWS AREA -->
     <div class="content">
       
-      <!-- VIEW: AGENDA -->
       <div id="v-agenda" class="view active">
         <div class="agenda-hdr">
           <div class="prof-selectors" id="profSelectors"></div>
-          <div style="display: flex; gap: 15px; align-items: center;">
+          <div style="display: flex; gap: 12px; align-items: center;">
             <div class="cal-controls">
               <div class="cal-nav" onclick="offsetCal(-1)">◀</div>
               <div id="weekLbl">...</div>
               <div class="cal-nav" onclick="offsetCal(1)">▶</div>
-              <button class="vmode-btn" style="background:var(--sand-d); margin-left:5px; border-radius:4px; padding:4px 8px; font-size:0.75rem;" onclick="resetCal()">Hoy</button>
+              <button class="vmode-btn" style="background:var(--sand-d); padding:4px 8px; font-size:0.75rem;" onclick="resetCal()">Hoy</button>
             </div>
             <div class="view-modes">
               <button class="vmode-btn active" id="vm-dia" onclick="setMode('dia')">📋 Día</button>
@@ -179,396 +145,306 @@
         <div id="agendaGrid"></div>
       </div>
 
-      <!-- VIEW: PACIENTES -->
       <div id="v-pacientes" class="view">
         <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
-          <input type="text" id="searchPac" placeholder="🔍 Buscar por nombre o DNI..." style="width: 300px;" oninput="renderPacientes()">
+          <input type="text" id="searchPac" placeholder="🔍 Buscar por nombre o DNI..." style="width: 280px;" oninput="renderPacientes()">
           <button class="btn btn-p" onclick="go('nuevo-paciente')">+ Nuevo Paciente</button>
         </div>
         <div class="table-responsive">
           <table>
             <thead>
-              <tr><th>Nombre Completo</th><th>DNI / Carnet</th><th>Teléfono Celular</th><th>Obra Social</th><th>Acciones</th></tr>
+              <tr><th>Nombre Completo</th><th>DNI</th><th>Teléfono</th><th>Obra Social</th><th>Acciones</th></tr>
             </thead>
             <tbody id="pacientesTable"></tbody>
           </table>
         </div>
       </div>
 
-      <!-- VIEW: CAJA (INGRESOS Y EGRESOS) -->
       <div id="v-caja" class="view">
-        <div class="f-row" style="margin-bottom: 25px;">
-          <div class="card" style="flex:1; min-width:180px; border-left: 5px solid var(--success); margin-bottom:0;">
-            <div class="m-lbl">Total Ingresos</div>
-            <h2 id="cj-tot-ing" style="color:var(--success)">$0.00</h2>
+        <div class="f-row" style="margin-bottom: 20px;">
+          <div class="card" style="flex:1; margin-bottom:0; border-left:4px solid var(--success);">
+            <div class="m-lbl">Ingresos</div><h2 id="cj-tot-ing" style="color:var(--success)">$0.00</h2>
           </div>
-          <div class="card" style="flex:1; min-width:180px; border-left: 5px solid var(--danger); margin-bottom:0;">
-            <div class="m-lbl">Total Egresos</div>
-            <h2 id="cj-tot-egr" style="color:var(--danger)">$0.00</h2>
-          </div>
-          <div class="card" style="flex:1; min-width:180px; border-left: 5px solid var(--navy); margin-bottom:0;">
-            <div class="m-lbl">Balance Neto</div>
-            <h2 id="cj-balance">$0.00</h2>
+          <div class="card" style="flex:1; margin-bottom:0; border-left:4px solid var(--danger);">
+            <div class="m-lbl">Egresos</div><h2 id="cj-tot-egr" style="color:var(--danger)">$0.00</h2>
           </div>
         </div>
-
         <div class="card">
-          <h3 style="color:var(--navy); margin-bottom:15px;">➕ Registrar Nuevo Movimiento</h3>
           <div class="f-row">
-            <div class="f-grp">
-              <label>Tipo</label>
-              <select id="cx-tipo"><option value="ingreso">🟢 Ingreso (Cobro)</option><option value="egreso">🔴 Egreso (Pago/Gasto)</option></select>
-            </div>
-            <div class="f-grp">
-              <label>Detalle / Concepto</label>
-              <input type="text" id="cx-concepto" placeholder="Ej: Cobro consulta, Pago insumos">
-            </div>
-            <div class="f-grp">
-              <label>Monto ($)</label>
-              <input type="number" id="cx-monto" placeholder="0.00">
-            </div>
-            <div class="f-grp" style="justify-content: flex-end; min-width:120px;">
-              <button class="btn btn-p" onclick="agregarMovimientoCaja()" style="width: 100%;">Cargar</button>
-            </div>
+            <div class="f-grp"><label>Tipo</label><select id="cx-tipo"><option value="ingreso">🟢 Ingreso</option><option value="egreso">🔴 Egreso</option></select></div>
+            <div class="f-grp"><label>Concepto</label><input type="text" id="cx-concepto" placeholder="Ej: Cobro consulta"></div>
+            <div class="f-grp"><label>Monto</label><input type="number" id="cx-monto" placeholder="0"></div>
+            <div class="f-grp" style="justify-content:flex-end;"><button class="btn btn-p" onclick="agregarMovimientoCaja()">Cargar</button></div>
           </div>
         </div>
-
-        <div class="table-responsive">
-          <table>
-            <thead><tr><th>Concepto</th><th>Tipo</th><th>Monto</th><th>Acciones</th></tr></thead>
-            <tbody id="cajaTable"></tbody>
-          </table>
-        </div>
+        <div class="table-responsive"><table><thead><tr><th>Concepto</th><th>Tipo</th><th>Monto</th><th>Acciones</th></tr></thead><tbody id="cajaTable"></tbody></table></div>
       </div>
 
-      <!-- VIEW: REPORTES -->
-      <div id="v-reportes" class="view">
-        <div class="f-row">
-          <div class="card" style="flex:1; min-width: 250px;">
-            <h3 style="color:var(--navy); margin-bottom:15px;">📊 Resumen del Centro</h3>
-            <p style="font-size:0.95rem; margin-bottom:8px;">Total Pacientes Fichados: <strong id="rep-tot-pac" style="color:var(--teal)">0</strong></p>
-            <p style="font-size:0.95rem;">Total Turnos Históricos: <strong id="rep-tot-tur" style="color:var(--navy)">0</strong></p>
-          </div>
-        </div>
-      </div>
-
-      <!-- FORM: NUEVO TURNO -->
       <div id="v-nuevo-turno" class="view">
-        <div class="card" style="max-width: 600px; margin: 0 auto;">
-          <h2 style="color:var(--navy); margin-bottom:20px; font-size:1.3rem;">📋 Programar Nuevo Turno</h2>
+        <div class="card" style="max-width: 550px; margin: 0 auto;">
+          <h3 style="color:var(--navy); margin-bottom:15px;">📋 Programar Turno</h3>
+          <div class="f-row"><div class="f-grp"><label>Paciente</label><select id="nt-pac"></select></div></div>
           <div class="f-row">
-            <div class="f-grp">
-              <label>Seleccionar Paciente</label>
-              <select id="nt-pac"></select>
-            </div>
+            <div class="f-grp"><label>Profesional</label><select id="nt-prof"></select></div>
+            <div class="f-grp"><label>Prestación</label><select id="nt-tipo">
+              <option value="Rehabilitación Vestibular (RV)">Rehabilitación Vestibular (RV)</option>
+              <option value="Evaluación Vestibular">Evaluación Vestibular</option>
+              <option value="Consulta Médica Otoneurología">Consulta Médica Otoneurología</option>
+              <option value="Control Evolutivo">Control Evolutivo</option>
+            </select></div>
           </div>
           <div class="f-row">
-            <div class="f-grp">
-              <label>Profesional Asignado</label>
-              <select id="nt-prof"></select>
-            </div>
-            <div class="f-grp">
-              <label>Tipo de Prestación</label>
-              <select id="nt-tipo">
-                <option value="Rehabilitación Vestibular (RV)">Rehabilitación Vestibular (RV)</option>
-                <option value="Evaluación Vestibular">Evaluación Vestibular</option>
-                <option value="Consulta Médica Otoneurología">Consulta Médica Otoneurología</option>
-                <option value="Control Evolutivo">Control Evolutivo</option>
-              </select>
-            </div>
-          </div>
-          <div class="f-row">
-            <div class="f-grp">
-              <label>Fecha del Turno</label>
-              <input type="date" id="nt-fecha">
-            </div>
-            <div class="f-grp">
-              <label>Hora de Atención</label>
-              <input type="time" id="nt-hora">
-            </div>
+            <div class="f-grp"><label>Fecha</label><input type="date" id="nt-fecha"></div>
+            <div class="f-grp"><label>Hora</label><input type="time" id="nt-hora"></div>
           </div>
           <div style="display: flex; gap: 10px; justify-content: flex-end; margin-top: 15px;">
-            <button class="btn btn-s" onclick="goBackAgenda()">Cancelar</button>
-            <button class="btn btn-p" onclick="guardarTurno()">Confirmar y Guardar</button>
+            <button class="btn btn-s" onclick="setView('agenda')">Cancelar</button>
+            <button class="btn btn-p" onclick="guardarTurno()">Guardar Cita</button>
           </div>
         </div>
       </div>
 
-      <!-- FORM: NUEVO PACIENTE -->
       <div id="v-nuevo-paciente" class="view">
-        <div class="card" style="max-width: 600px; margin: 0 auto;">
-          <h2 style="color:var(--navy); margin-bottom:20px; font-size:1.3rem;">👤 Registrar Nueva Ficha Médica</h2>
+        <div class="card" style="max-width: 550px; margin: 0 auto;">
+          <h3 style="color:var(--navy); margin-bottom:15px;">👤 Nueva Ficha de Paciente</h3>
+          <div class="f-row"><div class="f-grp"><label>Nombre y Apellido</label><input type="text" id="np-nombre" placeholder="Ej: Pérez, Juan"></div></div>
           <div class="f-row">
-            <div class="f-grp">
-              <label>Nombre y Apellido Completo</label>
-              <input type="text" id="np-nombre" placeholder="Ej: Pérez, Juan Carlos">
-            </div>
+            <div class="f-grp"><label>DNI</label><input type="text" id="np-dni" placeholder="Sin puntos"></div>
+            <div class="f-grp"><label>WhatsApp</label><input type="text" id="np-tel"></div>
           </div>
-          <div class="f-row">
-            <div class="f-grp">
-              <label>Documento de Identidad (DNI)</label>
-              <input type="text" id="np-dni" placeholder="Sin puntos">
-            </div>
-            <div class="f-grp">
-              <label>Teléfono de Contacto (WhatsApp)</label>
-              <input type="text" id="np-tel" placeholder="Ej: 3813021908">
-            </div>
-          </div>
-          <div class="f-row">
-            <div class="f-grp">
-              <label>Obra Social / Cobertura</label>
-              <input type="text" id="np-os" placeholder="Ej: Subsidio Salud, Particular, OSDE">
-            </div>
-          </div>
+          <div class="f-row"><div class="f-grp"><label>Obra Social</label><input type="text" id="np-os" placeholder="Particular, Subsidio, etc."></div></div>
           <div style="display: flex; gap: 10px; justify-content: flex-end; margin-top: 15px;">
             <button class="btn btn-s" onclick="setView('pacientes')">Cancelar</button>
-            <button class="btn btn-p" onclick="guardarPaciente()">Guardar Ficha</button>
+            <button class="btn btn-p" onclick="guardarPaciente()">Crear Ficha</button>
           </div>
         </div>
       </div>
 
     </div>
 
-    <!-- PIE INSTITUCIONAL -->
     <div class="inst-foot">
-      <div class="inst-foot-item">📍 Dirección: <strong>San Juan 28, Tucumán</strong></div>
-      <div class="inst-foot-item">📞 Teléfono Central: <strong>381 302-1908</strong></div>
-      <div class="inst-foot-item">📸 Instagram: <strong>@centrodemedicinavestibular</strong></div>
+      <div class="inst-foot-item">📍 San Juan 28, Tucumán</div>
+      <div class="inst-foot-item">📞 381 302-1908</div>
     </div>
   </div>
 
-  <!-- MODAL VER DETALLE TURNO -->
   <div class="modal-overlay" id="modalTurno" onclick="cerrarModalTurno(event)">
     <div class="modal-card" onclick="event.stopPropagation()">
-      <div class="modal-hdr">
-        <h3 id="m-title">Detalle del Turno</h3>
-        <button class="modal-close" onclick="cerrarModalTurno(null)">×</button>
-      </div>
+      <div class="modal-hdr"><h3 id="m-title">Detalle del Turno</h3><button class="modal-close" onclick="cerrarModalTurno(null)">×</button></div>
       <div>
-        <div class="m-lbl">Paciente</div>
-        <div class="m-val" id="m-paciente">—</div>
-        <div class="m-lbl">Profesional</div>
-        <div class="m-val" id="m-profesional">—</div>
-        <div class="m-lbl">Fecha y Hora</div>
-        <div class="m-val" id="m-fechahora">—</div>
-        <div class="m-lbl">Prestación</div>
-        <div class="m-val" id="m-tipo">—</div>
-        <div class="m-lbl">Estado de Asistencia</div>
+        <div class="m-lbl">Paciente</div><div class="m-val" id="m-paciente">—</div>
+        <div class="m-lbl">Profesional</div><div class="m-val" id="m-profesional">—</div>
+        <div class="m-lbl">Fecha y Hora</div><div class="m-val" id="m-fechahora">—</div>
+        <div class="m-lbl">Prestación</div><div class="m-val" id="m-tipo">—</div>
+        <div class="m-lbl">Estado</div>
         <select id="m-estado" style="width: 100%; margin-bottom: 10px;">
-          <option value="pendiente">🕐 Pendiente de Atención</option>
-          <option value="asistio">✅ Asistió al Centro</option>
-          <option value="ausente">❌ Ausente con Aviso / Inasistencia</option>
+          <option value="pendiente">🕐 Pendiente</option>
+          <option value="asistio">✅ Asistió</option>
+          <option value="ausente">❌ Ausente</option>
         </select>
       </div>
-      <div style="display: flex; justify-content: space-between; margin-top: 10px; gap: 10px;">
-        <button class="btn btn-d" onclick="eliminarTurno()">Eliminar Cita</button>
+      <div style="display: flex; justify-content: space-between; gap: 10px;">
+        <button class="btn btn-d" onclick="eliminarTurno()">Eliminar</button>
         <div style="display: flex; gap: 10px;">
           <button class="btn btn-s" onclick="cerrarModalTurno(null)">Cerrar</button>
-          <button class="btn btn-p" onclick="actualizarEstadoTurno()">Actualizar Estado</button>
+          <button class="btn btn-p" onclick="actualizarEstadoTurno()">Actualizar</button>
         </div>
       </div>
     </div>
   </div>
 
-  <!-- SCRIPT DE LOGICA CORREGIDO BASES ORIGINALES -->
   <script>
-    // SE RESTAURARON LOS NOMBRES EXACTOS DE LAS BASES ANTERIORES PARA RECUPERAR TUS PACIENTES GUARDADOS
-    let pacientes = JSON.parse(localStorage.getItem('pacientes')) || [];
-    let turnos = JSON.parse(localStorage.getItem('turnos')) || [];
-    let caja = JSON.parse(localStorage.getItem('caja')) || [];
+    // USAMOS TUS BASES DE DATOS DE SIEMPRE PARA LEER TU COMPLETO HISTORIAL DE INMEDIATO
+    let pacientes = JSON.parse(localStorage.getItem('vest_pacientes')) || JSON.parse(localStorage.getItem('pacientes')) || [];
+    let turnos = JSON.parse(localStorage.getItem('vest_turnos')) || JSON.parse(localStorage.getItem('turnos')) || [];
+    let caja = JSON.parse(localStorage.getItem('vest_caja')) || JSON.parse(localStorage.getItem('caja')) || [];
 
-    // CONFIGURACIÓN DE LOS PROFESIONALES CON SUS HORARIOS REALES EXACTOS
     let profs = [
-      { 
-        id: 'cecilia', 
-        nombre: 'Lic. Cecilia (Evaluación y RV)', 
-        rol: 'kinesiologo', 
-        color: '#2abfbf', 
-        duracionTurno: 60,
-        horarios: {
-          1: [{ inicio: '09:00', fin: '12:00' }, { inicio: '15:00', fin: '20:00' }], // Lunes
-          2: [{ inicio: '09:00', fin: '12:00' }, { inicio: '15:00', fin: '20:00' }], // Martes
-          3: [{ inicio: '09:00', fin: '12:00' }, { inicio: '15:00', fin: '20:00' }], // Miércoles
-          4: [{ inicio: '09:00', fin: '12:00' }, { inicio: '15:00', fin: '20:00' }], // Jueves
-          5: [{ inicio: '09:00', fin: '12:00' }, { inicio: '15:00', fin: '18:00' }]  // Viernes
-        }
-      },
-      { 
-        id: 'belen', 
-        nombre: 'Dra. Belén (Otoneuróloga)', 
-        rol: 'medico', 
-        color: '#6b21a8', 
-        duracionTurno: 20,
-        horarios: {
-          4: [{ inicio: '09:00', fin: '12:00' }] // Jueves mañana
-        }
-      },
-      { 
-        id: 'alvaro', 
-        nombre: 'Lic. Álvaro (RV)', 
-        rol: 'kinesiologo', 
-        color: '#1e3a5f', 
-        duracionTurno: 60,
-        horarios: {
-          2: [{ inicio: '14:00', fin: '20:00' }],
-          3: [{ inicio: '09:00', fin: '12:00' }],
-          4: [{ inicio: '14:00', fin: '20:00' }]
-        }
-      },
-      { 
-        id: 'natalia', 
-        nombre: 'Lic. Natalia (RV)', 
-        rol: 'kinesiologo', 
-        color: '#d97706', 
-        duracionTurno: 60,
-        horarios: {
-          2: [{ inicio: '16:00', fin: '20:00' }],
-          4: [{ inicio: '16:00', fin: '20:00' }]
-        }
-      },
-      { 
-        id: 'zulma', 
-        nombre: 'Lic. Zulma (RV)', 
-        rol: 'kinesiologo', 
-        color: '#0f7b4a', 
-        duracionTurno: 60,
-        horarios: {
-          5: [{ inicio: '09:00', fin: '12:00' }]
-        }
-      },
-      { 
-        id: 'nito', 
-        nombre: 'Lic. Nito (RV)', 
-        rol: 'kinesiologo', 
-        color: '#718096', 
-        duracionTurno: 60,
-        horarios: {
-          4: [{ inicio: '09:00', fin: '12:00' }]
-        }
-      }
+      { id: 'cecilia', nombre: 'Lic. Cecilia (Evaluación y RV)', color: '#2abfbf', duracionTurno: 60, horarios: { 1: [{ inicio: '08:00', fin: '12:00' }, { inicio: '14:00', fin: '20:00' }], 2: [{ inicio: '08:00', fin: '12:00' }, { inicio: '14:00', fin: '20:00' }], 3: [{ inicio: '08:00', fin: '12:00' }, { inicio: '14:00', fin: '20:00' }], 4: [{ inicio: '08:00', fin: '12:00' }, { inicio: '14:00', fin: '20:00' }], 5: [{ inicio: '08:00', fin: '12:00' }, { inicio: '14:00', fin: '18:00' }] } },
+      { id: 'belen', nombre: 'Dra. Belén (Otoneuróloga)', color: '#6b21a8', duracionTurno: 20, horarios: { 4: [{ inicio: '09:00', fin: '12:00' }] } },
+      { id: 'alvaro', nombre: 'Lic. Álvaro (RV)', color: '#1e3a5f', duracionTurno: 60, horarios: { 2: [{ inicio: '14:00', fin: '20:00' }], 3: [{ inicio: '09:00', fin: '12:00' }], 4: [{ inicio: '14:00', fin: '20:00' }] } },
+      { id: 'natalia', nombre: 'Lic. Natalia (RV)', color: '#d97706', duracionTurno: 60, horarios: { 2: [{ inicio: '16:00', fin: '20:00' }], 4: [{ inicio: '16:00', fin: '20:00' }] } },
+      { id: 'zulma', nombre: 'Lic. Zulma (RV)', color: '#0f7b4a', duracionTurno: 60, horarios: { 5: [{ inicio: '09:00', fin: '12:00' }] } },
+      { id: 'nito', nombre: 'Lic. Nito (RV)', color: '#718096', duracionTurno: 60, horarios: { 4: [{ inicio: '09:00', fin: '12:00' }] } }
     ];
 
-    let profActual = 'cecilia';
-    let vistaModo = 'dia'; 
-    let periodoOffset = 0; 
-    let turnoSeleccionadoId = null;
-
+    let profActual = 'cecilia'; let vistaModo = 'dia'; let periodoOffset = 0; let turnoSeleccionadoId = null;
     const DIAS = ['Domingo','Lunes','Martes','Miércoles','Jueves','Viernes','Sábado'];
 
     window.onload = function() {
-      initSelectors();
-      resetCal();
-      renderAgenda();
-      renderPacientes();
-      renderCaja();
-      actualizarReportes();
+      // Forzar migración interna para máxima seguridad
+      if(pacientes.length > 0 && !localStorage.getItem('vest_pacientes')) localStorage.setItem('vest_pacientes', JSON.stringify(pacientes));
+      if(turnos.length > 0 && !localStorage.getItem('vest_turnos')) localStorage.setItem('vest_turnos', JSON.stringify(turnos));
+      if(caja.length > 0 && !localStorage.getItem('vest_caja')) localStorage.setItem('vest_caja', JSON.stringify(caja));
+      
+      initSelectors(); resetCal(); renderAgenda(); renderPacientes(); renderCaja();
     };
 
     function save() {
-      localStorage.setItem('pacientes', JSON.stringify(pacientes));
-      localStorage.setItem('turnos', JSON.stringify(turnos));
-      localStorage.setItem('caja', JSON.stringify(caja));
-      actualizarReportes();
+      localStorage.setItem('vest_pacientes', JSON.stringify(pacientes));
+      localStorage.setItem('vest_turnos', JSON.stringify(turnos));
+      localStorage.setItem('vest_caja', JSON.stringify(caja));
     }
 
     function setView(viewId) {
       document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
       document.querySelectorAll('.menu li').forEach(li => li.classList.remove('active'));
+      document.getElementById('v-' + viewId).classList.add('active');
       
-      var target = document.getElementById('v-' + viewId);
-      if (target) target.classList.add('active');
+      var titleMap = { 'agenda': '🗓️ Agenda Central', 'pacientes': '👤 Fichas y Pacientes', 'caja': '💰 Caja Diaria' };
+      document.getElementById('viewTitle').textContent = titleMap[viewId];
       
-      var titleMap = { 'agenda': '🗓️ Agenda Central', 'pacientes': '👤 Fichas de Pacientes', 'caja': '💰 Control de Caja', 'reportes': '📊 Reportes Estadísticos' };
-      document.getElementById('viewTitle').textContent = titleMap[viewId] || 'Gestión';
-      
-      var indexMap = { 'agenda': 0, 'pacientes': 1, 'caja': 2, 'reportes': 3 };
-      if (indexMap[viewId] !== undefined) {
-        document.querySelectorAll('.menu li')[indexMap[viewId]].classList.add('active');
-      }
+      var indexMap = { 'agenda': 0, 'pacientes': 1, 'caja': 2 };
+      document.querySelectorAll('.menu li')[indexMap[viewId]].classList.add('active');
 
       if (viewId === 'agenda') renderAgenda();
       if (viewId === 'caja') renderCaja();
     }
 
     function initSelectors() {
-      var container = document.getElementById('profSelectors');
-      container.innerHTML = '';
+      var container = document.getElementById('profSelectors'); container.innerHTML = '';
       profs.forEach(p => {
         var b = document.createElement('button');
         b.className = 'prof-btn' + (p.id === profActual ? ' active' : '');
         b.style.backgroundColor = p.id === profActual ? p.color : '#fff';
         b.innerHTML = `<span class="dot" style="background:${p.id === profActual ? '#fff' : p.color}"></span>${p.nombre}`;
-        b.onclick = function() {
-          profActual = p.id;
-          initSelectors();
-          renderAgenda();
-        };
+        b.onclick = function() { profActual = p.id; initSelectors(); renderAgenda(); };
         container.appendChild(b);
       });
-
-      var sProf = document.getElementById('nt-prof');
-      sProf.innerHTML = '';
+      var sProf = document.getElementById('nt-prof'); sProf.innerHTML = '';
       profs.forEach(p => { sProf.innerHTML += `<option value="${p.id}">${p.nombre}</option>`; });
-      
       actualizarSelectPacientes();
     }
 
     function actualizarSelectPacientes() {
-      var sPac = document.getElementById('nt-pac');
-      sPac.innerHTML = '';
-      if(pacientes.length === 0) {
-        sPac.innerHTML = '<option value="">-- No hay pacientes creados --</option>';
-        return;
-      }
-      let pacOrdenados = [...pacientes].sort((a,b) => a.nombre.localeCompare(b.nombre));
-      pacOrdenados.forEach(p => { sPac.innerHTML += `<option value="${p.id}">${p.nombre} (DNI: ${p.dni})</option>`; });
+      var sPac = document.getElementById('nt-pac'); sPac.innerHTML = '';
+      if(pacientes.length === 0) { sPac.innerHTML = '<option value="">-- Sin pacientes --</option>'; return; }
+      [...pacientes].sort((a,b) => a.nombre.localeCompare(b.nombre)).forEach(p => { sPac.innerHTML += `<option value="${p.id}">${p.nombre} (DNI: ${p.dni})</option>`; });
     }
 
-    function setMode(m) {
-      vistaModo = m;
-      document.querySelectorAll('.view-modes .vmode-btn').forEach(b => b.classList.remove('active'));
-      document.getElementById('vm-' + m).classList.add('active');
-      periodoOffset = 0;
-      renderAgenda();
-    }
-
-    function offsetCal(n) {
-      periodoOffset += n;
-      renderAgenda();
-    }
-
-    function resetCal() {
-      periodoOffset = 0;
-      renderAgenda();
-    }
-
-    function fd(d) {
-      var y = d.getFullYear();
-      var m = String(d.getMonth() + 1).padStart(2, '0');
-      var day = String(d.getDate()).padStart(2, '0');
-      return `${y}-${m}-${day}`;
-    }
+    function setMode(m) { vistaModo = m; document.querySelectorAll('.view-modes .vmode-btn').forEach(b => b.classList.remove('active')); document.getElementById('vm-' + m).classList.add('active'); periodoOffset = 0; renderAgenda(); }
+    function offsetCal(n) { periodoOffset += n; renderAgenda(); }
+    function resetCal() { periodoOffset = 0; renderAgenda(); }
+    function fd(d) { return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`; }
 
     function renderAgenda() {
-      if (vistaModo === 'dia') renderVistaDia();
-      else renderVistaSemana();
+      if (vistaModo === 'dia') {
+        var dia = new Date(); dia.setDate(dia.getDate() + periodoOffset);
+        var ds = fd(dia);
+        document.getElementById('weekLbl').textContent = DIAS[dia.getDay()] + ' ' + dia.getDate() + '/' + (dia.getMonth() + 1) + '/' + dia.getFullYear();
+        var dt = turnos.filter(t => t.fecha === ds && t.profId === profActual).sort((a,b) => a.hora.localeCompare(b.hora));
+        var pr = profs.find(p => p.id === profActual);
+        var bloquesHoy = pr.horarios ? pr.horarios[dia.getDay()] : null;
+
+        if (!bloquesHoy || bloquesHoy.length === 0) {
+          document.getElementById('agendaGrid').innerHTML = '<div class="empty">😴 El profesional no atiende este día</div>'; return;
+        }
+        var turnosPorHora = {}; dt.forEach(t => { if (!turnosPorHora[t.hora]) turnosPorHora[t.hora] = []; turnosPorHora[t.hora].push(t); });
+        var todosLosSlots = [];
+        bloquesHoy.forEach(bloque => {
+          var inicioArr = bloque.inicio.split(':').map(Number); var finArr = bloque.fin.split(':').map(Number);
+          var minInicio = inicioArr[0] * 60 + inicioArr[1]; var minFin = finArr[0] * 60 + finArr[1];
+          for (var min = minInicio; min < minFin; min += pr.duracionTurno) {
+            todosLosSlots.push(String(Math.floor(min / 60)).padStart(2, '0') + ':' + String(min % 60).padStart(2, '0'));
+          }
+        });
+
+        var h = '<div class="dia-grid">';
+        todosLosSlots.forEach(horaSlot => {
+          h += `<div class="dia-hora-row"><div class="dia-hora-label">${horaSlot}</div><div class="dia-hora-slots">`;
+          if (turnosPorHora[horaSlot]) {
+            turnosPorHora[horaSlot].forEach(t => {
+              var pac = pacientes.find(p => p.id == t.pacId);
+              var evalClass = (t.tipo && t.tipo.toLowerCase().includes('evaluación')) ? ' eval' : '';
+              h += `<div class="dia-chip ${t.estado}${evalClass}" style="border-left-color:${pr.color}" onclick="abrirModalTurno(${t.id})"><div class="dc-pac">${pac?pac.nombre:'—'}</div><div class="dc-tipo">${t.tipo}</div></div>`;
+            });
+          } else {
+            h += `<div class="dia-chip" style="border-left-color:var(--border); border-style:dashed; opacity:0.6;" onclick="abrirFormNuevoTurno('${ds}', '${horaSlot}')"><div class="dc-pac" style="color:var(--text-soft)">✨ Disponible</div></div>`;
+          }
+          h += '</div></div>';
+        });
+        document.getElementById('agendaGrid').innerHTML = h + '</div>';
+      } else {
+        var today = new Date(); var base = new Date(today); base.setDate(today.getDate() + (periodoOffset * 7));
+        var dow = base.getDay(); var mon = new Date(base); mon.setDate(base.getDate() - (dow === 0 ? 6 : dow - 1));
+        var we = new Date(mon); we.setDate(mon.getDate() + 5);
+        document.getElementById('weekLbl').textContent = mon.getDate() + '/' + (mon.getMonth() + 1) + ' — ' + we.getDate() + '/' + (we.getMonth() + 1);
+        var pr = profs.find(p => p.id === profActual);
+        var h = '<div class="week-grid">';
+        for (var i = 0; i < 6; i++) {
+          var d = new Date(mon); d.setDate(mon.getDate() + i); var ds = fd(d);
+          var dt = turnos.filter(t => t.fecha === ds && t.profId === profActual).sort((a,b) => a.hora.localeCompare(b.hora));
+          var atiende = pr && pr.horarios && pr.horarios[d.getDay()] && pr.horarios[d.getDay()].length > 0;
+          h += `<div class="day-col" style="${!atiende ? 'background:var(--sand-d);' : ''}"><div class="day-hd${ds===fd(today)?' today':''}">${DIAS[d.getDay()]} <span>${d.getDate()}</span></div><div class="day-body">`;
+          if(!atiende) h += '<div style="text-align:center; font-size:0.7rem; color:var(--text-soft); margin-top:10px;">No atiende</div>';
+          dt.forEach(t => {
+            var pac = pacientes.find(p => p.id == t.pacId);
+            h += `<div class="tchip ${t.estado}" style="border-left-color:${pr.color}" onclick="abrirModalTurno(${t.id})"><div class="th">${t.hora}</div><div class="tp">${pac?pac.nombre:'—'}</div></div>`;
+          });
+          h += '</div></div>';
+        }
+        document.getElementById('agendaGrid').innerHTML = h + '</div>';
+      }
     }
 
-    function renderVistaDia() {
-      var dia = new Date();
-      dia.setDate(dia.getDate() + periodoOffset);
-      
-      var y = dia.getFullYear();
-      var m = String(dia.getMonth() + 1).padStart(2, '0');
-      var dNum = String(dia.getDate()).padStart(2, '0');
-      var ds = `${y}-${m}-${dNum}`;
+    function abrirFormNuevoTurno(fechaIso, horaSlot) { setView('nuevo-turno'); document.getElementById('nt-fecha').value = fechaIso; document.getElementById('nt-hora').value = horaSlot; document.getElementById('nt-prof').value = profActual; }
+    function go(v) { if(v==='nuevo-turno') { document.getElementById('nt-fecha').value = fd(new Date()); document.getElementById('nt-hora').value = '09:00'; }; setView(v); }
 
-      var numDiaSemana = dia.getDay();
-      document.getElementById('weekLbl').textContent = DIAS[numDiaSemana] + ' ' + dia.getDate() + '/' + (dia.getMonth() + 1) + '/' + dia.getFullYear();
+    function guardarTurno() {
+      var pacId = document.getElementById('nt-pac').value; var profId = document.getElementById('nt-prof').value;
+      var tipo = document.getElementById('nt-tipo').value; var fecha = document.getElementById('nt-fecha').value; var hora = document.getElementById('nt-hora').value;
+      if(!pacId) { alert('Primero debés dar de alta al paciente en la sección Fichas'); return; }
+      turnos.push({ id: Date.now(), pacId: parseInt(pacId), profId: profId, tipo: tipo, fecha: fecha, hora: hora, estado: 'pendiente' });
+      save(); setView('agenda');
+    }
 
-      var dt = turnos.filter(t => t.fecha === ds && t.profId === profActual).sort((a,b) => a.hora.localeCompare(b.hora));
-      var pr = profs.find(p => p.id === profActual);
+    function renderPacientes() {
+      var q = document.getElementById('searchPac').value.toLowerCase(); var tbody = document.getElementById('pacientesTable'); tbody.innerHTML = '';
+      var fil = pacientes.filter(p => p.nombre.toLowerCase().includes(q) || p.dni.includes(q)).sort((a,b) => a.nombre.localeCompare(b.nombre));
+      fil.forEach(p => {
+        tbody.innerHTML += `<tr><td><strong>${p.nombre}</strong></td><td>${p.dni}</td><td>${p.tel || '—'}</td><td>${p.os}</td><td><button class="btn btn-s" style="padding:4px 8px; font-size:0.75rem;" onclick="eliminarPaciente(${p.id})">❌ Borrar</button></td></tr>`;
+      });
+    }
 
-      if (!pr) return;
+    function guardarPaciente() {
+      var n = document.getElementById('np-nombre').value; var d = document.getElementById('np-dni').value;
+      var t = document.getElementById('np-tel').value; var o = document.getElementById('np-os').value;
+      if(!n || !d) { alert('Nombre y DNI requeridos'); return; }
+      pacientes.push({ id: Date.now(), nombre: n, dni: d, tel: t, os: o || 'Particular' });
+      save(); document.getElementById('np-nombre').value = ''; document.getElementById('np-dni').value = ''; document.getElementById('np-tel').value = ''; document.getElementById('np-os').value = '';
+      initSelectors(); setView('pacientes');
+    }
 
-      var ...
+    function eliminarPaciente(id) { if(confirm('¿Eliminar ficha?')) { pacientes = pacientes.filter(p => p.id != id); save(); initSelectors(); renderPacientes(); } }
+
+    function renderCaja() {
+      var tbody = document.getElementById('cajaTable'); tbody.innerHTML = ''; var ting = 0, tegr = 0;
+      caja.forEach((m, idx) => {
+        if(m.tipo === 'ingreso') ting += parseFloat(m.monto); else tegr += parseFloat(m.monto);
+        tbody.innerHTML += `<tr><td>${m.concepto}</td><td>${m.tipo==='ingreso'?'🟢 Ingreso':'🔴 Egreso'}</td><td>$${parseFloat(m.monto).toFixed(2)}</td><td><button class="btn btn-s" style="padding:2px 6px;" onclick="eliminarCaja(${idx})">❌</button></td></tr>`;
+      });
+      document.getElementById('cj-tot-ing').textContent = `$${ting.toFixed(2)}`; document.getElementById('cj-tot-egr').textContent = `$${tegr.toFixed(2)}`;
+    }
+
+    function agregarMovimientoCaja() {
+      var t = document.getElementById('cx-tipo').value; var c = document.getElementById('cx-concepto').value; var m = document.getElementById('cx-monto').value;
+      if(!c || !m) return; caja.push({ concepto: c, tipo: t, monto: parseFloat(m) }); save();
+      document.getElementById('cx-concepto').value = ''; document.getElementById('cx-monto').value = ''; renderCaja();
+    }
+    function eliminarCaja(idx) { caja.splice(idx,1); save(); renderCaja(); }
+
+    function abrirModalTurno(id) {
+      turnoSeleccionadoId = id; var t = turnos.find(x => x.id == id); if(!t) return;
+      var pac = pacientes.find(p => p.id == t.pacId); var prof = profs.find(p => p.id === t.profId);
+      document.getElementById('m-paciente').textContent = pac ? pac.nombre : '—';
+      document.getElementById('m-profesional').textContent = prof ? prof.nombre : '—';
+      document.getElementById('m-fechahora').textContent = t.fecha.split('-').reverse().join('/') + " - " + t.hora + " hs";
+      document.getElementById('m-tipo').textContent = t.tipo; document.getElementById('m-estado').value = t.estado;
+      document.getElementById('modalTurno').classList.add('active');
+    }
+    function cerrarModalTurno(e) { if(!e || e.target.classList.contains('modal-overlay') || e === null) document.getElementById('modalTurno').classList.remove('active'); }
+    function actualizarEstadoTurno() { var t = turnos.find(x => x.id == turnoSeleccionadoId); if(t) { t.estado = document.getElementById('m-estado').value; save(); renderAgenda(); cerrarModalTurno(null); } }
+    function eliminarTurno() { if(confirm('¿Borrar?')) { turnos = turnos.filter(x => x.id != turnoSeleccionadoId); save(); renderAgenda(); cerrarModalTurno(null); } }
+  </script>
+</body>
+</html>
