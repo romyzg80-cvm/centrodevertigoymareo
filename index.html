@@ -1199,11 +1199,10 @@ function renderVistaDia() {
     turnosPorHora[t.hora].push(t);
   });
 
-  // Generar slots fijos
+  // Generar slots fijos corregido sin errores de nombres
   var todosLosSlots = [];
   bloquesHoy.forEach(function(bloque) {
-    var inicioArr = blockInicio || bloque.inicio.split(':').map(Number);
-    if (!inicioArr && bloque.inicio) inicioArr = bloque.inicio.split(':').map(Number);
+    var inicioArr = bloque.inicio.split(':').map(Number);
     var finArr = bloque.fin.split(':').map(Number);
     var minInicio = inicioArr[0] * 60 + inicioArr[1];
     var minFin = finArr[0] * 60 + finArr[1];
@@ -1231,7 +1230,6 @@ function renderVistaDia() {
           +'</div>';
       });
     } else {
-      // AQUÍ CORREGIMOS EL SALTO DE FECHA PASANDO LA FECHA FORMATEADA CORRECTAMENTE
       h += '<div class="dia-chip" style="border-left-color:var(--border); border-style:dashed; opacity:0.6;" onclick="go(\'nuevo-turno\'); setTimeout(function(){ document.getElementById(\'nt-hora\').value=\''+horaSlot+'\'; document.getElementById(\'nt-prof\').value=\''+profActual+'\'; document.getElementById(\'nt-fecha\').value=\''+ds+'\'; if(typeof toggleRepetir === \'function\') toggleRepetir(); },200);">'
         +'<div class="dc-pac" style="color:var(--text-soft)">✨ Disponible</div>'
         +'<div class="dc-tipo">Hacé clic para agendar</div>'
@@ -1242,7 +1240,6 @@ function renderVistaDia() {
   h += '</div>';
   document.getElementById('agendaGrid').innerHTML = h;
 }
-
 // ── VISTA SEMANA ──
 function renderVistaSemana() {
   var today = new Date(), base = new Date(today);
