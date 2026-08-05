@@ -779,7 +779,7 @@ async function login() {
   } catch(e) {
     ocultarLoading();
     // Si falla Supabase usar fallback local
-    var fallback = {romina:{pass:'otolitos',nombre:'Romina',rol:'admin',profId:null},cecilia:{pass:'otolitos',nombre:'Cecilia',rol:'admin',profId:'p1'},alvaro:{pass:'otolitos',nombre:'Álvaro',rol:'kine',profId:'p2'},zulma:{pass:'otolitos',nombre:'Zulma',rol:'kine',profId:'p3'},lucas:{pass:'otolitos',nombre:'Lucas',rol:'kine',profId:'p4'}};
+    var fallback = {romina:{pass:'otolitos',nombre:'Romina',rol:'admin',profId:null},cecilia:{pass:'otolitos',nombre:'Cecilia',rol:'admin',profId:'p1'},alvaro:{pass:'otolitos',nombre:'Álvaro',rol:'kine',profId:'p2'},zulma:{pass:'otolitos',nombre:'Zulma',rol:'kine',profId:'p3'},Natalia:{pass:'otolitos',nombre:'Lucas',rol:'kine',profId:'p4'}};
     var fu = fallback[user];
     if (fu && fu.pass === pass) {
       usuarioActual = {username:user, nombre:fu.nombre, rol:fu.rol, profId:fu.profId};
