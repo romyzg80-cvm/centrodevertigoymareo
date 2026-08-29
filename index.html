@@ -696,8 +696,7 @@ slot.innerHTML='<div class="vacio">Disponible</div>';
 
 }else{
 
-turnosHora.slice(0,5).forEach(turno=>{
-
+turnosHora.forEach(turno=>{
 const paciente=document.createElement("div");
 
 paciente.className="paciente "+(turno.tratamiento || "control");
@@ -715,10 +714,6 @@ slot.appendChild(paciente);
 
 });
 
-}
-
-if(turnosHora.length<5){
-
 const boton=document.createElement("button");
 
 boton.className="btn-agregar-turno";
@@ -730,15 +725,14 @@ abrirModalTurno(dia,hora);
 
 slot.appendChild(boton);
 
-}
 
 grid.appendChild(slot);
 
 });
 
 });
-
 }
+
 
 function abrirModalTurno(dia,hora){
 
