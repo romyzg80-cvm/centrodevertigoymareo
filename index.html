@@ -95,7 +95,8 @@ header p{
 /* MENU */
 
 .sidebar{
-  width:260px;
+  width:220px;
+  flex:0 0 220px;
   background:white;
   border-right:1px solid var(--gris);
   padding:22px;
@@ -145,7 +146,8 @@ header p{
 
 main{
   flex:1;
-  padding:28px;
+  min-width:0;
+  padding:20px;
   overflow:auto;
 }
 
@@ -203,13 +205,14 @@ main{
   background:white;
   border-radius:14px;
   border:1px solid var(--gris);
-  overflow:auto;
+  width:100%;
+  overflow-x:auto;
 }
 
 .grid{
   display:grid;
-  grid-template-columns:90px repeat(5,minmax(190px,1fr));
-  min-width:1100px;
+  width:100%;
+  grid-template-columns:80px repeat(5,minmax(0,1fr));
 }
 
 .celda{
@@ -337,6 +340,17 @@ textarea{
   font-size:13px;
 }
 
+@media(max-width:1050px){
+  .agenda{
+    overflow-x:auto;
+  }
+
+  .grid{
+    min-width:900px;
+    grid-template-columns:80px repeat(5,minmax(164px,1fr));
+  }
+}
+
 @media(max-width:800px){
   .contenedor{
     flex-direction:column;
@@ -374,11 +388,6 @@ textarea{
 <h3>👩‍⚕️ Profesionales</h3>
 
 <div id="listaProfesionales"></div>
-
-<button class="btn btn-secundario agregar-profesional"
-onclick="abrirModalProfesional()">
-+ Agregar profesional
-</button>
 
 <hr style="margin:25px 0;border:none;border-top:1px solid #e2e8eb;">
 
@@ -655,84 +664,76 @@ select.innerHTML+=`<option>${p.nombre}</option>`;
 function renderAgenda(){
 
 const grid=document.getElementById("agendaGrid");
-
 grid.innerHTML="";
 
+// Encabezado: Hora + todos los días, incluido Viernes.
 const esquina=document.createElement("div");
 esquina.className="celda encabezado";
 esquina.textContent="Hora";
 grid.appendChild(esquina);
 
 dias.forEach(dia=>{
-
-const celda=document.createElement("div");
-celda.className="celda encabezado";
-celda.textContent=dia;
-
-grid.appendChild(celda);
-
+  const celda=document.createElement("div");
+  celda.className="celda encabezado";
+  celda.textContent=dia;
+  grid.appendChild(celda);
 });
 
 horarios.forEach(hora=>{
 
-const celdaHora=document.createElement("div");
-celdaHora.className="celda hora";
-celdaHora.textContent=hora;
+  const celdaHora=document.createElement("div");
+  celdaHora.className="celda hora";
+  celdaHora.textContent=hora;
+  grid.appendChild(celdaHora);
 
-grid.appendChild(celdaHora);
+  dias.forEach(dia=>{
 
-dias.forEach(dia=>{
+    const slot=document.createElement("div");
+    slot.className="celda slot";
 
-const slot=document.createElement("div");
-slot.className="celda slot";
+    const turnosHora=turnos.filter(
+      t=>t.dia===dia && t.hora===hora
+    );
 
-const turnosHora=turnos.filter(
-t=>t.dia===dia && t.hora===hora
-);
+    if(turnosHora.length===0){
+      slot.innerHTML='<div class="vacio">Disponible</div>';
+    }else{
+      turnosHora.forEach(turno=>{
 
-if(turnosHora.length===0){
+        const paciente=document.createElement("div");
+        paciente.className="paciente "+(turno.tratamiento || "control");
 
-slot.innerHTML='<div class="vacio">Disponible</div>';
+        if(turno.nombre==="Turno disponible"){
+          paciente.style.background="#eef1f3";
+        }
 
-}else{
+        paciente.innerHTML=`
+          <strong>${turno.nombre}</strong>
+          <small>${turno.profesional || "Disponible"}</small>
+        `;
 
-turnosHora.forEach(turno=>{
-const paciente=document.createElement("div");
+        slot.appendChild(paciente);
+      });
+    }
 
-paciente.className="paciente "+(turno.tratamiento || "control");
+    // El horario admite hasta 5 pacientes en total.
+    // Cada profesional puede tener como máximo 2 en la misma hora.
+    if(turnosHora.length<5){
+      const boton=document.createElement("button");
+      boton.className="btn-agregar-turno";
+      boton.textContent="+ Agregar paciente";
+      boton.onclick=()=>{
+        abrirModalTurno(dia,hora);
+      };
+      slot.appendChild(boton);
+    }
 
-if(turno.nombre==="Turno disponible"){
-paciente.style.background="#eef1f3";
-}
-
-paciente.innerHTML=`
-<strong>${turno.nombre}</strong>
-<small>${turno.profesional || "Disponible"}</small>
-`;
-
-slot.appendChild(paciente);
-
-});
-
-const boton=document.createElement("button");
-
-boton.className="btn-agregar-turno";
-boton.textContent="+ Agregar paciente";
-
-boton.onclick=()=>{
-abrirModalTurno(dia,hora);
-};
-
-slot.appendChild(boton);
-
-
-grid.appendChild(slot);
-
-});
-
+    // IMPORTANTE: siempre agregamos el slot al grid,
+    // aunque esté vacío. Así se ven todos los días hasta Viernes.
+    grid.appendChild(slot);
+  });
 });
 }
-
 
 function abrirModalTurno(dia,hora){
 
