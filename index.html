@@ -419,6 +419,7 @@ Centro de Vértigo y Mareo
 </div>
 
 <div class="controles">
+<button class="btn btn-secundario" onclick="mostrarPacientes()">👥 Pacientes</button>
 <button class="btn btn-secundario">‹ Semana anterior</button>
 <button class="btn btn-principal">Septiembre 2026</button>
 <button class="btn btn-secundario">Semana siguiente ›</button>
@@ -437,9 +438,30 @@ Centro de Vértigo y Mareo
 <span class="tag otro">Otro / Especial</span>
 </div>
 
+<section id="seccionPacientes" style="display:none;">
+  <div class="superior">
+    <div>
+      <h2>👥 Pacientes</h2>
+      <p style="margin-bottom:0;color:#687983">Altas e historial de pacientes</p>
+    </div>
+    <div class="controles">
+      <button class="btn btn-principal" onclick="abrirAltaPaciente()">+ Alta de paciente</button>
+      <button class="btn btn-secundario" onclick="mostrarAgenda()">📅 Volver a agenda</button>
+    </div>
+  </div>
+
+  <div style="background:white;border:1px solid var(--gris);border-radius:14px;padding:18px;margin-bottom:18px;">
+    <input id="buscarPaciente" type="text" placeholder="🔎 Buscar por nombre, DNI o teléfono" oninput="renderListaPacientes()" style="margin-bottom:0;">
+  </div>
+
+  <div id="listaPacientesCompleta"></div>
+</section>
+
+<section id="seccionAgenda">
 <div class="agenda">
 <div class="grid" id="agendaGrid"></div>
 </div>
+</section>
 
 </main>
 </div>
@@ -452,7 +474,26 @@ Centro de Vértigo y Mareo
 
 <h2>➕ Nuevo turno</h2>
 
-<input type="text" id="nombrePaciente" placeholder="Nombre del paciente">
+<label><b>Paciente</b></label>
+<input type="text" id="nombrePaciente" placeholder="Nombre y apellido">
+
+<div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;">
+  <div>
+    <input type="text" id="dniPaciente" placeholder="DNI">
+  </div>
+  <div>
+    <input type="text" id="telefonoPaciente" placeholder="Teléfono">
+  </div>
+</div>
+
+<div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;">
+  <div>
+    <input type="date" id="fechaNacimientoPaciente">
+  </div>
+  <div>
+    <input type="text" id="obraSocialPaciente" placeholder="Obra social / Particular">
+  </div>
+</div>
 
 <select id="profesionalTurno"></select>
 
@@ -472,7 +513,10 @@ Centro de Vértigo y Mareo
 <input type="text" id="horaPaciente" placeholder="Hora (ej: 09:00)">
 
 <textarea id="detalleTratamiento"
-placeholder="Detalle del tratamiento (opcional)"></textarea>
+placeholder="Detalle del tratamiento / Otro o Especial"></textarea>
+
+<textarea id="observacionesPaciente"
+placeholder="Observaciones del paciente (opcional)"></textarea>
 
 <div class="modal-botones">
 
@@ -482,6 +526,53 @@ onclick="cerrarModalTurno()">Cancelar</button>
 <button class="btn btn-principal"
 onclick="guardarTurno()">Guardar turno</button>
 
+</div>
+
+</div>
+</div>
+
+<!-- MODAL ALTA PACIENTE -->
+
+<div class="modal" id="modalAltaPaciente">
+<div class="modal-contenido" style="max-height:90vh;overflow:auto;">
+
+<h2>👤 Alta de paciente</h2>
+
+<label><b>Datos personales</b></label>
+<input type="text" id="altaNombre" placeholder="Nombre y apellido *">
+
+<div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;">
+  <input type="text" id="altaDni" placeholder="DNI">
+  <input type="date" id="altaNacimiento">
+</div>
+
+<div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;">
+  <input type="text" id="altaTelefono" placeholder="Teléfono / WhatsApp">
+  <input type="email" id="altaEmail" placeholder="Email (opcional)">
+</div>
+
+<label><b>Cobertura</b></label>
+<input type="text" id="altaObraSocial" placeholder="Obra social / Prepaga / Particular">
+
+<label><b>Información clínica inicial</b></label>
+<select id="altaMotivo">
+  <option value="">Motivo de consulta</option>
+  <option>Vértigo</option>
+  <option>Mareo</option>
+  <option>Tinnitus</option>
+  <option>Rehabilitación Vestibular</option>
+  <option>ATM</option>
+  <option>Conmoción cerebral</option>
+  <option>Otro</option>
+</select>
+
+<select id="altaProfesional"></select>
+
+<textarea id="altaObservaciones" placeholder="Observaciones iniciales"></textarea>
+
+<div class="modal-botones">
+<button class="btn btn-secundario" onclick="cerrarAltaPaciente()">Cancelar</button>
+<button class="btn btn-principal" onclick="guardarAltaPaciente()">Guardar paciente</button>
 </div>
 
 </div>
@@ -741,6 +832,11 @@ diaSeleccionado=dia;
 horaSeleccionada=hora;
 
 document.getElementById("nombrePaciente").value="";
+document.getElementById("dniPaciente").value="";
+document.getElementById("telefonoPaciente").value="";
+document.getElementById("fechaNacimientoPaciente").value="";
+document.getElementById("obraSocialPaciente").value="";
+document.getElementById("observacionesPaciente").value="";
 document.getElementById("horaPaciente").value=hora;
 document.getElementById("detalleTratamiento").value="";
 
@@ -755,20 +851,28 @@ document.getElementById("modalTurno").classList.remove("activo");
 function guardarTurno(){
 
 const nombre=document.getElementById("nombrePaciente").value.trim();
+const dni=document.getElementById("dniPaciente").value.trim();
+const telefono=document.getElementById("telefonoPaciente").value.trim();
+const fechaNacimiento=document.getElementById("fechaNacimientoPaciente").value;
+const obraSocial=document.getElementById("obraSocialPaciente").value.trim();
+const observaciones=document.getElementById("observacionesPaciente").value.trim();
+
 const profesional=document.getElementById("profesionalTurno").value;
 const tratamiento=document.getElementById("tratamiento").value;
+const detalle=document.getElementById("detalleTratamiento").value.trim();
 const hora=document.getElementById("horaPaciente").value.trim();
 
 if(!nombre){
-alert("Escribí el nombre del paciente.");
-return;
+  alert("Escribí el nombre del paciente.");
+  return;
 }
 
 if(!profesional){
-alert("Seleccioná un profesional.");
-return;
+  alert("Seleccioná un profesional.");
+  return;
 }
 
+/* Máximo 2 pacientes por profesional en la misma hora */
 const existentes = turnos.filter(
   t => t.dia === diaSeleccionado &&
        t.hora === hora &&
@@ -778,24 +882,70 @@ const existentes = turnos.filter(
 if(existentes.length >= 2){
   alert("Este profesional ya tiene 2 pacientes en este horario.");
   return;
-  
 }
 
+/* Regla especial Dra. Belén */
+if(profesional === "Dra. Belén Sánchez"){
+  if(diaSeleccionado !== "Jueves"){
+    alert("La Dra. Belén Sánchez atiende únicamente los jueves.");
+    return;
+  }
+
+  const minutosValidos=["00","20","40"];
+  const partes=hora.split(":");
+  const h=parseInt(partes[0],10);
+  const min=partes[1] || "";
+
+  if(h < 9 || h >= 12 || !minutosValidos.includes(min)){
+    alert("La Dra. Belén atiende los jueves de 09:00 a 12:00, cada 20 minutos.");
+    return;
+  }
+}
+
+const paciente={
+  nombre,
+  dni,
+  telefono,
+  fechaNacimiento,
+  obraSocial,
+  observaciones
+};
+
+let pacientes=JSON.parse(localStorage.getItem("pacientesAgenda")) || [];
+
+/* Evita duplicar al mismo paciente por DNI o nombre */
+const indicePaciente=pacientes.findIndex(p =>
+  (dni && p.dni===dni) ||
+  (!dni && p.nombre.toLowerCase()===nombre.toLowerCase())
+);
+
+if(indicePaciente>=0){
+  pacientes[indicePaciente]={...pacientes[indicePaciente],...paciente};
+}else{
+  pacientes.push(paciente);
+}
+
+localStorage.setItem("pacientesAgenda",JSON.stringify(pacientes));
+
 turnos.push({
-dia:diaSeleccionado,
-hora:hora,
-nombre:nombre,
-profesional:profesional,
-tratamiento:tratamiento
+  dia:diaSeleccionado,
+  hora:hora,
+  nombre:nombre,
+  profesional:profesional,
+  tratamiento:tratamiento,
+  detalle:detalle,
+  dni:dni,
+  telefono:telefono,
+  fechaNacimiento:fechaNacimiento,
+  obraSocial:obraSocial,
+  observaciones:observaciones
 });
 
 guardarDatos();
-
 cerrarModalTurno();
-
 renderAgenda();
 
-}
+} 
 
 function abrirModalProfesional(){
 document.getElementById("nuevoProfesional").value="";
@@ -830,9 +980,142 @@ actualizarSelectProfesionales();
 
 }
 
+
+function obtenerPacientes(){
+  return JSON.parse(localStorage.getItem("pacientesAgenda")) || [];
+}
+
+function guardarPacientes(pacientes){
+  localStorage.setItem("pacientesAgenda",JSON.stringify(pacientes));
+}
+
+function mostrarPacientes(){
+  document.getElementById("seccionAgenda").style.display="none";
+  document.getElementById("seccionPacientes").style.display="block";
+  renderListaPacientes();
+}
+
+function mostrarAgenda(){
+  document.getElementById("seccionPacientes").style.display="none";
+  document.getElementById("seccionAgenda").style.display="block";
+  renderAgenda();
+}
+
+function actualizarSelectAltaProfesional(){
+  const select=document.getElementById("altaProfesional");
+  select.innerHTML='<option value="">Profesional asignado</option>';
+  profesionales.forEach(p=>{
+    select.innerHTML+=`<option value="${p.nombre}">${p.nombre} — ${p.especialidad}</option>`;
+  });
+}
+
+function abrirAltaPaciente(){
+  ["altaNombre","altaDni","altaNacimiento","altaTelefono","altaEmail","altaObraSocial","altaMotivo","altaProfesional","altaObservaciones"]
+    .forEach(id=>document.getElementById(id).value="");
+
+  actualizarSelectAltaProfesional();
+  document.getElementById("modalAltaPaciente").classList.add("activo");
+}
+
+function cerrarAltaPaciente(){
+  document.getElementById("modalAltaPaciente").classList.remove("activo");
+}
+
+function guardarAltaPaciente(){
+  const nombre=document.getElementById("altaNombre").value.trim();
+  const dni=document.getElementById("altaDni").value.trim();
+
+  if(!nombre){
+    alert("Escribí el nombre y apellido del paciente.");
+    return;
+  }
+
+  let pacientes=obtenerPacientes();
+
+  const existe=pacientes.findIndex(p =>
+    (dni && p.dni===dni) ||
+    (!dni && p.nombre.toLowerCase()===nombre.toLowerCase())
+  );
+
+  const datos={
+    id: existe>=0 ? pacientes[existe].id : Date.now().toString(),
+    nombre,
+    dni,
+    fechaNacimiento:document.getElementById("altaNacimiento").value,
+    telefono:document.getElementById("altaTelefono").value.trim(),
+    email:document.getElementById("altaEmail").value.trim(),
+    obraSocial:document.getElementById("altaObraSocial").value.trim(),
+    motivo:document.getElementById("altaMotivo").value,
+    profesionalAsignado:document.getElementById("altaProfesional").value,
+    observaciones:document.getElementById("altaObservaciones").value.trim(),
+    fechaAlta: existe>=0 ? pacientes[existe].fechaAlta : new Date().toLocaleDateString("es-AR"),
+    historial: existe>=0 ? (pacientes[existe].historial || []) : []
+  };
+
+  if(existe>=0){
+    pacientes[existe]={...pacientes[existe],...datos};
+  }else{
+    pacientes.push(datos);
+  }
+
+  guardarPacientes(pacientes);
+  cerrarAltaPaciente();
+  renderListaPacientes();
+  alert("Paciente guardado correctamente.");
+}
+
+function renderListaPacientes(){
+  const contenedor=document.getElementById("listaPacientesCompleta");
+  if(!contenedor) return;
+
+  const filtro=(document.getElementById("buscarPaciente")?.value || "").toLowerCase().trim();
+  let pacientes=obtenerPacientes();
+
+  if(filtro){
+    pacientes=pacientes.filter(p =>
+      (p.nombre||"").toLowerCase().includes(filtro) ||
+      (p.dni||"").includes(filtro) ||
+      (p.telefono||"").includes(filtro)
+    );
+  }
+
+  if(pacientes.length===0){
+    contenedor.innerHTML='<div style="background:white;border:1px solid var(--gris);border-radius:12px;padding:30px;text-align:center;color:#687983;">Todavía no hay pacientes registrados.</div>';
+    return;
+  }
+
+  contenedor.innerHTML=pacientes.map(p=>`
+    <div style="background:white;border:1px solid var(--gris);border-radius:12px;padding:16px;margin-bottom:10px;display:flex;justify-content:space-between;gap:15px;align-items:center;flex-wrap:wrap;">
+      <div>
+        <b style="font-size:17px;">${p.nombre}</b><br>
+        <small>DNI: ${p.dni || "—"} · Tel: ${p.telefono || "—"}</small><br>
+        <small>${p.motivo || "Sin motivo registrado"} · ${p.profesionalAsignado || "Sin profesional asignado"}</small>
+      </div>
+      <button class="btn btn-principal" onclick="verFichaPaciente('${p.id}')">Ver ficha</button>
+    </div>
+  `).join("");
+}
+
+function verFichaPaciente(id){
+  const paciente=obtenerPacientes().find(p=>p.id===id);
+  if(!paciente) return;
+
+  const historial=(paciente.historial || []);
+  alert(
+    "PACIENTE: "+paciente.nombre+
+    "\nDNI: "+(paciente.dni || "—")+
+    "\nTeléfono: "+(paciente.telefono || "—")+
+    "\nProfesional: "+(paciente.profesionalAsignado || "—")+
+    "\nMotivo: "+(paciente.motivo || "—")+
+    "\n\nEn el próximo paso esta ficha tendrá el historial completo, seguimiento RV y audios."
+  );
+}
+
 renderProfesionales();
 actualizarSelectProfesionales();
+actualizarSelectAltaProfesional();
 renderAgenda();
+
 
 </script>
 
