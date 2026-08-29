@@ -774,13 +774,16 @@ alert("Seleccioná un profesional.");
 return;
 }
 
-const existentes=turnos.filter(
-t=>t.dia===diaSeleccionado && t.hora===hora
+const existentes = turnos.filter(
+  t => t.dia === diaSeleccionado &&
+       t.hora === hora &&
+       t.profesional === profesional
 );
 
-if(existentes.length>=5){
-alert("Ya hay 5 pacientes en esta hora.");
-return;
+if(existentes.length >= 2){
+  alert("Este profesional ya tiene 2 pacientes en este horario.");
+  return;
+  
 }
 
 turnos.push({
